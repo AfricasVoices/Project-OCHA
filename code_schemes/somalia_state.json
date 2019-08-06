@@ -1,0 +1,156 @@
+{
+  "SchemeID": "Scheme-a390e6ce",
+  "Name": "Somalia State",
+  "Version": "0.0.0.1",
+  "Codes": [
+    {
+      "CodeID": "code-3951a76e",
+      "CodeType": "Normal",
+      "DisplayText": "banadir",
+      "StringValue": "banadir",
+      "NumericValue": 1,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "banadir"
+      ]
+    },
+    {
+      "CodeID": "code-42498bd0",
+      "CodeType": "Normal",
+      "DisplayText": "galmudug",
+      "StringValue": "galmudug",
+      "NumericValue": 2,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "galmudug"
+      ]
+    },
+    {
+      "CodeID": "code-79e2b000",
+      "CodeType": "Normal",
+      "DisplayText": "hir-shabelle",
+      "StringValue": "hir-shabelle",
+      "NumericValue": 3,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "hir-shabelle"
+      ]
+    },
+    {
+      "CodeID": "code-0a1aaafb",
+      "CodeType": "Normal",
+      "DisplayText": "jubbaland",
+      "StringValue": "jubbaland",
+      "NumericValue": 4,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "jubbaland"
+      ]
+    },
+    {
+      "CodeID": "code-8ba54648",
+      "CodeType": "Normal",
+      "DisplayText": "puntland",
+      "StringValue": "puntland",
+      "NumericValue": 5,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "puntland"
+      ]
+    },
+    {
+      "CodeID": "code-3e70a2b5",
+      "CodeType": "Normal",
+      "DisplayText": "somaliland",
+      "StringValue": "somaliland",
+      "NumericValue": 6,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "somaliland"
+      ]
+    },
+    {
+      "CodeID": "code-1cb9c226",
+      "CodeType": "Normal",
+      "DisplayText": "south west state",
+      "StringValue": "south west state",
+      "NumericValue": 7,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "south west state"
+      ]
+    },
+    {
+      "CodeID": "code-NA-f93d3eb7",
+      "CodeType": "Control",
+      "ControlCode": "NA",
+      "DisplayText": "NA (missing)",
+      "NumericValue": -10,
+      "StringValue": "NA",
+      "VisibleInCoda": false
+    },
+    {
+      "CodeID": "code-NS-2c11b7c9",
+      "CodeType": "Control",
+      "ControlCode": "NS",
+      "DisplayText": "NS (skip)",
+      "NumericValue": -20,
+      "StringValue": "NS",
+      "VisibleInCoda": false
+    },
+    {
+      "CodeID": "code-NC-42f1d983",
+      "CodeType": "Control",
+      "ControlCode": "NC",
+      "DisplayText": "NC (not coded)",
+      "NumericValue": -30,
+      "StringValue": "NC",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-NR-5e3eee23",
+      "CodeType": "Control",
+      "ControlCode": "NR",
+      "DisplayText": "NR (not reviewed)",
+      "NumericValue": -40,
+      "StringValue": "NR",
+      "VisibleInCoda": false
+    },
+    {
+      "CodeID": "code-NIC-99631cb8",
+      "CodeType": "Control",
+      "ControlCode": "NIC",
+      "DisplayText": "NIC (not internally consistent)",
+      "NumericValue": -50,
+      "StringValue": "NIC",
+      "VisibleInCoda": false
+    },
+    {
+      "CodeID": "code-STOP-08b832a8",
+      "CodeType": "Control",
+      "ControlCode": "STOP",
+      "DisplayText": "STOP",
+      "NumericValue": -90,
+      "StringValue": "STOP",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-WS-adb25603b7af",
+      "CodeType": "Control",
+      "ControlCode": "WS",
+      "DisplayText": "WS (wrong scheme)",
+      "NumericValue": -100,
+      "StringValue": "WS",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-CE-016c1e22",
+      "CodeType": "Control",
+      "ControlCode": "CE",
+      "DisplayText": "CE (coding error)",
+      "NumericValue": -110,
+      "StringValue": "CE",
+      "VisibleInCoda": false
+    }
+  ]
+}
