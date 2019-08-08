@@ -1,0 +1,312 @@
+{
+  "SchemeID": "Scheme-fffffc6e",
+  "Name": "WS - Correct Dataset",
+  "Version": "0.0.0.4",
+  "Codes": [
+    {
+      "CodeID": "code-70ac05ab",
+      "CodeType": "Normal",
+      "DisplayText": "age",
+      "StringValue": "age",
+      "NumericValue": 1,
+      "VisibleInCoda": true,
+      "MatchValues":  [
+        "age"
+      ]
+    },
+    {
+      "CodeID": "code-6774cedd",
+      "CodeType": "Normal",
+      "DisplayText": "gender",
+      "StringValue": "gender",
+      "NumericValue": 2,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "gender"
+      ]
+    },
+    {
+      "CodeID": "code-dda6e4b4",
+      "CodeType": "Normal",
+      "DisplayText": "location",
+      "StringValue": "location",
+      "NumericValue": 3,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "location"
+      ]
+    },
+    {
+      "CodeID": "code-c2ef3b7f",
+      "CodeType": "Normal",
+      "DisplayText": "recently displaced",
+      "StringValue": "recently displaced",
+      "NumericValue": 4,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "recently displaced"
+      ]
+    },
+    {
+      "CodeID": "code-cd9eeed9",
+      "CodeType": "Normal",
+      "DisplayText": "in idp camp",
+      "StringValue": "in idp camp",
+      "NumericValue": 5,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "in idp camp"
+      ]
+    },
+    {
+      "CodeID": "code-87ec1cb8",
+      "CodeType": "Normal",
+      "DisplayText": "household language",
+      "StringValue": "household language",
+      "NumericValue": 6,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "hh language",
+        "household language"
+      ]
+    },
+    {
+      "CodeID": "code-9bd0f2b1",
+      "CodeType": "Normal",
+      "DisplayText": "s01e01",
+      "StringValue": "s01e01",
+      "NumericValue": 7,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s01e01"
+      ]
+    },
+    {
+      "CodeID": "code-9a5f15d6",
+      "CodeType": "Normal",
+      "DisplayText": "s01e02",
+      "StringValue": "s01e02",
+      "NumericValue": 8,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s01e02"
+      ]
+    },
+    {
+      "CodeID": "code-e8621530",
+      "CodeType": "Normal",
+      "DisplayText": "s01e03",
+      "StringValue": "s01e03",
+      "NumericValue": 9,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s01e03"
+      ]
+    },
+    {
+      "CodeID": "code-f7a875ee",
+      "CodeType": "Normal",
+      "DisplayText": "s01e04",
+      "StringValue": "s01e04",
+      "NumericValue": 10,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s01e04"
+      ]
+    },
+    {
+      "CodeID": "code-4dc91858",
+      "CodeType": "Normal",
+      "DisplayText": "s02e01",
+      "StringValue": "s02e01",
+      "NumericValue": 11,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s02e01"
+      ]
+    },
+    {
+      "CodeID": "code-93ae8d7f",
+      "CodeType": "Normal",
+      "DisplayText": "s02e02",
+      "StringValue": "s02e02",
+      "NumericValue": 12,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s02e02"
+      ]
+    },
+    {
+      "CodeID": "code-d321aaf7",
+      "CodeType": "Normal",
+      "DisplayText": "s02e03",
+      "StringValue": "s02e03",
+      "NumericValue": 13,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s02e03"
+      ]
+    },
+    {
+      "CodeID": "code-adc56730",
+      "CodeType": "Normal",
+      "DisplayText": "s02e04",
+      "StringValue": "s02e04",
+      "NumericValue": 14,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s02e04"
+      ]
+    },
+    {
+      "CodeID": "code-f216169d",
+      "CodeType": "Normal",
+      "DisplayText": "s02e05",
+      "StringValue": "s02e05",
+      "NumericValue": 15,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s02e05"
+      ]
+    },
+    {
+      "CodeID": "code-015a26ae",
+      "CodeType": "Normal",
+      "DisplayText": "s02e06",
+      "StringValue": "s02e06",
+      "NumericValue": 16,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s02e06"
+      ]
+    },
+    {
+      "CodeID": "code-c88d935a",
+      "CodeType": "Normal",
+      "DisplayText": "s03e01 bossaso",
+      "StringValue": "s03e01 bossaso",
+      "NumericValue": 17,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s03e01 bossaso"
+      ]
+    },
+    {
+      "CodeID": "code-877c8799",
+      "CodeType": "Normal",
+      "DisplayText": "s03e02 bossaso",
+      "StringValue": "s03e02 bossaso",
+      "NumericValue": 18,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s03e02 bossaso"
+      ]
+    },
+    {
+      "CodeID": "code-d32e8d97",
+      "CodeType": "Normal",
+      "DisplayText": "s03e03 bossaso",
+      "StringValue": "s03e03 bossaso",
+      "NumericValue": 19,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s03e03 bossaso"
+      ]
+    },
+    {
+      "CodeID": "code-d8f2ee69",
+      "CodeType": "Normal",
+      "DisplayText": "s03e04 bossaso",
+      "StringValue": "s03e04 bossaso",
+      "NumericValue": 20,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s03e04 bossaso"
+      ]
+    },
+    {
+      "CodeID": "code-2c048169",
+      "CodeType": "Normal",
+      "DisplayText": "s03e01 baidoa",
+      "StringValue": "s03e01 baidoa",
+      "NumericValue": 21,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s03e01 baidoa"
+      ]
+    },
+    {
+      "CodeID": "code-9036fd02",
+      "CodeType": "Normal",
+      "DisplayText": "s03e02 baidoa",
+      "StringValue": "s03e02 baidoa",
+      "NumericValue": 22,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s03e02 baidoa"
+      ]
+    },
+    {
+      "CodeID": "code-e7285811",
+      "CodeType": "Normal",
+      "DisplayText": "s03e03 baidoa",
+      "StringValue": "s03e03 baidoa",
+      "NumericValue": 23,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s03e03 baidoa"
+      ]
+    },
+    {
+      "CodeID": "code-15bb27cc",
+      "CodeType": "Normal",
+      "DisplayText": "s03e04 baidoa",
+      "StringValue": "s03e04 baidoa",
+      "NumericValue": 24,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s03e04 baidoa"
+      ]
+    },
+    {
+      "CodeID": "code-ec61083c",
+      "CodeType": "Normal",
+      "DisplayText": "s04e01",
+      "StringValue": "s04e01",
+      "NumericValue": 25,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s04e01"
+      ]
+    },
+    {
+      "CodeID": "code-097dbcfa",
+      "CodeType": "Normal",
+      "DisplayText": "s04e02",
+      "StringValue": "s04e02",
+      "NumericValue": 26,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "s04e02"
+      ]
+    },
+    {
+      "CodeID": "code-NR-5e3eee23",
+      "CodeType": "Control",
+      "ControlCode": "NR",
+      "DisplayText": "NR (not reviewed)",
+      "NumericValue": -40,
+      "StringValue": "NR",
+      "VisibleInCoda": false
+    },
+    {
+      "CodeID": "code-CE-016c1e22",
+      "CodeType": "Control",
+      "ControlCode": "CE",
+      "DisplayText": "CE (coding error)",
+      "NumericValue": -110,
+      "StringValue": "CE",
+      "VisibleInCoda": false
+    }
+  ]
+}
