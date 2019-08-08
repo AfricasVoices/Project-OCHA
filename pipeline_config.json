@@ -1,0 +1,58 @@
+{
+  "RawDataSources": [
+    {
+      "SourceType": "RapidPro",
+      "Domain": "textit.in",
+      "TokenFileURL": "gs://avf-credentials/csap-secondary-text-it-token.txt",
+      "ContactsFileName": "csap_secondary_contacts",
+      "ActivationFlowNames": [
+        "Sample Flow - Simple Poll"
+      ],
+      "SurveyFlowNames": [
+        "csap_s04_demog"
+      ]
+    },
+    {
+      "SourceType": "RapidPro",
+      "Domain": "textit.in",
+      "TokenFileURL": "gs://avf-credentials/csap-text-it-token.txt",
+      "ContactsFileName": "csap_contacts",
+      "ActivationFlowNames": [
+        "csap_s03w03_activation"
+      ],
+      "SurveyFlowNames": [
+        "csap_s03_demog"
+      ]
+    },
+    {
+      "SourceType": "GCloudBucket",
+      "SurveyFlowURLs": [
+        "gs://avf-project-datasets/2019/UNDP-RCO/csap_demog.jsonl",
+        "gs://avf-project-datasets/2019/UNDP-RCO/csap_s02_demog.jsonl"
+      ]
+    }
+  ],
+  "RapidProTestContactUUIDs": [
+
+  ],
+  "PhoneNumberUuidTable": {
+    "FirebaseCredentialsFileURL": "gs://avf-credentials/avf-id-infrastructure-firebase-adminsdk-6xps8-b9173f2bfd.json",
+    "TableName": "ADSS"
+  },
+  "RapidProKeyRemappings": [
+
+  ],
+  "ProjectStartDate": "2000-01-01T00:00:00+03:00",
+  "ProjectEndDate": "2100-12-31T24:00:00+03:00",
+  "FilterTestMessages": false,
+  "DriveUpload": {
+    "DriveCredentialsFileURL": "gs://avf-credentials/pipeline-runner-service-acct-avf-data-core-64cc71459fe7.json",
+    "ProductionUploadPath": "ocha_analysis_outputs/ocha_s01_production.csv",
+    "MessagesUploadPath": "ocha_analysis_outputs/ocha_s01_messages.csv",
+    "IndividualsUploadPath": "ocha_analysis_outputs/ocha_s01_individuals.csv",
+    "MessagesTracedDataUploadPath": "ocha_analysis_outputs/ocha_s01_traced_data_messages.jsonl",
+    "IndividualsTracedDataUploadPath": "ocha_analysis_outputs/ocha_s01_traced_data_individuals.jsonl"
+  },
+  "FlowDefinitionsUploadURLPrefix": "gs://avf-flow-definitions-test/OCHA-test-",
+  "MemoryProfileUploadURLPrefix": "gs://avf-pipeline-logs-performance-nearline/2019/OCHA/memory-"
+}

@@ -1,4 +1,5 @@
 import json
+from abc import ABC, abstractmethod
 from urllib.parse import urlparse
 
 from core_data_modules.cleaners import Codes, swahili
@@ -9,7 +10,7 @@ from dateutil.parser import isoparse
 class CodingModes(object):
     SINGLE = "SINGLE"
     MULTIPLE = "MULTIPLE"
-    
+
 
 class FoldingModes(object):
     ASSERT_EQUAL = "ASSERT_EQUAL"
@@ -71,20 +72,12 @@ class PipelineConfiguration(object):
 
     ]
 
-    def __init__(self, rapid_pro_domain, rapid_pro_token_file_url, activation_flow_names, survey_flow_names,
-                 rapid_pro_test_contact_uuids, phone_number_uuid_table, recovery_csv_urls, rapid_pro_key_remappings,
-                 project_start_date, project_end_date, filter_test_messages,
+    def __init__(self, raw_data_sources, rapid_pro_test_contact_uuids, phone_number_uuid_table, recovery_csv_urls,
+                 rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
                  flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, drive_upload=None):
         """
-        :param rapid_pro_domain: URL of the Rapid Pro server to download data from.
-        :type rapid_pro_domain: str
-        :param rapid_pro_token_file_url: GS URL of a text file containing the authorisation token for the Rapid Pro
-                                         server.
-        :type rapid_pro_token_file_url: str
-        :param activation_flow_names: The names of the RapidPro flows that contain the radio show responses.
-        :type: activation_flow_names: list of str
-        :param survey_flow_names: The names of the RapidPro flows that contain the survey responses.
-        :type: survey_flow_names: list of str
+        :param raw_data_sources: List of sources to pull the various raw run files from.
+        :type raw_data_sources: list of RawDataSource
         :param rapid_pro_test_contact_uuids: Rapid Pro contact UUIDs of test contacts.
                                              Runs for any of those test contacts will be tagged with {'test_run': True},
                                              and dropped when the pipeline is in production mode.
@@ -115,10 +108,7 @@ class PipelineConfiguration(object):
                              If None, does not upload to Google Drive.
         :type drive_upload: DriveUploadPaths | None
         """
-        self.rapid_pro_domain = rapid_pro_domain
-        self.rapid_pro_token_file_url = rapid_pro_token_file_url
-        self.activation_flow_names = activation_flow_names
-        self.survey_flow_names = survey_flow_names
+        self.raw_data_sources = raw_data_sources
         self.rapid_pro_test_contact_uuids = rapid_pro_test_contact_uuids
         self.phone_number_uuid_table = phone_number_uuid_table
         self.recovery_csv_urls = recovery_csv_urls
@@ -134,14 +124,21 @@ class PipelineConfiguration(object):
 
     @classmethod
     def from_configuration_dict(cls, configuration_dict):
-        rapid_pro_domain = configuration_dict["RapidProDomain"]
-        rapid_pro_token_file_url = configuration_dict["RapidProTokenFileURL"]
-        activation_flow_names = configuration_dict["ActivationFlowNames"]
-        survey_flow_names = configuration_dict["SurveyFlowNames"]
-        recovery_csv_urls = configuration_dict.get("RecoveryCSVURLs")
+        raw_data_sources = []
+        for raw_data_source in configuration_dict["RawDataSources"]:
+            if raw_data_source["SourceType"] == "RapidPro":
+                raw_data_sources.append(RapidProSource.from_configuration_dict(raw_data_source))
+            elif raw_data_source["SourceType"] == "GCloudBucket":
+                raw_data_sources.append(GCloudBucketSource.from_configuration_dict(raw_data_source))
+            else:
+                assert False, f"Unknown SourceType '{raw_data_source['SourceType']}'. " \
+                              f"Must be 'RapidPro' or 'GCloudBucket'."
+        
+        recovery_csv_urls = configuration_dict.get("RecoveryCSVURLs")  # TODO: Convert to be a RawDataSource
         rapid_pro_test_contact_uuids = configuration_dict["RapidProTestContactUUIDs"]
 
-        phone_number_uuid_table = PhoneNumberUuidTable.from_configuration_dict(configuration_dict["PhoneNumberUuidTable"])
+        phone_number_uuid_table = PhoneNumberUuidTable.from_configuration_dict(
+            configuration_dict["PhoneNumberUuidTable"])
 
         rapid_pro_key_remappings = []
         for remapping_dict in configuration_dict["RapidProKeyRemappings"]:
@@ -159,26 +156,19 @@ class PipelineConfiguration(object):
         flow_definitions_upload_url_prefix = configuration_dict["FlowDefinitionsUploadURLPrefix"]
         memory_profile_upload_url_prefix = configuration_dict["MemoryProfileUploadURLPrefix"]
 
-        return cls(rapid_pro_domain, rapid_pro_token_file_url, activation_flow_names, survey_flow_names,
-                   rapid_pro_test_contact_uuids, phone_number_uuid_table, recovery_csv_urls, rapid_pro_key_remappings,
-                   project_start_date, project_end_date, filter_test_messages,
+        return cls(raw_data_sources, rapid_pro_test_contact_uuids, phone_number_uuid_table, recovery_csv_urls,
+                   rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
                    flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, drive_upload_paths)
 
     @classmethod
     def from_configuration_file(cls, f):
         return cls.from_configuration_dict(json.load(f))
-    
+
     def validate(self):
-        validators.validate_string(self.rapid_pro_domain, "rapid_pro_domain")
-        validators.validate_string(self.rapid_pro_token_file_url, "rapid_pro_token_file_url")
-
-        validators.validate_list(self.activation_flow_names, "activation_flow_names")
-        for i, activation_flow_name in enumerate(self.activation_flow_names):
-            validators.validate_string(activation_flow_name, f"activation_flow_names[{i}]")
-
-        validators.validate_list(self.survey_flow_names, "survey_flow_names")
-        for i, survey_flow_name in enumerate(self.survey_flow_names):
-            validators.validate_string(survey_flow_name, f"survey_flow_names[{i}]")
+        validators.validate_list(self.raw_data_sources, "raw_data_sources")
+        for i, raw_data_source in enumerate(self.raw_data_sources):
+            assert isinstance(raw_data_source, RawDataSource), f"raw_data_sources[{i}] is not of type of RawDataSource"
+            raw_data_source.validate()
 
         if self.recovery_csv_urls is not None:
             validators.validate_list(self.recovery_csv_urls, "recovery_csv_urls")
@@ -210,6 +200,82 @@ class PipelineConfiguration(object):
 
         validators.validate_string(self.flow_definitions_upload_url_prefix, "flow_definitions_upload_url_prefix")
         validators.validate_string(self.memory_profile_upload_url_prefix, "memory_profile_upload_url_prefix")
+
+
+class RawDataSource(ABC):
+    @abstractmethod
+    def validate(self):
+        pass
+
+
+class RapidProSource(RawDataSource):
+    def __init__(self, domain, token_file_url, contacts_file_name, activation_flow_names, survey_flow_names):
+        """
+        :param domain: URL of the Rapid Pro server to download data from.
+        :type domain: str
+        :param token_file_url: GS URL of a text file containing the authorisation token for the Rapid Pro server.
+        :type token_file_url: str
+        :param contacts_file_name:
+        :type contacts_file_name: str
+        :param activation_flow_names: The names of the RapidPro flows that contain the radio show responses.
+        :type: activation_flow_names: list of str
+        :param survey_flow_names: The names of the RapidPro flows that contain the survey responses.
+        :type: survey_flow_names: list of str
+        """
+        self.domain = domain
+        self.token_file_url = token_file_url
+        self.contacts_file_name = contacts_file_name
+        self.activation_flow_names = activation_flow_names
+        self.survey_flow_names = survey_flow_names
+
+        self.validate()
+
+    @classmethod
+    def from_configuration_dict(cls, configuration_dict):
+        domain = configuration_dict["Domain"]
+        token_file_url = configuration_dict["TokenFileURL"]
+        contacts_file_name = configuration_dict["ContactsFileName"]
+        activation_flow_names = configuration_dict.get("ActivationFlowNames", [])
+        survey_flow_names = configuration_dict.get("SurveyFlowNames", [])
+
+        return cls(domain, token_file_url, contacts_file_name, activation_flow_names, survey_flow_names)
+
+    def validate(self):
+        validators.validate_string(self.domain, "domain")
+        validators.validate_string(self.token_file_url, "token_file_url")
+        validators.validate_string(self.contacts_file_name, "contacts_file_name")
+
+        validators.validate_list(self.activation_flow_names, "activation_flow_names")
+        for i, activation_flow_name in enumerate(self.activation_flow_names):
+            validators.validate_string(activation_flow_name, f"activation_flow_names[{i}]")
+
+        validators.validate_list(self.survey_flow_names, "survey_flow_names")
+        for i, survey_flow_name in enumerate(self.survey_flow_names):
+            validators.validate_string(survey_flow_name, f"survey_flow_names[{i}]")
+            
+
+class GCloudBucketSource(RawDataSource):
+    def __init__(self, activation_flow_urls, survey_flow_urls):
+        self.activation_flow_urls = activation_flow_urls
+        self.survey_flow_urls = survey_flow_urls
+        
+        self.validate()
+        
+    @classmethod
+    def from_configuration_dict(cls, configuration_dict):
+        activation_flow_urls = configuration_dict.get("ActivationFlowURLs", [])
+        survey_flow_urls = configuration_dict.get("SurveyFlowURLs", [])
+
+        return cls(activation_flow_urls, survey_flow_urls)
+
+    def validate(self):
+        validators.validate_list(self.activation_flow_urls, "activation_flow_urls")
+        for i, activation_flow_url in enumerate(self.activation_flow_urls):
+            validators.validate_url(activation_flow_url, f"activation_flow_urls[{i}]", "gs")
+
+        validators.validate_list(self.survey_flow_urls, "survey_flow_urls")
+        for i, survey_flow_url in enumerate(self.survey_flow_urls):
+            validators.validate_url(survey_flow_url, f"survey_flow_urls[{i}]", "gs")
 
 
 class PhoneNumberUuidTable(object):
@@ -252,7 +318,7 @@ class RapidProKeyRemapping(object):
         self.is_activation_message = is_activation_message
         self.rapid_pro_key = rapid_pro_key
         self.pipeline_key = pipeline_key
-        
+
         self.validate()
 
     @classmethod
@@ -260,9 +326,9 @@ class RapidProKeyRemapping(object):
         is_activation_message = configuration_dict.get("IsActivationMessage", False)
         rapid_pro_key = configuration_dict["RapidProKey"]
         pipeline_key = configuration_dict["PipelineKey"]
-        
+
         return cls(is_activation_message, rapid_pro_key, pipeline_key)
-    
+
     def validate(self):
         validators.validate_bool(self.is_activation_message, "is_activation_message")
         validators.validate_string(self.rapid_pro_key, "rapid_pro_key")
