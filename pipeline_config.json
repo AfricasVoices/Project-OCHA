@@ -1,16 +1,10 @@
 {
   "RawDataSources": [
     {
-      "SourceType": "RapidPro",
-      "Domain": "textit.in",
-      "TokenFileURL": "gs://avf-credentials/csap-secondary-text-it-token.txt",
-      "ContactsFileName": "csap_secondary_contacts",
-      "ActivationFlowNames": [
-        "csap_s04e01_activation",
-        "csap_s04e02_activation"
-      ],
-      "SurveyFlowNames": [
-        "csap_s04_demog"
+      "SourceType": "GCloudBucket",
+      "SurveyFlowURLs": [
+        "gs://avf-project-datasets/2019/UNDP-RCO/csap_demog.jsonl",
+        "gs://avf-project-datasets/2019/UNDP-RCO/csap_s02_demog.jsonl"
       ]
     },
     {
@@ -26,10 +20,15 @@
       ]
     },
     {
-      "SourceType": "GCloudBucket",
-      "SurveyFlowURLs": [
-        "gs://avf-project-datasets/2019/UNDP-RCO/csap_demog.jsonl",
-        "gs://avf-project-datasets/2019/UNDP-RCO/csap_s02_demog.jsonl"
+      "SourceType": "RapidPro",
+      "Domain": "textit.in",
+      "TokenFileURL": "gs://avf-credentials/csap-secondary-text-it-token.txt",
+      "ContactsFileName": "csap_secondary_contacts",
+      "ActivationFlowNames": [
+
+      ],
+      "SurveyFlowNames": [
+        "csap_s04_demog"
       ]
     }
   ],
