@@ -141,8 +141,7 @@ class PipelineConfiguration(object):
                            coding_mode=CodingModes.SINGLE,
                            code_scheme=CodeSchemes.SOMALIA_ZONE,
                            coded_field="zone_coded",
-                           # This code exists for compatibility with the previous CSAP demog datasets.
-                           # Not including in the analysis file because the zone is implicit from the project.
+                           analysis_file_key="zone",
                            folding_mode=FoldingModes.ASSERT_EQUAL
                        )
                    ],
