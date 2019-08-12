@@ -8,7 +8,8 @@ from core_data_modules.util import IOUtils
 from storage.google_cloud import google_cloud_utils
 from storage.google_drive import drive_client_wrapper
 
-from src import CombineRawDatasets, TranslateRapidProKeys, AutoCodeShowMessages, ProductionFile
+from src import CombineRawDatasets, TranslateRapidProKeys, AutoCodeShowMessages, ProductionFile, AutoCodeSurveys, \
+    ApplyManualCodes, AnalysisFile
 from src.lib import PipelineConfiguration
 
 Logger.set_project_name("OCHA")
@@ -126,27 +127,24 @@ if __name__ == "__main__":
     data = ProductionFile.generate(data, production_csv_output_path)
 
     # log.info("Auto Coding Surveys...")
-    # data = AutoCodeSurveys.auto_code_surveys(user, data, coded_dir_path)
+    data = AutoCodeSurveys.auto_code_surveys(user, data, coded_dir_path)
 
     # log.info("Applying Manual Codes from Coda...")
-    # data = ApplyManualCodes.apply_manual_codes(user, data, prev_coded_dir_path)
+    data = ApplyManualCodes.apply_manual_codes(user, data, prev_coded_dir_path)
 
     # log.info("Generating Analysis CSVs...")
-    # messages_data, individuals_data = AnalysisFile.generate(user, data, csv_by_message_output_path,
-    #                                                         csv_by_individual_output_path)
-
-    # TODO: Delete when generating analysis CSVs again
-    messages_data = data
+    messages_data, individuals_data = AnalysisFile.generate(user, data, csv_by_message_output_path,
+                                                            csv_by_individual_output_path)
 
     log.info("Writing messages TracedData to file...")
     IOUtils.ensure_dirs_exist_for_file(messages_json_output_path)
     with open(messages_json_output_path, "w") as f:
         TracedDataJsonIO.export_traced_data_iterable_to_jsonl(messages_data, f)
 
-    # log.info("Writing individuals TracedData to file...")
-    # IOUtils.ensure_dirs_exist_for_file(individuals_json_output_path)
-    # with open(individuals_json_output_path, "w") as f:
-    #     TracedDataJsonIO.export_traced_data_iterable_to_jsonl(individuals_data, f)
+    log.info("Writing individuals TracedData to file...")
+    IOUtils.ensure_dirs_exist_for_file(individuals_json_output_path)
+    with open(individuals_json_output_path, "w") as f:
+        TracedDataJsonIO.export_traced_data_iterable_to_jsonl(individuals_data, f)
 
     # Upload to Google Drive, if requested.
     # Note: This should happen as late as possible in order to reduce the risk of the remainder of the pipeline failing
