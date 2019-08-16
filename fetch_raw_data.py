@@ -1,19 +1,44 @@
 import argparse
 import json
 
+from core_data_modules.cleaners import Codes, PhoneCleaner
+from core_data_modules.cleaners.cleaning_utils import CleaningUtils
 from core_data_modules.logging import Logger
+from core_data_modules.traced_data import Metadata
 from core_data_modules.traced_data.io import TracedDataJsonIO
-from core_data_modules.util import IOUtils
+from core_data_modules.util import IOUtils, TimeUtils
 from id_infrastructure.firestore_uuid_table import FirestoreUuidTable
 from rapid_pro_tools.rapid_pro_client import RapidProClient
 from storage.google_cloud import google_cloud_utils
 from temba_client.v2 import Contact, Run
 
-from src.lib import PipelineConfiguration
+from src.lib import PipelineConfiguration, CodeSchemes
 from src.lib.pipeline_configuration import RapidProSource, GCloudBucketSource
 
 Logger.set_project_name("OCHA")
 log = Logger(__name__)
+
+
+def set_operator(user, traced_runs, phone_number_uuid_table):
+    # Set the operator codes for each message.
+    uuids = {td["avf_phone_id"] for td in traced_runs}
+    uuid_to_phone_lut = phone_number_uuid_table.uuid_to_data_batch(uuids)
+    for td in traced_runs:
+        operator_code = PhoneCleaner.clean_operator(uuid_to_phone_lut[td["avf_phone_id"]])
+        if operator_code == Codes.NOT_CODED:
+            operator_label = CleaningUtils.make_label_from_cleaner_code(
+                CodeSchemes.SOMALIA_OPERATOR,
+                CodeSchemes.SOMALIA_OPERATOR.get_code_with_control_code(Codes.NOT_CODED),
+                Metadata.get_call_location()
+            )
+        else:
+            operator_label = CleaningUtils.make_label_from_cleaner_code(
+                CodeSchemes.SOMALIA_OPERATOR,
+                CodeSchemes.SOMALIA_OPERATOR.get_code_with_match_value(operator_code),
+                Metadata.get_call_location()
+            )
+        td.append_data({"operator_coded": operator_label.to_dict()},
+                       Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
 
 def fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir, phone_number_uuid_table,
