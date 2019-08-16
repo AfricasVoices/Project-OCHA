@@ -12,9 +12,6 @@
       "Domain": "textit.in",
       "TokenFileURL": "gs://avf-credentials/csap-text-it-token.txt",
       "ContactsFileName": "csap_contacts",
-      "ActivationFlowNames": [
-        "csap_s03w05_activation"
-      ],
       "SurveyFlowNames": [
         "csap_s03_demog"
       ]
@@ -25,7 +22,7 @@
       "TokenFileURL": "gs://avf-credentials/csap-secondary-text-it-token.txt",
       "ContactsFileName": "csap_secondary_contacts",
       "ActivationFlowNames": [
-
+        "csap_s04e01_activation"
       ],
       "SurveyFlowNames": [
         "csap_s04_demog"
