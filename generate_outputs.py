@@ -16,9 +16,7 @@ Logger.set_project_name("OCHA")
 log = Logger(__name__)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Runs the post-fetch phase of the ReDSS pipeline",
-                                     # Support \n and long lines
-                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description="Runs the post-fetch phase of the pipeline")
 
     parser.add_argument("user", help="User launching this program")
     parser.add_argument("google_cloud_credentials_file_path", metavar="google-cloud-credentials-file-path",
