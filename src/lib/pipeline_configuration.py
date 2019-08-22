@@ -6,7 +6,7 @@ from core_data_modules.cleaners import Codes, swahili, somali
 from core_data_modules.data_models import validators
 from dateutil.parser import isoparse
 
-from src.lib import CodeSchemes
+from src.lib import CodeSchemes, code_imputation_functions
 
 
 class CodingModes(object):
@@ -141,8 +141,7 @@ class PipelineConfiguration(object):
                            coding_mode=CodingModes.SINGLE,
                            code_scheme=CodeSchemes.SOMALIA_ZONE,
                            coded_field="zone_coded",
-                           # This code exists for compatibility with the previous CSAP demog datasets.
-                           # Not including in the analysis file because the zone is implicit from the project.
+                           analysis_file_key="zone",
                            folding_mode=FoldingModes.ASSERT_EQUAL
                        )
                    ],
@@ -347,6 +346,14 @@ class PipelineConfiguration(object):
 
 class RawDataSource(ABC):
     @abstractmethod
+    def get_activation_flow_names(self):
+        pass
+
+    @abstractmethod
+    def get_survey_flow_names(self):
+        pass
+
+    @abstractmethod
     def validate(self):
         pass
 
@@ -372,6 +379,12 @@ class RapidProSource(RawDataSource):
         self.survey_flow_names = survey_flow_names
 
         self.validate()
+
+    def get_activation_flow_names(self):
+        return self.activation_flow_names
+
+    def get_survey_flow_names(self):
+        return self.survey_flow_names
 
     @classmethod
     def from_configuration_dict(cls, configuration_dict):
@@ -403,6 +416,12 @@ class GCloudBucketSource(RawDataSource):
         self.survey_flow_urls = survey_flow_urls
         
         self.validate()
+
+    def get_activation_flow_names(self):
+        return [url.split('/')[-1].split('.')[0] for url in self.activation_flow_urls]
+
+    def get_survey_flow_names(self):
+        return [url.split('/')[-1].split('.')[0] for url in self.survey_flow_urls]
         
     @classmethod
     def from_configuration_dict(cls, configuration_dict):
