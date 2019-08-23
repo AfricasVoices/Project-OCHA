@@ -2,18 +2,16 @@
 
 set -e
 
-if [[ $# -ne 3 ]]; then
-    echo "Usage: ./5_backup_data_root <data-root> <data-backups-dir> <run-id>"
-    echo "Backs-up the data root directory to a compressed file in a backups directory"
-    echo "The directory is gzipped and given the name 'data-<run-id>-<git-HEAD-hash>'"
+if [[ $# -ne 2 ]]; then
+    echo "Usage: ./5_backup_data_root <data-root> <backup-location>"
+    echo "Backs-up the data root directory to a compressed file in at the specified location"
     exit
 fi
 
 DATA_ROOT=$1
-DATA_BACKUPS_DIR=$2
-RUN_ID=$3
+BACKUP_LOCATION=$2
 
-mkdir -p "$DATA_BACKUPS_DIR"
+mkdir -p "$(dirname "$BACKUP_LOCATION")"
 find "$DATA_ROOT" -type f -name '.DS_Store' -delete
 cd "$DATA_ROOT"
-tar -czvf "$DATA_BACKUPS_DIR/data-$RUN_ID.tar.gzip" .
+tar -czvf "$BACKUP_LOCATION" .

@@ -34,7 +34,7 @@ RUN_ID="$DATE-$HASH"
 
 ./4_coda_add.sh "$CODA_PUSH_CREDENTIALS_PATH" "$CODA_TOOLS_ROOT" "$DATA_ROOT"
 
-./5_backup_data_root.sh "$DATA_ROOT" "$DATA_BACKUPS_DIR" "$RUN_ID"
+./5_backup_data_root.sh "$DATA_ROOT" "$DATA_BACKUPS_DIR/data-$RUN_ID.tar.gzip"
 
 ./6_upload_logs.sh "$USER" "$AVF_BUCKET_CREDENTIALS_PATH" "$PIPELINE_CONFIGURATION" "$RUN_ID" \
-    "$PERFORMANCE_LOGS_DIR/memory-$RUN_ID.profile"
+    "$PERFORMANCE_LOGS_DIR/memory-$RUN_ID.profile" "$DATA_BACKUPS_DIR/data-$RUN_ID.tar.gzip"

@@ -106,5 +106,6 @@
     "IndividualsTracedDataUploadPath": "ocha_analysis_outputs/csap_s04_traced_data_individuals.jsonl"
   },
   "FlowDefinitionsUploadURLPrefix": "gs://avf-flow-definitions-test/OCHA-test-",
-  "MemoryProfileUploadURLPrefix": "gs://avf-pipeline-logs-performance-nearline/2019/OCHA/memory-"
+  "MemoryProfileUploadURLPrefix": "gs://avf-pipeline-logs-performance-nearline/2019/OCHA/memory-",
+  "DataArchiveUploadURLPrefix": "gs://pipeline-execution-backup-archive/2019/OCHA/data-"
 }
