@@ -21,7 +21,9 @@ DATA_ROOT=$7
 DATA_BACKUPS_DIR=$8
 PERFORMANCE_LOGS_DIR=$9
 
-RUN_ID=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+HASH=$(git rev-parse HEAD)
+RUN_ID="$DATE-$HASH"
 
 ./1_coda_get.sh "$CODA_PULL_CREDENTIALS_PATH" "$CODA_TOOLS_ROOT" "$DATA_ROOT"
 
