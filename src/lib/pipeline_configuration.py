@@ -214,16 +214,12 @@ class PipelineConfiguration(object):
                    raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
     ]
 
-    def __init__(self, raw_data_sources, rapid_pro_test_contact_uuids, phone_number_uuid_table, recovery_csv_urls,
+    def __init__(self, raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
                  rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
                  flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, drive_upload=None):
         """
         :param raw_data_sources: List of sources to pull the various raw run files from.
         :type raw_data_sources: list of RawDataSource
-        :param rapid_pro_test_contact_uuids: Rapid Pro contact UUIDs of test contacts.
-                                             Runs for any of those test contacts will be tagged with {'test_run': True},
-                                             and dropped when the pipeline is in production mode.
-        :type rapid_pro_test_contact_uuids: list of str
         :param phone_number_uuid_table: Configuration for the Firestore phone number <-> uuid table.
         :type phone_number_uuid_table: PhoneNumberUuidTable
         :param rapid_pro_key_remappings: List of rapid_pro_key -> pipeline_key remappings.
@@ -251,7 +247,6 @@ class PipelineConfiguration(object):
         :type drive_upload: DriveUploadPaths | None
         """
         self.raw_data_sources = raw_data_sources
-        self.rapid_pro_test_contact_uuids = rapid_pro_test_contact_uuids
         self.phone_number_uuid_table = phone_number_uuid_table
         self.recovery_csv_urls = recovery_csv_urls
         self.rapid_pro_key_remappings = rapid_pro_key_remappings
@@ -277,7 +272,6 @@ class PipelineConfiguration(object):
                               f"Must be 'RapidPro' or 'GCloudBucket'."
         
         recovery_csv_urls = configuration_dict.get("RecoveryCSVURLs")  # TODO: Convert to be a RawDataSource
-        rapid_pro_test_contact_uuids = configuration_dict["RapidProTestContactUUIDs"]
 
         phone_number_uuid_table = PhoneNumberUuidTable.from_configuration_dict(
             configuration_dict["PhoneNumberUuidTable"])
@@ -298,7 +292,7 @@ class PipelineConfiguration(object):
         flow_definitions_upload_url_prefix = configuration_dict["FlowDefinitionsUploadURLPrefix"]
         memory_profile_upload_url_prefix = configuration_dict["MemoryProfileUploadURLPrefix"]
 
-        return cls(raw_data_sources, rapid_pro_test_contact_uuids, phone_number_uuid_table, recovery_csv_urls,
+        return cls(raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
                    rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
                    flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, drive_upload_paths)
 
@@ -316,10 +310,6 @@ class PipelineConfiguration(object):
             validators.validate_list(self.recovery_csv_urls, "recovery_csv_urls")
             for i, recovery_csv_url in enumerate(self.recovery_csv_urls):
                 validators.validate_string(recovery_csv_url, f"recovery_csv_urls[{i}]")
-
-        validators.validate_list(self.rapid_pro_test_contact_uuids, "rapid_pro_test_contact_uuids")
-        for i, contact_uuid in enumerate(self.rapid_pro_test_contact_uuids):
-            validators.validate_string(contact_uuid, f"rapid_pro_test_contact_uuids[{i}]")
 
         assert isinstance(self.phone_number_uuid_table, PhoneNumberUuidTable)
         self.phone_number_uuid_table.validate()
@@ -359,7 +349,8 @@ class RawDataSource(ABC):
 
 
 class RapidProSource(RawDataSource):
-    def __init__(self, domain, token_file_url, contacts_file_name, activation_flow_names, survey_flow_names):
+    def __init__(self, domain, token_file_url, contacts_file_name, activation_flow_names, survey_flow_names,
+                 test_contact_uuids):
         """
         :param domain: URL of the Rapid Pro server to download data from.
         :type domain: str
@@ -371,12 +362,17 @@ class RapidProSource(RawDataSource):
         :type: activation_flow_names: list of str
         :param survey_flow_names: The names of the RapidPro flows that contain the survey responses.
         :type: survey_flow_names: list of str
+        :param test_contact_uuids: Rapid Pro contact UUIDs of test contacts.
+                                   Runs for any of those test contacts will be tagged with {'test_run': True},
+                                   and dropped when the pipeline is run with "FilterTestMessages" set to true.
+        :type test_contact_uuids: list of str
         """
         self.domain = domain
         self.token_file_url = token_file_url
         self.contacts_file_name = contacts_file_name
         self.activation_flow_names = activation_flow_names
         self.survey_flow_names = survey_flow_names
+        self.test_contact_uuids = test_contact_uuids
 
         self.validate()
 
@@ -393,8 +389,10 @@ class RapidProSource(RawDataSource):
         contacts_file_name = configuration_dict["ContactsFileName"]
         activation_flow_names = configuration_dict.get("ActivationFlowNames", [])
         survey_flow_names = configuration_dict.get("SurveyFlowNames", [])
+        test_contact_uuids = configuration_dict.get("TestContactUUIDs", [])
 
-        return cls(domain, token_file_url, contacts_file_name, activation_flow_names, survey_flow_names)
+        return cls(domain, token_file_url, contacts_file_name, activation_flow_names,
+                   survey_flow_names, test_contact_uuids)
 
     def validate(self):
         validators.validate_string(self.domain, "domain")
@@ -408,6 +406,10 @@ class RapidProSource(RawDataSource):
         validators.validate_list(self.survey_flow_names, "survey_flow_names")
         for i, survey_flow_name in enumerate(self.survey_flow_names):
             validators.validate_string(survey_flow_name, f"survey_flow_names[{i}]")
+
+        validators.validate_list(self.test_contact_uuids, "test_contact_uuids")
+        for i, contact_uuid in enumerate(self.test_contact_uuids):
+            validators.validate_string(contact_uuid, f"test_contact_uuids[{i}]")
             
 
 class GCloudBucketSource(RawDataSource):
