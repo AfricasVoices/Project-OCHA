@@ -216,7 +216,8 @@ class PipelineConfiguration(object):
 
     def __init__(self, raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
                  rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
-                 flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, drive_upload=None):
+                 flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
+                 drive_upload=None):
         """
         :param raw_data_sources: List of sources to pull the various raw run files from.
         :type raw_data_sources: list of RawDataSource
@@ -256,6 +257,7 @@ class PipelineConfiguration(object):
         self.drive_upload = drive_upload
         self.flow_definitions_upload_url_prefix = flow_definitions_upload_url_prefix
         self.memory_profile_upload_url_prefix = memory_profile_upload_url_prefix
+        self.data_archive_upload_url_prefix = data_archive_upload_url_prefix
 
         self.validate()
 
@@ -291,10 +293,12 @@ class PipelineConfiguration(object):
 
         flow_definitions_upload_url_prefix = configuration_dict["FlowDefinitionsUploadURLPrefix"]
         memory_profile_upload_url_prefix = configuration_dict["MemoryProfileUploadURLPrefix"]
+        data_archive_upload_url_prefix = configuration_dict["DataArchiveUploadURLPrefix"]
 
         return cls(raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
                    rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
-                   flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, drive_upload_paths)
+                   flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
+                   drive_upload_paths)
 
     @classmethod
     def from_configuration_file(cls, f):
