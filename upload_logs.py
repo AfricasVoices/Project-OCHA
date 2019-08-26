@@ -21,6 +21,8 @@ if __name__ == "__main__":
                         help="Identifier of this pipeline run")
     parser.add_argument("memory_profile_file_path", metavar="memory-profile-file-path",
                         help="Path to the memory profile log file to upload")
+    parser.add_argument("data_archive_file_path", metavar="data-archive-file-path",
+                        help="Path to the data archive file to upload")
 
     args = parser.parse_args()
 
@@ -29,6 +31,7 @@ if __name__ == "__main__":
     pipeline_configuration_file_path = args.pipeline_configuration_file_path
     run_id = args.run_id
     memory_profile_file_path = args.memory_profile_file_path
+    data_archive_file_path = args.data_archive_file_path
 
     log.info("Loading Pipeline Configuration File...")
     with open(pipeline_configuration_file_path) as f:
@@ -40,4 +43,12 @@ if __name__ == "__main__":
     with open(memory_profile_file_path, "rb") as f:
         google_cloud_utils.upload_file_to_blob(
             google_cloud_credentials_file_path, memory_profile_upload_location, f
+        )
+
+    data_archive_upload_location = f"{pipeline_configuration.data_archive_upload_url_prefix}{run_id}.tar.gzip"
+    log.info(f"Uploading the data archive from {data_archive_file_path} to "
+             f"{data_archive_upload_location}...")
+    with open(data_archive_file_path, "rb") as f:
+        google_cloud_utils.upload_file_to_blob(
+            google_cloud_credentials_file_path, data_archive_upload_location, f
         )
