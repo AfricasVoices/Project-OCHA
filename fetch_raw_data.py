@@ -42,7 +42,7 @@ def set_operator(user, traced_runs, phone_number_uuid_table):
 
 
 def fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir, phone_number_uuid_table,
-                         rapid_pro_test_contact_uuids, rapid_pro_source):
+                         rapid_pro_source):
     log.info("Fetching data from Rapid Pro...")
     log.info("Downloading Rapid Pro access token...")
     rapid_pro_token = google_cloud_utils.download_blob_to_string(
@@ -93,7 +93,7 @@ def fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir,
 
         # Convert the runs to TracedData.
         traced_runs = rapid_pro.convert_runs_to_traced_data(
-            user, raw_runs, raw_contacts, phone_number_uuid_table, rapid_pro_test_contact_uuids)
+            user, raw_runs, raw_contacts, phone_number_uuid_table, rapid_pro_source.test_contact_uuids)
 
         log.info(f"Saving {len(raw_runs)} raw runs to {raw_runs_path}...")
         with open(raw_runs_path, "w") as raw_runs_file:
@@ -148,7 +148,7 @@ def main(user, google_cloud_credentials_file_path, pipeline_configuration_file_p
         log.info(f"Fetching from source {i + 1}/{len(pipeline_configuration.raw_data_sources)}...")
         if isinstance(raw_data_source, RapidProSource):
             fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir, phone_number_uuid_table,
-                                 pipeline_configuration.rapid_pro_test_contact_uuids, raw_data_source)
+                                 raw_data_source)
         elif isinstance(raw_data_source, GCloudBucketSource):
             fetch_from_gcloud_bucket(google_cloud_credentials_file_path, raw_data_dir, raw_data_source)
         else:

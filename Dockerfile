@@ -38,7 +38,7 @@ RUN pipenv sync
 ADD code_schemes/*.json /app/code_schemes/
 ADD src /app/src
 ADD fetch_raw_data.py /app
-#ADD fetch_recovered_data.py /app
 #ADD fetch_flow_definitions.py /app
 ADD generate_outputs.py /app
-#ADD upload_logs.py /app
+ADD upload_logs.py /app
+ADD generate_analysis_graphs.py /app
