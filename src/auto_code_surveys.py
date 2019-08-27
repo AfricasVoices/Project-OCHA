@@ -12,8 +12,6 @@ from src.lib.pipeline_configuration import PipelineConfiguration
 
 
 class AutoCodeSurveys(object):
-    SENT_ON_KEY = "sent_on"
-
     @classmethod
     def auto_code_surveys(cls, user, data, coda_output_dir):
         # Auto-code surveys
