@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 
 from core_data_modules.logging import Logger
 from core_data_modules.traced_data.io import TracedDataJsonIO
@@ -93,7 +94,11 @@ def fetch_from_gcloud_bucket(google_cloud_credentials_file_path, raw_data_dir, g
         flow = blob_url.split("/")[-1]
 
         traced_runs_output_path = f"{raw_data_dir}/{flow}"
-        log.info(f"Saving {flow} to file '{traced_runs_output_path}'...")
+        if os.path.exists(traced_runs_output_path):
+            log.info(f"File '{traced_runs_output_path}' for flow '{flow}' already exists; skipping download")
+            continue
+        
+        log.info(f"Saving '{flow}' to file '{traced_runs_output_path}'...")
         with open(traced_runs_output_path, "wb") as traced_runs_output_file:
             google_cloud_utils.download_blob_to_file(
                 google_cloud_credentials_file_path, blob_url, traced_runs_output_file)
