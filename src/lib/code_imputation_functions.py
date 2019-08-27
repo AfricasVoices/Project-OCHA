@@ -76,3 +76,16 @@ def impute_somalia_location_codes(user, data, location_configurations):
                                        SomaliaLocations.zone_for_location_code(location)),
                     Metadata.get_call_location()).to_dict()
             }, Metadata(user, Metadata.get_call_location(), time.time()))
+
+        # Impute zone from operator
+        if "location_raw" not in td:
+            operator_str = CodeSchemes.SOMALIA_OPERATOR.get_code_with_id(td["operator_coded"]["CodeID"]).string_value
+            zone_str = SomaliaLocations.zone_for_operator_code(operator_str)
+
+            td.append_data({
+                "zone_coded": CleaningUtils.make_label_from_cleaner_code(
+                    CodeSchemes.SOMALIA_ZONE,
+                    make_location_code(CodeSchemes.SOMALIA_ZONE,
+                                       SomaliaLocations.state_for_location_code(zone_str)),
+                    Metadata.get_call_location()).to_dict()
+            }, Metadata(user, Metadata.get_call_location(), time.time()))
