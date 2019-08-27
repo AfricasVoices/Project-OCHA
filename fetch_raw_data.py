@@ -95,6 +95,9 @@ def fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir,
         traced_runs = rapid_pro.convert_runs_to_traced_data(
             user, raw_runs, raw_contacts, phone_number_uuid_table, rapid_pro_source.test_contact_uuids)
 
+        if flow in rapid_pro_source.activation_flow_names:
+            set_operator(user, traced_runs, phone_number_uuid_table)
+
         log.info(f"Saving {len(raw_runs)} raw runs to {raw_runs_path}...")
         with open(raw_runs_path, "w") as raw_runs_file:
             json.dump([run.serialize() for run in raw_runs], raw_runs_file)
