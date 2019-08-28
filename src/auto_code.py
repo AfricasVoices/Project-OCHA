@@ -84,6 +84,7 @@ class AutoCode(object):
 
         # For any locations where the cleaners assigned a code to a sub district, set the district code to NC
         # (this is because only one column should have a value set in Coda)
+        # TODO: This is Somalia-specific configuration. It should move to pipeline_configuration.py or .json
         for td in data:
             if "mogadishu_sub_district_coded" in td:
                 mogadishu_code_id = td["mogadishu_sub_district_coded"]["CodeID"]
