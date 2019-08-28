@@ -113,17 +113,8 @@ class AutoCode(object):
                 )
 
     @classmethod
-    def auto_code(cls, user, data, pipeline_configuration, icr_output_dir, coda_output_dir):
-        data = cls.filter_messages(data, pipeline_configuration.project_start_date,
-                                   pipeline_configuration.project_end_date, pipeline_configuration.filter_test_messages)
-
-        cls.run_cleaners(user, data)
-
-        cls.export_to_coda(user, data, coda_output_dir)
-
-        cls.log_empty_string_stats(data)
-
-        # # Output messages for ICR
+    def export_icr(cls, data, icr_output_dir):
+        # Output messages for ICR
         IOUtils.ensure_dirs_exist(icr_output_dir)
         for plan in PipelineConfiguration.RQA_CODING_PLANS:
             rqa_messages = []
@@ -139,5 +130,15 @@ class AutoCode(object):
                 TracedDataCSVIO.export_traced_data_iterable_to_csv(
                     icr_messages, f, headers=[plan.run_id_field, plan.raw_field]
                 )
+
+    @classmethod
+    def auto_code(cls, user, data, pipeline_configuration, icr_output_dir, coda_output_dir):
+        data = cls.filter_messages(data, pipeline_configuration.project_start_date,
+                                   pipeline_configuration.project_end_date, pipeline_configuration.filter_test_messages)
+
+        cls.run_cleaners(user, data)
+        cls.export_to_coda(user, data, coda_output_dir)
+        cls.export_icr(data, icr_output_dir)
+        cls.log_empty_string_stats(data)
 
         return data
