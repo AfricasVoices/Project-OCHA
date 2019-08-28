@@ -11,8 +11,6 @@ from core_data_modules.util import IOUtils
 
 from src.lib import PipelineConfiguration, MessageFilters, ICRTools, CodeSchemes
 
-# from src.lib.channels import Channels
-
 log = Logger(__name__)
 
 
