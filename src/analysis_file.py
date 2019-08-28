@@ -1,4 +1,3 @@
-import sys
 import time
 
 from core_data_modules.cleaners import Codes
@@ -96,7 +95,7 @@ class AnalysisFile(object):
     def generate(user, data, csv_by_message_output_path, csv_by_individual_output_path):
         # Serializer is currently overflowing
         # TODO: Investigate/address the cause of this.
-        sys.setrecursionlimit(15000)
+        # sys.setrecursionlimit(15000)
 
         consent_withdrawn_key = "consent_withdrawn"
         for td in data:
