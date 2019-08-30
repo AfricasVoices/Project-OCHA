@@ -2,7 +2,7 @@
 
 set -e
 
-IMAGE_NAME=ocha
+IMAGE_NAME=ocha-generate-analysis-graphs
 
 while [[ $# -gt 0 ]]; do
     case "$1" in

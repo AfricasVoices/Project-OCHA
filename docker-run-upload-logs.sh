@@ -2,7 +2,7 @@
 
 set -e
 
-IMAGE_NAME=ocha
+IMAGE_NAME=ocha-upload-logs
 
 # Check that the correct number of arguments were provided.
 if [[ $# -ne 6 ]]; then
