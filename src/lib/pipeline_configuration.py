@@ -526,7 +526,8 @@ class RapidProKeyRemapping(object):
 
 class DriveUpload(object):
     def __init__(self, drive_credentials_file_url, production_upload_path, messages_upload_path,
-                 individuals_upload_path, messages_traced_data_upload_path, individuals_traced_data_upload_path):
+                 individuals_upload_path, messages_traced_data_upload_path, individuals_traced_data_upload_path,
+                 analysis_graphs_dir):
         """
         :param drive_credentials_file_url: GS URL to the private credentials file for the Drive service account to use
                                            to upload the output files.
@@ -547,6 +548,9 @@ class DriveUpload(object):
                                                     upload the serialized individuals TracedData from this pipeline
                                                     run to.
         :type individuals_traced_data_upload_path: str
+        :param analysis_graphs_dir: Directory in the Drive service account's "Shared with Me" directory to upload the
+                                    analysis graphs from this pipeline run to.
+        :type analysis_graphs_dir: str
         """
         self.drive_credentials_file_url = drive_credentials_file_url
         self.production_upload_path = production_upload_path
@@ -554,6 +558,7 @@ class DriveUpload(object):
         self.individuals_upload_path = individuals_upload_path
         self.messages_traced_data_upload_path = messages_traced_data_upload_path
         self.individuals_traced_data_upload_path = individuals_traced_data_upload_path
+        self.analysis_graphs_dir = analysis_graphs_dir
 
         self.validate()
 
@@ -565,9 +570,11 @@ class DriveUpload(object):
         individuals_upload_path = configuration_dict["IndividualsUploadPath"]
         messages_traced_data_upload_path = configuration_dict["MessagesTracedDataUploadPath"]
         individuals_traced_data_upload_path = configuration_dict["IndividualsTracedDataUploadPath"]
+        analysis_graphs_dir = configuration_dict["AnalysisGraphsDir"]
 
         return cls(drive_credentials_file_url, production_upload_path, messages_upload_path,
-                   individuals_upload_path, messages_traced_data_upload_path, individuals_traced_data_upload_path)
+                   individuals_upload_path, messages_traced_data_upload_path, individuals_traced_data_upload_path,
+                   analysis_graphs_dir)
 
     def validate(self):
         validators.validate_string(self.drive_credentials_file_url, "drive_credentials_file_url")
@@ -579,3 +586,4 @@ class DriveUpload(object):
         validators.validate_string(self.individuals_upload_path, "individuals_upload_path")
         validators.validate_string(self.messages_traced_data_upload_path, "messages_traced_data_upload_path")
         validators.validate_string(self.individuals_traced_data_upload_path, "individuals_traced_data_upload_path")
+        validators.validate_string(self.analysis_graphs_dir, "analysis_graphs_dir")

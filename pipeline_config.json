@@ -105,7 +105,8 @@
     "MessagesUploadPath": "ocha_analysis_outputs/csap_s04_messages.csv",
     "IndividualsUploadPath": "ocha_analysis_outputs/csap_s04_individuals.csv",
     "MessagesTracedDataUploadPath": "ocha_analysis_outputs/csap_s04_traced_data_messages.jsonl",
-    "IndividualsTracedDataUploadPath": "ocha_analysis_outputs/csap_s04_traced_data_individuals.jsonl"
+    "IndividualsTracedDataUploadPath": "ocha_analysis_outputs/csap_s04_traced_data_individuals.jsonl",
+    "AnalysisGraphsDir"
   },
   "FlowDefinitionsUploadURLPrefix": "gs://avf-flow-definitions-test/OCHA-test-",
   "MemoryProfileUploadURLPrefix": "gs://avf-pipeline-logs-performance-nearline/2019/OCHA/memory-",
