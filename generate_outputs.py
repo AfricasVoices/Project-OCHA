@@ -8,7 +8,7 @@ from core_data_modules.util import IOUtils
 from storage.google_cloud import google_cloud_utils
 from storage.google_drive import drive_client_wrapper
 
-from src import CombineRawDatasets, TranslateRapidProKeys, AutoCodeShowMessages, ProductionFile, AutoCodeSurveys, \
+from src import CombineRawDatasets, TranslateRapidProKeys, AutoCode, ProductionFile, \
     ApplyManualCodes, AnalysisFile, WSCorrection
 from src.lib import PipelineConfiguration
 
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     production_csv_drive_path = None
 
     user = args.user
-    pipeline_configuration_file_path = args.pipeline_configuration_file_path
     google_cloud_credentials_file_path = args.google_cloud_credentials_file_path
+    pipeline_configuration_file_path = args.pipeline_configuration_file_path
 
     raw_data_dir = args.raw_data_dir
     prev_coded_dir_path = args.prev_coded_dir_path
@@ -123,18 +123,15 @@ if __name__ == "__main__":
                  "json was set to 'false')")
 
     log.info("Auto Coding Messages...")
-    data = AutoCodeShowMessages.auto_code_show_messages(user, data, pipeline_configuration, icr_output_dir, coded_dir_path)
+    data = AutoCode.auto_code(user, data, pipeline_configuration, icr_output_dir, coded_dir_path)
 
     log.info("Exporting production CSV...")
     data = ProductionFile.generate(data, production_csv_output_path)
 
-    # log.info("Auto Coding Surveys...")
-    data = AutoCodeSurveys.auto_code_surveys(user, data, coded_dir_path)
-
-    # log.info("Applying Manual Codes from Coda...")
+    log.info("Applying Manual Codes from Coda...")
     data = ApplyManualCodes.apply_manual_codes(user, data, prev_coded_dir_path)
 
-    # log.info("Generating Analysis CSVs...")
+    log.info("Generating Analysis CSVs...")
     messages_data, individuals_data = AnalysisFile.generate(user, data, csv_by_message_output_path,
                                                             csv_by_individual_output_path)
 

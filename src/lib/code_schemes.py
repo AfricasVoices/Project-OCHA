@@ -10,6 +10,8 @@ def _open_scheme(filename):
 
 
 class CodeSchemes(object):
+    SOMALIA_OPERATOR = _open_scheme("somalia_operator.json")
+
     S04E01_REASONS = _open_scheme("s04e01_reasons.json")
     S04E02_REASONS = _open_scheme("s04e02_reasons.json")
 

@@ -45,6 +45,9 @@ class ApplyManualCodes(object):
     def apply_manual_codes(cls, user, data, coda_input_dir):
         # Merge manually coded data into the cleaned dataset
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
+            if plan.coda_filename is None:
+                continue
+
             coda_input_path = path.join(coda_input_dir, plan.coda_filename)
 
             for cc in plan.coding_configurations:
