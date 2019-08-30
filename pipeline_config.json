@@ -100,9 +100,9 @@
     {"RapidProKey": "Idp_Camp (Text) - csap_s04_demog", "PipelineKey": "in_idp_camp_raw"},
     {"RapidProKey": "Idp_Camp (Time) - csap_s04_demog", "PipelineKey": "in_idp_camp_time"}
   ],
-  "ProjectStartDate": "2000-01-01T00:00:00+03:00",
+  "ProjectStartDate": "2019-08-25T00:00:00+03:00",
   "ProjectEndDate": "2100-12-31T24:00:00+03:00",
-  "FilterTestMessages": false,
+  "FilterTestMessages": true,
   "DriveUpload": {
     "DriveCredentialsFileURL": "gs://avf-credentials/pipeline-runner-service-acct-avf-data-core-64cc71459fe7.json",
     "ProductionUploadPath": "ocha_analysis_outputs/csap_s04_production.csv",
