@@ -3,7 +3,206 @@
   "Name": "S04E01 Reasons",
   "Version": "0.0.0.1",
   "Codes": [
-
+    {
+      "CodeID": "code-60748e61",
+      "CodeType": "Normal",
+      "DisplayText": "food nutrition",
+      "NumericValue": 1,
+      "StringValue": "food_nutrition",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-8bcab25c",
+      "CodeType": "Normal",
+      "DisplayText": "health services",
+      "NumericValue": 2,
+      "StringValue": "health_services",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-002efa0d",
+      "CodeType": "Normal",
+      "DisplayText": "access to water",
+      "NumericValue": 3,
+      "StringValue": "access_to_water",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-6cfcc96e",
+      "CodeType": "Normal",
+      "DisplayText": "hygiene",
+      "NumericValue": 4,
+      "StringValue": "hygiene",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-c45b8832",
+      "CodeType": "Normal",
+      "DisplayText": "education",
+      "NumericValue": 5,
+      "StringValue": "education",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-e527ed20",
+      "CodeType": "Normal",
+      "DisplayText": "shelter",
+      "NumericValue": 6,
+      "StringValue": "shelter",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-a58975ad",
+      "CodeType": "Normal",
+      "DisplayText": "peace and security",
+      "NumericValue": 7,
+      "StringValue": "peace_and_security",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-9ce5d93d",
+      "CodeType": "Normal",
+      "DisplayText": "good governance",
+      "NumericValue": 8,
+      "StringValue": "good_governance",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-09786e22",
+      "CodeType": "Normal",
+      "DisplayText": "protection of rights",
+      "NumericValue": 9,
+      "StringValue": "protection_of_rights",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-2ef79de5",
+      "CodeType": "Normal",
+      "DisplayText": "cooperation between government and people",
+      "NumericValue": 10,
+      "StringValue": "cooperation_between_government_and_people",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-d51691ab",
+      "CodeType": "Normal",
+      "DisplayText": "cooperation between government and NGOs",
+      "NumericValue": 11,
+      "StringValue": "cooperation_between_government_and_NGOs",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-c86b4a11",
+      "CodeType": "Normal",
+      "DisplayText": "NGOs to be accountable participatory",
+      "NumericValue": 12,
+      "StringValue": "NGOs_to_be_accountable_participatory",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-339b1721",
+      "CodeType": "Normal",
+      "DisplayText": "community organisation",
+      "NumericValue": 13,
+      "StringValue": "community_organisation",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-b7ae89cc",
+      "CodeType": "Normal",
+      "DisplayText": "job creation",
+      "NumericValue": 14,
+      "StringValue": "job_creation",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-c2b73f44",
+      "CodeType": "Normal",
+      "DisplayText": "build resilience to drought",
+      "NumericValue": 15,
+      "StringValue": "build_resilience_to_drought",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-e3a5f7d2",
+      "CodeType": "Normal",
+      "DisplayText": "support for IDPs",
+      "NumericValue": 16,
+      "StringValue": "support_for_IDPs",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-c2647481",
+      "CodeType": "Normal",
+      "DisplayText": "information",
+      "NumericValue": 17,
+      "StringValue": "information",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-6f14ec51",
+      "CodeType": "Normal",
+      "DisplayText": "religion",
+      "NumericValue": 18,
+      "StringValue": "religion",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-0a60c8a1",
+      "CodeType": "Normal",
+      "DisplayText": "support to the poor",
+      "NumericValue": 19,
+      "StringValue": "support_to_the_poor",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-49f56e6e",
+      "CodeType": "Normal",
+      "DisplayText": "return and resettlement of IDPs",
+      "NumericValue": 20,
+      "StringValue": "return_and_resettlement_of_IDPs",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-011c880c",
+      "CodeType": "Normal",
+      "DisplayText": "stop aid dependency",
+      "NumericValue": 21,
+      "StringValue": "stop_aid_dependency",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-0f9ad546",
+      "CodeType": "Normal",
+      "DisplayText": "farming support",
+      "NumericValue": 22,
+      "StringValue": "farming_support",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-69615395",
+      "CodeType": "Normal",
+      "DisplayText": "stop clannism",
+      "NumericValue": 23,
+      "StringValue": "stop_clannism",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-4b6fa3aa",
+      "CodeType": "Normal",
+      "DisplayText": "economic development",
+      "NumericValue": 24,
+      "StringValue": "economic_development",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-57e6a45d",
+      "CodeType": "Normal",
+      "DisplayText": "other",
+      "NumericValue": 25,
+      "StringValue": "other",
+      "VisibleInCoda": true
+    },
     {
       "CodeID": "code-NA-f93d3eb7",
       "CodeType": "Control",
@@ -106,6 +305,14 @@
       "DisplayText": "greeting",
       "NumericValue": -100020,
       "StringValue": "greeting",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-OI-c5f1d054",
+      "CodeType": "Meta",
+      "DisplayText": "opt-in",
+      "NumericValue": -100040,
+      "StringValue": "opt_in",
       "VisibleInCoda": true
     }
   ]
