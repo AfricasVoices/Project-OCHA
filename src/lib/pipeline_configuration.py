@@ -236,7 +236,7 @@ class PipelineConfiguration(object):
     ]
 
     def __init__(self, raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
-                 rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
+                 rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages, move_ws_messages,
                  flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
                  drive_upload=None):
         """
@@ -254,6 +254,8 @@ class PipelineConfiguration(object):
         :type project_end_date: datetime.datetime
         :param filter_test_messages: Whether to filter out messages sent from the rapid_pro_test_contact_uuids
         :type filter_test_messages: bool
+        :param move_ws_messages: Whether to move messages labelled as Wrong Scheme to the correct dataset.
+        :type move_ws_messages: bool
         :param flow_definitions_upload_url_prefix: The prefix of the GS URL to upload serialised flow definitions to.
                                                    This prefix will be appended with the current datetime and the
                                                    ".json" file extension.
@@ -275,6 +277,7 @@ class PipelineConfiguration(object):
         self.project_start_date = project_start_date
         self.project_end_date = project_end_date
         self.filter_test_messages = filter_test_messages
+        self.move_ws_messages = move_ws_messages
         self.drive_upload = drive_upload
         self.flow_definitions_upload_url_prefix = flow_definitions_upload_url_prefix
         self.memory_profile_upload_url_prefix = memory_profile_upload_url_prefix
@@ -307,6 +310,7 @@ class PipelineConfiguration(object):
         project_end_date = isoparse(configuration_dict["ProjectEndDate"])
 
         filter_test_messages = configuration_dict["FilterTestMessages"]
+        move_ws_messages = configuration_dict["MoveWSMessages"]
 
         drive_upload_paths = None
         if "DriveUpload" in configuration_dict:
@@ -317,7 +321,7 @@ class PipelineConfiguration(object):
         data_archive_upload_url_prefix = configuration_dict["DataArchiveUploadURLPrefix"]
 
         return cls(raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
-                   rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
+                   rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages, move_ws_messages,
                    flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
                    drive_upload_paths)
 
@@ -349,6 +353,7 @@ class PipelineConfiguration(object):
         validators.validate_datetime(self.project_end_date, "project_end_date")
 
         validators.validate_bool(self.filter_test_messages, "filter_test_messages")
+        validators.validate_bool(self.move_ws_messages, "move_ws_messages")
 
         if self.drive_upload is not None:
             assert isinstance(self.drive_upload, DriveUpload), \
