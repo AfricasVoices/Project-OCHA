@@ -174,9 +174,9 @@
     {
       "CodeID": "code-0f9ad546",
       "CodeType": "Normal",
-      "DisplayText": "farming",
+      "DisplayText": "farming support",
       "NumericValue": 22,
-      "StringValue": "farming",
+      "StringValue": "farming_support",
       "VisibleInCoda": true
     },
     {
