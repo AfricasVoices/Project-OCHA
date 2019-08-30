@@ -1,15 +1,12 @@
 import random
-import time
 from os import path
 
-from core_data_modules.cleaners import Codes
 from core_data_modules.cleaners.cleaning_utils import CleaningUtils
 from core_data_modules.logging import Logger
-from core_data_modules.traced_data import Metadata
 from core_data_modules.traced_data.io import TracedDataCSVIO, TracedDataCodaV2IO
 from core_data_modules.util import IOUtils
 
-from src.lib import PipelineConfiguration, MessageFilters, ICRTools, CodeSchemes
+from src.lib import PipelineConfiguration, MessageFilters, ICRTools
 
 log = Logger(__name__)
 
@@ -81,21 +78,6 @@ class AutoCode(object):
                 if cc.cleaner is not None:
                     CleaningUtils.apply_cleaner_to_traced_data_iterable(user, data, plan.raw_field, cc.coded_field,
                                                                         cc.cleaner, cc.code_scheme)
-
-        # For any locations where the cleaners assigned a code to a sub district, set the district code to NC
-        # (this is because only one column should have a value set in Coda)
-        # TODO: This is Somalia-specific configuration. It should move to pipeline_configuration.py or .json
-        for td in data:
-            if "mogadishu_sub_district_coded" in td:
-                mogadishu_code_id = td["mogadishu_sub_district_coded"]["CodeID"]
-                if CodeSchemes.MOGADISHU_SUB_DISTRICT.get_code_with_id(mogadishu_code_id).code_type == "Normal":
-                    nc_label = CleaningUtils.make_label_from_cleaner_code(
-                        CodeSchemes.MOGADISHU_SUB_DISTRICT,
-                        CodeSchemes.MOGADISHU_SUB_DISTRICT.get_code_with_control_code(Codes.NOT_CODED),
-                        Metadata.get_call_location(),
-                    )
-                    td.append_data({"district_coded": nc_label.to_dict()},
-                                   Metadata(user, Metadata.get_call_location(), time.time()))
 
     @classmethod
     def export_coda(cls, user, data, coda_output_dir):

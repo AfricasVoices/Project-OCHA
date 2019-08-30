@@ -102,6 +102,14 @@ class PipelineConfiguration(object):
         else:
             return Codes.NOT_CODED
 
+    @staticmethod
+    def clean_district_if_no_mogadishu_sub_district(text):
+        mogadishu_sub_district = somali.DemographicCleaner.clean_mogadishu_sub_district(text)
+        if mogadishu_sub_district == Codes.NOT_CODED:
+            return somali.DemographicCleaner.clean_somalia_district(text)
+        else:
+            return Codes.NOT_CODED
+
     SURVEY_CODING_PLANS = [
         CodingPlan(raw_field="location_raw",
                    time_field="location_time",
@@ -110,6 +118,7 @@ class PipelineConfiguration(object):
                        CodingConfiguration(
                            coding_mode=CodingModes.SINGLE,
                            code_scheme=CodeSchemes.MOGADISHU_SUB_DISTRICT,
+                           cleaner=somali.DemographicCleaner.clean_mogadishu_sub_district,
                            coded_field="mogadishu_sub_district_coded",
                            # This code exists for compatibility with the previous CSAP demog datasets.
                            # Not including in the analysis file because this project is not in Mogadishu.
@@ -118,7 +127,7 @@ class PipelineConfiguration(object):
                        CodingConfiguration(
                            coding_mode=CodingModes.SINGLE,
                            code_scheme=CodeSchemes.SOMALIA_DISTRICT,
-                           cleaner=somali.DemographicCleaner.clean_somalia_district,
+                           cleaner=lambda text: PipelineConfiguration.clean_district_if_no_mogadishu_sub_district(text),
                            coded_field="district_coded",
                            analysis_file_key="district",
                            folding_mode=FoldingModes.ASSERT_EQUAL
