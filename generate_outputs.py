@@ -56,8 +56,8 @@ if __name__ == "__main__":
     production_csv_drive_path = None
 
     user = args.user
-    pipeline_configuration_file_path = args.pipeline_configuration_file_path
     google_cloud_credentials_file_path = args.google_cloud_credentials_file_path
+    pipeline_configuration_file_path = args.pipeline_configuration_file_path
 
     raw_data_dir = args.raw_data_dir
     prev_coded_dir_path = args.prev_coded_dir_path
