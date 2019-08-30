@@ -9,7 +9,7 @@ from storage.google_cloud import google_cloud_utils
 from storage.google_drive import drive_client_wrapper
 
 from src import CombineRawDatasets, TranslateRapidProKeys, AutoCode, ProductionFile, \
-    ApplyManualCodes, AnalysisFile
+    ApplyManualCodes, AnalysisFile, WSCorrection
 from src.lib import PipelineConfiguration
 
 Logger.set_project_name("OCHA")
@@ -115,8 +115,12 @@ if __name__ == "__main__":
     log.info("Translating Rapid Pro Keys...")
     data = TranslateRapidProKeys.translate_rapid_pro_keys(user, data, pipeline_configuration, prev_coded_dir_path)
 
-    # log.info("Redirecting WS messages...")
-    # data = WSCorrection.move_wrong_scheme_messages(user, data, prev_coded_dir_path)
+    if pipeline_configuration.move_ws_messages:
+        log.info("Moving WS messages...")
+        data = WSCorrection.move_wrong_scheme_messages(user, data, prev_coded_dir_path)
+    else:
+        log.info("Not moving WS messages (because the 'MoveWSMessages' key in the pipeline configuration "
+                 "json was set to 'false')")
 
     log.info("Auto Coding Messages...")
     data = AutoCode.auto_code(user, data, pipeline_configuration, icr_output_dir, coded_dir_path)
