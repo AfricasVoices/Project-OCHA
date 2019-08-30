@@ -101,6 +101,9 @@ class AutoCode(object):
     def export_coda(cls, user, data, coda_output_dir):
         IOUtils.ensure_dirs_exist(coda_output_dir)
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
+            if plan.coda_filename is None:
+                continue
+
             TracedDataCodaV2IO.compute_message_ids(user, data, plan.raw_field, plan.id_field)
 
             coda_output_path = path.join(coda_output_dir, plan.coda_filename)

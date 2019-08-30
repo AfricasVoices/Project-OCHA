@@ -35,7 +35,7 @@ class CodingConfiguration(object):
 
 # TODO: Rename CodingPlan to something like DatasetConfiguration?
 class CodingPlan(object):
-    def __init__(self, raw_field, coda_filename, coding_configurations, raw_field_folding_mode, ws_code=None,
+    def __init__(self, raw_field, coding_configurations, raw_field_folding_mode, coda_filename=None, ws_code=None,
                  time_field=None, run_id_field=None, icr_filename=None, id_field=None, code_imputation_function=None):
         self.raw_field = raw_field
         self.time_field = time_field
@@ -103,6 +103,18 @@ class PipelineConfiguration(object):
             return Codes.NOT_CODED
 
     SURVEY_CODING_PLANS = [
+        CodingPlan(raw_field="operator_raw",
+                   coding_configurations=[
+                        CodingConfiguration(
+                            coding_mode=CodingModes.SINGLE,
+                            code_scheme=CodeSchemes.SOMALIA_OPERATOR,
+                            coded_field="operator_coded",
+                            analysis_file_key="operator",
+                            folding_mode=FoldingModes.ASSERT_EQUAL
+                        )
+                   ],
+                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
+
         CodingPlan(raw_field="location_raw",
                    time_field="location_time",
                    coda_filename="location.json",
@@ -505,7 +517,8 @@ class RapidProKeyRemapping(object):
 
 class DriveUpload(object):
     def __init__(self, drive_credentials_file_url, production_upload_path, messages_upload_path,
-                 individuals_upload_path, messages_traced_data_upload_path, individuals_traced_data_upload_path):
+                 individuals_upload_path, messages_traced_data_upload_path, individuals_traced_data_upload_path,
+                 analysis_graphs_dir):
         """
         :param drive_credentials_file_url: GS URL to the private credentials file for the Drive service account to use
                                            to upload the output files.
@@ -526,6 +539,9 @@ class DriveUpload(object):
                                                     upload the serialized individuals TracedData from this pipeline
                                                     run to.
         :type individuals_traced_data_upload_path: str
+        :param analysis_graphs_dir: Directory in the Drive service account's "Shared with Me" directory to upload the
+                                    analysis graphs from this pipeline run to.
+        :type analysis_graphs_dir: str
         """
         self.drive_credentials_file_url = drive_credentials_file_url
         self.production_upload_path = production_upload_path
@@ -533,6 +549,7 @@ class DriveUpload(object):
         self.individuals_upload_path = individuals_upload_path
         self.messages_traced_data_upload_path = messages_traced_data_upload_path
         self.individuals_traced_data_upload_path = individuals_traced_data_upload_path
+        self.analysis_graphs_dir = analysis_graphs_dir
 
         self.validate()
 
@@ -544,9 +561,11 @@ class DriveUpload(object):
         individuals_upload_path = configuration_dict["IndividualsUploadPath"]
         messages_traced_data_upload_path = configuration_dict["MessagesTracedDataUploadPath"]
         individuals_traced_data_upload_path = configuration_dict["IndividualsTracedDataUploadPath"]
+        analysis_graphs_dir = configuration_dict["AnalysisGraphsDir"]
 
         return cls(drive_credentials_file_url, production_upload_path, messages_upload_path,
-                   individuals_upload_path, messages_traced_data_upload_path, individuals_traced_data_upload_path)
+                   individuals_upload_path, messages_traced_data_upload_path, individuals_traced_data_upload_path,
+                   analysis_graphs_dir)
 
     def validate(self):
         validators.validate_string(self.drive_credentials_file_url, "drive_credentials_file_url")
@@ -558,3 +577,4 @@ class DriveUpload(object):
         validators.validate_string(self.individuals_upload_path, "individuals_upload_path")
         validators.validate_string(self.messages_traced_data_upload_path, "messages_traced_data_upload_path")
         validators.validate_string(self.individuals_traced_data_upload_path, "individuals_traced_data_upload_path")
+        validators.validate_string(self.analysis_graphs_dir, "analysis_graphs_dir")
