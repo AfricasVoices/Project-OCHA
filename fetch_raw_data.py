@@ -20,12 +20,14 @@ Logger.set_project_name("OCHA")
 log = Logger(__name__)
 
 
-def set_operator(user, traced_runs, phone_number_uuid_table):
+def label_somalia_operator(user, traced_runs, phone_number_uuid_table):
     # Set the operator codes for each message.
     uuids = {td["avf_phone_id"] for td in traced_runs}
     uuid_to_phone_lut = phone_number_uuid_table.uuid_to_data_batch(uuids)
     for td in traced_runs:
-        operator_code = PhoneCleaner.clean_operator(uuid_to_phone_lut[td["avf_phone_id"]])
+        operator_raw = uuid_to_phone_lut[td["avf_phone_id"]][:5]  # Returns the country code 252 and the next two digits
+
+        operator_code = PhoneCleaner.clean_operator(operator_raw)
         if operator_code == Codes.NOT_CODED:
             operator_label = CleaningUtils.make_label_from_cleaner_code(
                 CodeSchemes.SOMALIA_OPERATOR,
@@ -38,8 +40,11 @@ def set_operator(user, traced_runs, phone_number_uuid_table):
                 CodeSchemes.SOMALIA_OPERATOR.get_code_with_match_value(operator_code),
                 Metadata.get_call_location()
             )
-        td.append_data({"operator_coded": operator_label.to_dict()},
-                       Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+
+        td.append_data({
+            "operator_raw": operator_raw,
+            "operator_coded": operator_label.to_dict()
+        }, Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
 
 def fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir, phone_number_uuid_table,
@@ -97,7 +102,7 @@ def fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir,
             user, raw_runs, raw_contacts, phone_number_uuid_table, rapid_pro_source.test_contact_uuids)
 
         if flow in rapid_pro_source.activation_flow_names:
-            set_operator(user, traced_runs, phone_number_uuid_table)
+            label_somalia_operator(user, traced_runs, phone_number_uuid_table)
 
         log.info(f"Saving {len(raw_runs)} raw runs to {raw_runs_path}...")
         with open(raw_runs_path, "w") as raw_runs_file:
