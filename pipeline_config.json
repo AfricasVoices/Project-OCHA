@@ -52,10 +52,6 @@
     {"RapidProKey": "Rqa_S04E02 (Run ID) - csap_s04e02_activation", "PipelineKey": "rqa_s04e02_run_id"},
     {"RapidProKey": "Rqa_S04E02 (Time) - csap_s04e02_activation", "PipelineKey": "sent_on"},
 
-    {"RapidProKey": "Rqa_S03W05 (Text) - csap_s03w05_activation", "PipelineKey": "rqa_s03w05_raw", "IsActivationMessage": true},
-    {"RapidProKey": "Rqa_S03W05 (Run ID) - csap_s03w05_activation", "PipelineKey": "rqa_s03w05_run_id"},
-    {"RapidProKey": "Rqa_S03W05 (Time) - csap_s03w05_activation", "PipelineKey": "sent_on"},
-
     {"RapidProKey": "Mog_Sub_District (Text) - csap_demog", "PipelineKey": "location_raw"},
     {"RapidProKey": "Mog_Sub_District (Time) - csap_demog", "PipelineKey": "location_time"},
     {"RapidProKey": "Gender (Text) - csap_demog", "PipelineKey": "gender_raw"},
