@@ -113,13 +113,13 @@ class PipelineConfiguration(object):
     SURVEY_CODING_PLANS = [
         CodingPlan(raw_field="operator_raw",
                    coding_configurations=[
-                        CodingConfiguration(
-                            coding_mode=CodingModes.SINGLE,
-                            code_scheme=CodeSchemes.SOMALIA_OPERATOR,
-                            coded_field="operator_coded",
-                            analysis_file_key="operator",
-                            folding_mode=FoldingModes.ASSERT_EQUAL
-                        )
+                       CodingConfiguration(
+                           coding_mode=CodingModes.SINGLE,
+                           code_scheme=CodeSchemes.SOMALIA_OPERATOR,
+                           coded_field="operator_coded",
+                           analysis_file_key="operator",
+                           folding_mode=FoldingModes.ASSERT_EQUAL
+                       )
                    ],
                    raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
 
@@ -293,10 +293,12 @@ class PipelineConfiguration(object):
                 raw_data_sources.append(RapidProSource.from_configuration_dict(raw_data_source))
             elif raw_data_source["SourceType"] == "GCloudBucket":
                 raw_data_sources.append(GCloudBucketSource.from_configuration_dict(raw_data_source))
+            elif raw_data_source["SourceType"] == "ShaqadoonCSV":
+                raw_data_sources.append(ShaqadoonCSVSource.from_configuration_dict(raw_data_source))
             else:
                 assert False, f"Unknown SourceType '{raw_data_source['SourceType']}'. " \
-                              f"Must be 'RapidPro' or 'GCloudBucket'."
-        
+                              f"Must be 'RapidPro', 'GCloudBucket', or 'ShaqadoonCSV'."
+
         recovery_csv_urls = configuration_dict.get("RecoveryCSVURLs")  # TODO: Convert to be a RawDataSource
 
         phone_number_uuid_table = PhoneNumberUuidTable.from_configuration_dict(
@@ -321,7 +323,8 @@ class PipelineConfiguration(object):
         data_archive_upload_url_prefix = configuration_dict["DataArchiveUploadURLPrefix"]
 
         return cls(raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
-                   rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages, move_ws_messages,
+                   rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
+                   move_ws_messages,
                    flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
                    drive_upload_paths)
 
@@ -440,13 +443,13 @@ class RapidProSource(RawDataSource):
         validators.validate_list(self.test_contact_uuids, "test_contact_uuids")
         for i, contact_uuid in enumerate(self.test_contact_uuids):
             validators.validate_string(contact_uuid, f"test_contact_uuids[{i}]")
-            
 
-class GCloudBucketSource(RawDataSource):
+
+class AbstractRemoteURLSource(RawDataSource):
     def __init__(self, activation_flow_urls, survey_flow_urls):
         self.activation_flow_urls = activation_flow_urls
         self.survey_flow_urls = survey_flow_urls
-        
+
         self.validate()
 
     def get_activation_flow_names(self):
@@ -454,7 +457,7 @@ class GCloudBucketSource(RawDataSource):
 
     def get_survey_flow_names(self):
         return [url.split('/')[-1].split('.')[0] for url in self.survey_flow_urls]
-        
+
     @classmethod
     def from_configuration_dict(cls, configuration_dict):
         activation_flow_urls = configuration_dict.get("ActivationFlowURLs", [])
@@ -470,6 +473,16 @@ class GCloudBucketSource(RawDataSource):
         validators.validate_list(self.survey_flow_urls, "survey_flow_urls")
         for i, survey_flow_url in enumerate(self.survey_flow_urls):
             validators.validate_url(survey_flow_url, f"survey_flow_urls[{i}]", "gs")
+
+
+class GCloudBucketSource(AbstractRemoteURLSource):
+    def __init__(self, activation_flow_urls, survey_flow_urls):
+        super().__init__(activation_flow_urls, survey_flow_urls)
+
+
+class ShaqadoonCSVSource(AbstractRemoteURLSource):
+    def __init__(self, activation_flow_urls, survey_flow_urls):
+        super().__init__(activation_flow_urls, survey_flow_urls)
 
 
 class PhoneNumberUuidTable(object):
