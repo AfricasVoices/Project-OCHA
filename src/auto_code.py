@@ -81,6 +81,9 @@ class AutoCode(object):
 
     @classmethod
     def export_coda(cls, user, data, coda_output_dir):
+        # Temporarily don't export week 2 data to Coda.
+        data = [td for td in data if "rqa_s04e01_raw" in td]
+
         IOUtils.ensure_dirs_exist(coda_output_dir)
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
             if plan.coda_filename is None:
