@@ -15,7 +15,6 @@ DATA_ROOT=$3
 ./checkout_coda_v2.sh "$CODA_V2_ROOT"
 
 PROJECT_NAME="OCHA"
-git checkout master
 DATASETS=(
     "gender"
     "age"
@@ -24,6 +23,7 @@ DATASETS=(
 )
 
 cd "$CODA_V2_ROOT/data_tools"
+git checkout master
 
 for DATASET in ${DATASETS[@]}
 do
