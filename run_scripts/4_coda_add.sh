@@ -15,11 +15,8 @@ DATA_ROOT=$3
 ./checkout_coda_v2.sh "$CODA_V2_ROOT"
 
 PROJECT_NAME="OCHA"
+git checkout master
 DATASETS=(
-    "s04e01"
-    "s04e02"
-
-    "location"
     "gender"
     "age"
     "recently_displaced"
@@ -27,6 +24,22 @@ DATASETS=(
 )
 
 cd "$CODA_V2_ROOT/data_tools"
+
+for DATASET in ${DATASETS[@]}
+do
+    echo "Pushing messages data to ${PROJECT_NAME}_${DATASET}..."
+
+    pipenv run python add.py "$AUTH" "${PROJECT_NAME}_${DATASET}" messages "$DATA_ROOT/Outputs/Coda Files/$DATASET.json"
+done
+
+DATASETS=(
+    "s04e01"
+    "s04e02"
+    "location"
+)
+
+cd "$CODA_V2_ROOT/data_tools"
+git checkout Sharding
 
 for DATASET in ${DATASETS[@]}
 do
