@@ -123,7 +123,7 @@ class AutoCode(object):
     def auto_code(cls, user, data, pipeline_configuration, icr_output_dir, coda_output_dir):
         data = cls.filter_messages(data, pipeline_configuration.project_start_date,
                                    pipeline_configuration.project_end_date, pipeline_configuration.filter_test_messages)
-        log.info("Hiding survey messages sent after the end of the project. These will not be exported in "
+        log.info("Hiding survey messages sent after week 1. These will not be exported in "
                  "production/analysis files")
         out_of_range_count = 0
         for td in data:
