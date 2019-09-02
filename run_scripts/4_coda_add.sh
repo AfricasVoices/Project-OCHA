@@ -23,7 +23,7 @@ DATASETS=(
 )
 
 cd "$CODA_V2_ROOT/data_tools"
-git checkout master
+git checkout '6e4b5e280b0baded86bc2afbf27f44f542e1aeed'  # (master before we started work on Sharding)
 
 for DATASET in ${DATASETS[@]}
 do
