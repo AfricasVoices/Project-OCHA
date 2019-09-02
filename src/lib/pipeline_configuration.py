@@ -235,7 +235,7 @@ class PipelineConfiguration(object):
                    raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
     ]
 
-    def __init__(self, raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
+    def __init__(self, raw_data_sources, phone_number_uuid_table,
                  rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages, move_ws_messages,
                  flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
                  drive_upload=None):
@@ -272,7 +272,6 @@ class PipelineConfiguration(object):
         """
         self.raw_data_sources = raw_data_sources
         self.phone_number_uuid_table = phone_number_uuid_table
-        self.recovery_csv_urls = recovery_csv_urls
         self.rapid_pro_key_remappings = rapid_pro_key_remappings
         self.project_start_date = project_start_date
         self.project_end_date = project_end_date
@@ -299,8 +298,6 @@ class PipelineConfiguration(object):
                 assert False, f"Unknown SourceType '{raw_data_source['SourceType']}'. " \
                               f"Must be 'RapidPro', 'GCloudBucket', or 'ShaqadoonCSV'."
 
-        recovery_csv_urls = configuration_dict.get("RecoveryCSVURLs")  # TODO: Convert to be a RawDataSource
-
         phone_number_uuid_table = PhoneNumberUuidTable.from_configuration_dict(
             configuration_dict["PhoneNumberUuidTable"])
 
@@ -322,7 +319,7 @@ class PipelineConfiguration(object):
         memory_profile_upload_url_prefix = configuration_dict["MemoryProfileUploadURLPrefix"]
         data_archive_upload_url_prefix = configuration_dict["DataArchiveUploadURLPrefix"]
 
-        return cls(raw_data_sources, phone_number_uuid_table, recovery_csv_urls,
+        return cls(raw_data_sources, phone_number_uuid_table,
                    rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
                    move_ws_messages,
                    flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
@@ -337,11 +334,6 @@ class PipelineConfiguration(object):
         for i, raw_data_source in enumerate(self.raw_data_sources):
             assert isinstance(raw_data_source, RawDataSource), f"raw_data_sources[{i}] is not of type of RawDataSource"
             raw_data_source.validate()
-
-        if self.recovery_csv_urls is not None:
-            validators.validate_list(self.recovery_csv_urls, "recovery_csv_urls")
-            for i, recovery_csv_url in enumerate(self.recovery_csv_urls):
-                validators.validate_string(recovery_csv_url, f"recovery_csv_urls[{i}]")
 
         assert isinstance(self.phone_number_uuid_table, PhoneNumberUuidTable)
         self.phone_number_uuid_table.validate()
