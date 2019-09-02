@@ -145,11 +145,10 @@ def fetch_from_shaqadoon_csv(user, google_cloud_credentials_file_path, raw_data_
                              shaqadoon_csv_source):
     log.info("Fetching data from a Shaqadoon CSV...")
     for blob_url in shaqadoon_csv_source.activation_flow_urls + shaqadoon_csv_source.survey_flow_urls:
-        # TODO
-        # traced_runs_output_path = f"{raw_data_dir}/{flow}"
-        # if os.path.exists(traced_runs_output_path):
-        #     log.info(f"File '{traced_runs_output_path}' for flow '{flow}' already exists; skipping download")
-        #     continue
+        traced_runs_output_path = f"{raw_data_dir}/{blob_url.split('/')[-1].split('.')[0]}.jsonl"
+        if os.path.exists(traced_runs_output_path):
+            log.info(f"File '{traced_runs_output_path}' for blob '{blob_url}' already exists; skipping download")
+            continue
 
         log.info(f"Downloading recovered data from '{blob_url}'...")
         raw_csv_string = StringIO(google_cloud_utils.download_blob_to_string(
@@ -183,10 +182,9 @@ def fetch_from_shaqadoon_csv(user, google_cloud_credentials_file_path, raw_data_
         if blob_url in shaqadoon_csv_source.activation_flow_urls:
             label_somalia_operator(user, traced_runs, phone_number_uuid_table)
 
-        traced_data_output_path = f"{raw_data_dir}/{blob_url.split('/')[-1].split('.')[0]}.jsonl"
-        log.info(f"Exporting {len(traced_runs)} TracedData items to {traced_data_output_path}...")
-        IOUtils.ensure_dirs_exist_for_file(traced_data_output_path)
-        with open(traced_data_output_path, "w") as f:
+        log.info(f"Exporting {len(traced_runs)} TracedData items to {traced_runs_output_path}...")
+        IOUtils.ensure_dirs_exist_for_file(traced_runs_output_path)
+        with open(traced_runs_output_path, "w") as f:
             TracedDataJsonIO.export_traced_data_iterable_to_jsonl(traced_runs, f)
         log.info(f"Exported TracedData")
 
