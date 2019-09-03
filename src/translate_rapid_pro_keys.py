@@ -6,6 +6,8 @@ from core_data_modules.traced_data import Metadata
 from core_data_modules.util import TimeUtils
 from dateutil.parser import isoparse
 
+from src.lib import PipelineConfiguration
+
 log = Logger(__name__)
 
 
@@ -126,7 +128,7 @@ class TranslateRapidProKeys(object):
                 old_key = remapping.rapid_pro_key
                 new_key = remapping.pipeline_key
                 
-                if td.get(old_key) is not None and new_key not in td:
+                if old_key in td and new_key not in td:
                     remapped[new_key] = td[old_key]
 
             td.append_data(remapped, Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
@@ -152,6 +154,23 @@ class TranslateRapidProKeys(object):
                                Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
     @classmethod
+    def hide_null_messages(cls, user, data):
+        """
+        Hides messages which were null in Rapid Pro.
+
+        :param user: Identifier of the user running this program, for TracedData Metadata.
+        :type user: str
+        :param data: TracedData objects to search for null messages in and hide.
+        :type data: iterable of TracedData
+        """
+        for td in data:
+            null_keys = set()
+            for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
+                if plan.raw_field in td and td[plan.raw_field] is None:
+                    null_keys.update({plan.raw_field, plan.time_field})
+            td.hide_keys(null_keys, Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+
+    @classmethod
     def translate_rapid_pro_keys(cls, user, data, pipeline_configuration, coda_input_dir):
         """
         Remaps the keys of rqa messages in the wrong flow into the correct one, and remaps all Rapid Pro keys to
@@ -173,5 +192,9 @@ class TranslateRapidProKeys(object):
 
         # Convert from the new show key format to the raw field format still used by the rest of the pipeline.
         cls.set_rqa_raw_keys_from_show_ids(user, data)
+
+        # Some Text inputs in Rapid Pro can be null. We don't know why, but there's no useful messages in those
+        # cases so hide them (which means the rest of the pipeline will treat those as NA).
+        cls.hide_null_messages(user, data)
 
         return data
