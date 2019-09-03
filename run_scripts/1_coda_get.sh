@@ -27,6 +27,8 @@ DATASETS=(
 )
 
 cd "$CODA_V2_ROOT/data_tools"
+git checkout Sharding
+
 mkdir -p "$DATA_ROOT/Coded Coda Files"
 
 for DATASET in ${DATASETS[@]}
