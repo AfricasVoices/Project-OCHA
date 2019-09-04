@@ -99,7 +99,8 @@ class WSCorrection(object):
         # Perform the WS correction for each uid.
         log.info("Performing WS correction...")
         corrected_data = []  # List of TracedData with the WS data moved.
-        unknown_target_codes = set()  # 'WS - Correct Dataset' codes with no matching code id in any coding plan for this project
+        unknown_target_code_counts = dict()  # 'WS - Correct Dataset' codes with no matching code id in any coding plan
+                                             # for this project, with a count of the occurrences
         for group in data_grouped_by_uid.values():
             # Find all the surveys data being moved.
             # (Note: we only need to check one td in this group because all the demographics are the same)
@@ -113,7 +114,9 @@ class WSCorrection(object):
                     if ws_code.code_id in ws_code_to_raw_field_map:
                         survey_moves[plan.raw_field] = ws_code_to_raw_field_map[ws_code.code_id]
                     else:
-                        unknown_target_codes.add((ws_code.code_id, ws_code.display_text))
+                        if (ws_code.code_id, ws_code.display_text) not in unknown_target_code_counts:
+                            unknown_target_code_counts[(ws_code.code_id, ws_code.display_text)] = 0
+                        unknown_target_code_counts[(ws_code.code_id, ws_code.display_text)] += 1
                         survey_moves[plan.raw_field] = None
 
             # Find all the RQA data being moved.
@@ -127,7 +130,9 @@ class WSCorrection(object):
                         if ws_code.code_id in ws_code_to_raw_field_map:
                             rqa_moves[(i, plan.raw_field)] = ws_code_to_raw_field_map[ws_code.code_id]
                         else:
-                            unknown_target_codes.add((ws_code.code_id, ws_code.display_text))
+                            if (ws_code.code_id, ws_code.display_text) not in unknown_target_code_counts:
+                                unknown_target_code_counts[(ws_code.code_id, ws_code.display_text)] = 0
+                            unknown_target_code_counts[(ws_code.code_id, ws_code.display_text)] += 1
                             rqa_moves[(i, plan.raw_field)] = None
 
             # Build a dictionary of the survey fields that haven't been moved, and cleared fields for those which have.
@@ -225,9 +230,9 @@ class WSCorrection(object):
                 corrected_td.append_data(rqa_dict, Metadata(user, Metadata.get_call_location(), time.time()))
                 corrected_data.append(corrected_td)
 
-        if len(unknown_target_codes) > 0:
+        if len(unknown_target_code_counts) > 0:
             log.warning("Found the following 'WS - Correct Dataset' CodeIDs with no matching coding plan:")
-            for code_id, display_text in unknown_target_codes:
-                log.warning(f"  '{code_id}' (DisplayText '{display_text}')")
+            for (code_id, display_text), count in unknown_target_code_counts.items():
+                log.warning(f"  '{code_id}' (DisplayText '{display_text}') ({count} occurrences)")
 
         return corrected_data
