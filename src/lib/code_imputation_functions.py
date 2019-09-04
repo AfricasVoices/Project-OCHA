@@ -38,7 +38,7 @@ def impute_somalia_location_codes(user, data, location_configurations):
 
         # If a control code was found, set all other location keys to that control code,
         # otherwise convert the provided location to the other locations in the hierarchy.
-        if location_code.code_type == "Control":
+        if location_code.code_type in {"Control", "Meta"}:
             for cc in location_configurations:
                 td.append_data({
                     cc.coded_field: CleaningUtils.make_label_from_cleaner_code(
