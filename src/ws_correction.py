@@ -24,6 +24,9 @@ class WSCorrection(object):
     def move_wrong_scheme_messages(user, data, coda_input_dir):
         log.info("Importing manually coded Coda files to '_WS' fields...")
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
+            if plan.coda_filename is None:
+                continue
+
             TracedDataCodaV2IO.compute_message_ids(user, data, plan.raw_field, f"{plan.id_field}_WS")
             with open(f"{coda_input_dir}/{plan.coda_filename}") as f:
                 TracedDataCodaV2IO.import_coda_2_to_traced_data_iterable(
