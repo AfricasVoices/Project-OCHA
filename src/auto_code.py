@@ -1,13 +1,10 @@
 import random
-import time
 from os import path
 
 from core_data_modules.cleaners.cleaning_utils import CleaningUtils
 from core_data_modules.logging import Logger
-from core_data_modules.traced_data import Metadata
 from core_data_modules.traced_data.io import TracedDataCSVIO, TracedDataCodaV2IO
 from core_data_modules.util import IOUtils
-from dateutil.parser import isoparse
 
 from src.lib import PipelineConfiguration, MessageFilters, ICRTools
 
@@ -95,7 +92,7 @@ class AutoCode(object):
             coda_output_path = path.join(coda_output_dir, plan.coda_filename)
             with open(coda_output_path, "w") as f:
                 TracedDataCodaV2IO.export_traced_data_iterable_to_coda_2(
-                    [td for td in data if "rqa_s04e01_raw" in td], plan.raw_field, plan.time_field, plan.id_field,
+                    data, plan.raw_field, plan.time_field, plan.id_field,
                     {cc.coded_field: cc.code_scheme for cc in plan.coding_configurations},
                     f
                 )
@@ -123,16 +120,6 @@ class AutoCode(object):
     def auto_code(cls, user, data, pipeline_configuration, icr_output_dir, coda_output_dir):
         data = cls.filter_messages(data, pipeline_configuration.project_start_date,
                                    pipeline_configuration.project_end_date, pipeline_configuration.filter_test_messages)
-        log.info("Hiding survey messages sent after week 1. These will not be exported in "
-                 "production/analysis files")
-        out_of_range_count = 0
-        for td in data:
-            for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
-                if plan.raw_field in td and plan.time_field in td and isoparse(td[plan.time_field]) > isoparse("2019-08-31T24:00:00+03:00"):
-                    out_of_range_count += 1
-                    td.hide_keys({plan.raw_field, plan.time_field},
-                                 Metadata(user, Metadata.get_call_location(), time.time()))
-        log.info(f"Hid {out_of_range_count} survey messages sent after week 1")
 
         cls.run_cleaners(user, data)
         cls.export_coda(user, data, coda_output_dir)
