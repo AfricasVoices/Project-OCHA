@@ -86,6 +86,15 @@
       "NumericValue": -30,
       "StringValue": "NC",
       "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-STOP-08b832a8",
+      "CodeType": "Control",
+      "ControlCode": "STOP",
+      "DisplayText": "STOP",
+      "NumericValue": -90,
+      "StringValue": "STOP",
+      "VisibleInCoda": false
     }
   ]
 }
