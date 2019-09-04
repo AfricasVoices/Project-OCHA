@@ -124,7 +124,6 @@ if __name__ == "__main__":
             label_counts = OrderedDict()
             for code in cc.code_scheme.codes:
                 label_counts[code.string_value] = 0
-            label_counts["STOP"] = 0  # TODO: Add a STOP code to operator so that this can be removed
 
             if cc.coding_mode == CodingModes.SINGLE:
                 for ind in individuals:
