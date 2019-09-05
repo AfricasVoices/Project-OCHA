@@ -42,6 +42,13 @@
       "ActivationFlowURLs": [
         "gs://avf-project-datasets/2019/OCHA/hormud-recovery-1.csv"
       ]
+    },
+    {
+      "SourceType": "ShaqadoonCSV",
+      "ActivationFlowURLs": [
+        "gs://avf-project-datasets/2019/OCHA/hormud-recovery-1.csv",
+        "gs://avf-project-datasets/2019/OCHA/hormud-recovery-1b.csv"
+      ]
     }
   ],
   "PhoneNumberUuidTable": {
