@@ -110,7 +110,7 @@ class WSCorrection(object):
             td = group[0]
             survey_moves = dict()  # of source_field -> target_field
             for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
-                if plan.raw_field not in td:
+                if plan.raw_field not in td or plan.coda_filename is None:
                     continue
                 ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(td[f"{plan.raw_field}_WS_correct_dataset"]["CodeID"])
                 if ws_code.code_type == "Normal":
@@ -126,7 +126,7 @@ class WSCorrection(object):
             rqa_moves = dict()  # of (index in group, source_field) -> target_field
             for i, td in enumerate(group):
                 for plan in PipelineConfiguration.RQA_CODING_PLANS:
-                    if plan.raw_field not in td:
+                    if plan.raw_field not in td or plan.coda_filename is None:
                         continue
                     ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(td[f"{plan.raw_field}_WS_correct_dataset"]["CodeID"])
                     if ws_code.code_type == "Normal":
@@ -141,6 +141,9 @@ class WSCorrection(object):
             # Build a dictionary of the survey fields that haven't been moved, and cleared fields for those which have.
             survey_updates = dict()  # of raw_field -> updated value
             for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+                if plan.coda_filename is None:
+                    continue
+
                 if plan.raw_field in survey_moves.keys():
                     # Data is moving
                     survey_updates[plan.raw_field] = []
@@ -152,6 +155,9 @@ class WSCorrection(object):
             rqa_updates = []  # of (field, value)
             for i, td in enumerate(group):
                 for plan in PipelineConfiguration.RQA_CODING_PLANS:
+                    if plan.coda_filename is None:
+                        continue
+
                     if plan.raw_field in td:
                         if (i, plan.raw_field) in rqa_moves.keys():
                             # Data is moving
