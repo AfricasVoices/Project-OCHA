@@ -113,7 +113,7 @@ if __name__ == "__main__":
     data = CombineRawDatasets.combine_raw_datasets(user, activation_datasets, coalesced_survey_datasets)
 
     log.info("Translating Rapid Pro Keys...")
-    data = TranslateRapidProKeys.translate_rapid_pro_keys(user, data, pipeline_configuration, prev_coded_dir_path)
+    data = TranslateRapidProKeys.translate_rapid_pro_keys(user, data, pipeline_configuration)
 
     if pipeline_configuration.move_ws_messages:
         log.info("Moving WS messages...")
