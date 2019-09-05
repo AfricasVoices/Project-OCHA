@@ -104,7 +104,7 @@ class TranslateRapidProKeys(object):
         # Redirect recovered Hormud messages from the failure that occurred during the first week of radio shows
         cls._remap_radio_show_by_time_range(
             user, data, "received_on", "rqa_s04e01_raw",
-            range_start=isoparse("2019-08-29T00:00:00+03:00"), range_end=isoparse("2019-08-30T11:48:01+03:00")
+            range_start=isoparse("2019-08-28T13:46:27+03:00"), range_end=isoparse("2019-08-30T11:48:01+03:00")
         )
 
     @classmethod
