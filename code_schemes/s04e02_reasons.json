@@ -3,7 +3,142 @@
   "Name": "S04E02 Reasons",
   "Version": "0.0.0.2",
   "Codes": [
-
+    {
+      "CodeID": "code-8bf67356",
+      "CodeType": "Normal",
+      "DisplayText": "health services",
+      "NumericValue": 1,
+      "StringValue": "health_services",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-a107ed70",
+      "CodeType": "Normal",
+      "DisplayText": "government stability",
+      "NumericValue": 2,
+      "StringValue": "government_stability",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-93c40897",
+      "CodeType": "Normal",
+      "DisplayText": "job creation",
+      "NumericValue": 3,
+      "StringValue": "job_creation",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-84e60c83",
+      "CodeType": "Normal",
+      "DisplayText": "economic development",
+      "NumericValue": 4,
+      "StringValue": "economic_development",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-3766d440",
+      "CodeType": "Normal",
+      "DisplayText": "peace and security",
+      "NumericValue": 5,
+      "StringValue": "peace_and_security",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-5600dcc7",
+      "CodeType": "Normal",
+      "DisplayText": "education",
+      "NumericValue": 6,
+      "StringValue": "education",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-fb46d3ad",
+      "CodeType": "Normal",
+      "DisplayText": "shelter",
+      "NumericValue": 7,
+      "StringValue": "shelter",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-c7e0da4b",
+      "CodeType": "Normal",
+      "DisplayText": "NGOs to be accountable and transparent",
+      "NumericValue": 8,
+      "StringValue": "NGOs_to_be_accountable_and_transparent",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-194e12ac",
+      "CodeType": "Normal",
+      "DisplayText": "access to water",
+      "NumericValue": 9,
+      "StringValue": "access_to_water",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-72f36571",
+      "CodeType": "Normal",
+      "DisplayText": "food nutrition",
+      "NumericValue": 10,
+      "StringValue": "food_nutrition",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-3232ac13",
+      "CodeType": "Normal",
+      "DisplayText": "resettlement and return for IDPs",
+      "NumericValue": 11,
+      "StringValue": "resettlement_and_return_for_IDPs",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-1624c4b3",
+      "CodeType": "Normal",
+      "DisplayText": "support for agriculture",
+      "NumericValue": 12,
+      "StringValue": "support_for_agriculture",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-49e6b4f3",
+      "CodeType": "Normal",
+      "DisplayText": "cooperation between NGOs/people/government",
+      "NumericValue": 13,
+      "StringValue": "cooperation_between_NGOs_people_government",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-424a39e1",
+      "CodeType": "Normal",
+      "DisplayText": "stop aid dependency",
+      "NumericValue": 14,
+      "StringValue": "stop_aid_dependency",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-13621d3a",
+      "CodeType": "Normal",
+      "DisplayText": "support the poor/IDPs",
+      "NumericValue": 15,
+      "StringValue": "support_the_poor_IDPs",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-8ec038bc",
+      "CodeType": "Normal",
+      "DisplayText": "information",
+      "NumericValue": 16,
+      "StringValue": "information",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-d5199c3d",
+      "CodeType": "Normal",
+      "DisplayText": "other",
+      "NumericValue": 17,
+      "StringValue": "other",
+      "VisibleInCoda": true
+    },
     {
       "CodeID": "code-NA-f93d3eb7",
       "CodeType": "Control",
@@ -110,6 +245,14 @@
       "DisplayText": "greeting",
       "NumericValue": -100020,
       "StringValue": "greeting",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-OI-c5f1d054",
+      "CodeType": "Meta",
+      "DisplayText": "opt-in",
+      "NumericValue": -100040,
+      "StringValue": "opt_in",
       "VisibleInCoda": true
     }
   ]
