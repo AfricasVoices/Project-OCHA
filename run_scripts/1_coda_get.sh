@@ -24,6 +24,9 @@ DATASETS=(
     "age"
     "recently_displaced"
     "in_idp_camp"
+
+    "have_voice"
+    "suggestions"
 )
 
 cd "$CODA_V2_ROOT/data_tools"

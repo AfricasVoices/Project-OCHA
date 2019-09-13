@@ -1,32 +1,9 @@
 {
-  "SchemeID": "Scheme-e1aa9330",
-  "Name": "Recently Displaced",
-  "Version": "0.0.0.3",
+  "SchemeID": "Scheme-1c7e8dd7",
+  "Name": "Suggestions",
+  "Version": "0.0.0.1",
   "Codes": [
-    {
-      "CodeID": "code-2b565901",
-      "CodeType": "Normal",
-      "DisplayText": "yes",
-      "NumericValue": 1,
-      "StringValue": "yes",
-      "Shortcut": "y",
-      "VisibleInCoda": true,
-      "MatchValues": [
-        "yes"
-      ]
-    },
-    {
-      "CodeID": "code-d67739e0",
-      "CodeType": "Normal",
-      "DisplayText": "no",
-      "Shortcut": "n",
-      "NumericValue": 2,
-      "StringValue": "no",
-      "VisibleInCoda": true,
-      "MatchValues": [
-        "no"
-      ]
-    },
+
     {
       "CodeID": "code-NA-f93d3eb7",
       "CodeType": "Control",
@@ -146,3 +123,4 @@
     }
   ]
 }
+
