@@ -36,6 +36,8 @@ DATASETS=(
     "s04e01"
     "s04e02"
     "location"
+    "have_voice"
+    "suggestions"
 )
 
 cd "$CODA_V2_ROOT/data_tools"
