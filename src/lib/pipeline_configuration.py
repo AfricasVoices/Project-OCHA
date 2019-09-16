@@ -247,6 +247,7 @@ class PipelineConfiguration(object):
                            folding_mode=FoldingModes.ASSERT_EQUAL
                        )
                    ],
+                   ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("have_voice"),
                    raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
 
         CodingPlan(raw_field="suggestions_raw",
@@ -261,6 +262,7 @@ class PipelineConfiguration(object):
                            folding_mode=FoldingModes.MATRIX
                        )
                    ],
+                   ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("suggestions"),
                    raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
     ]
 
