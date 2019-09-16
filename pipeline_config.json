@@ -123,7 +123,7 @@
   "ProjectStartDate": "2019-08-25T00:00:00+03:00",
   "ProjectEndDate": "2019-09-07T24:00:00+03:00",
   "FilterTestMessages": true,
-  "MoveWSMessages": false,
+  "MoveWSMessages": true,
   "DriveUpload": {
     "DriveCredentialsFileURL": "gs://avf-credentials/pipeline-runner-service-acct-avf-data-core-64cc71459fe7.json",
     "ProductionUploadPath": "ocha_analysis_outputs/csap_s04_production.csv",
