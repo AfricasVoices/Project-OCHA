@@ -28,7 +28,8 @@
       "TokenFileURL": "gs://avf-credentials/csap-secondary-text-it-token.txt",
       "ContactsFileName": "csap_secondary_contacts",
       "ActivationFlowNames": [
-        "csap_s04e01_activation"
+        "csap_s04e01_activation",
+        "csap_s04e02_activation"
       ],
       "SurveyFlowNames": [
         "csap_s04_demog"
@@ -97,7 +98,7 @@
     {"RapidProKey": "Idp_Camp (Time) - csap_s04_demog", "PipelineKey": "in_idp_camp_time"}
   ],
   "ProjectStartDate": "2019-08-25T00:00:00+03:00",
-  "ProjectEndDate": "2100-12-31T24:00:00+03:00",
+  "ProjectEndDate": "2019-09-07T24:00:00+03:00",
   "FilterTestMessages": true,
   "MoveWSMessages": false,
   "DriveUpload": {
