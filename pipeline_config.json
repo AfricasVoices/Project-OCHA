@@ -38,6 +38,12 @@
       "TestContactUUIDs": [
         "61e74e0b-1b4a-41fe-9e78-712f2a048f4e"
       ]
+    },
+    {
+      "SourceType": "ShaqadoonCSV",
+      "ActivationFlowURLs": [
+        "gs://avf-project-datasets/2019/OCHA/hormud-recovery-1.csv"
+      ]
     }
   ],
   "PhoneNumberUuidTable": {
@@ -53,6 +59,10 @@
     {"RapidProKey": "Rqa_S04E02 (Text) - csap_s04e02_activation", "PipelineKey": "rqa_s04e02_raw", "IsActivationMessage": true},
     {"RapidProKey": "Rqa_S04E02 (Run ID) - csap_s04e02_activation", "PipelineKey": "rqa_s04e02_run_id"},
     {"RapidProKey": "Rqa_S04E02 (Time) - csap_s04e02_activation", "PipelineKey": "sent_on"},
+
+    {"RapidProKey": "message", "PipelineKey": "recovered_raw", "IsActivationMessage": true},
+    {"RapidProKey": "received_on", "PipelineKey": "sent_on"},
+    {"RapidProKey": "run_id", "PipelineKey": "recovered_run_id"},
 
     {"RapidProKey": "Mog_Sub_District (Text) - csap_demog", "PipelineKey": "location_raw"},
     {"RapidProKey": "Mog_Sub_District (Time) - csap_demog", "PipelineKey": "location_time"},
