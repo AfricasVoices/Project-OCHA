@@ -1,7 +1,7 @@
 {
   "SchemeID": "Scheme-0fe57c6d",
   "Name": "In IDP Camp",
-  "Version": "0.0.0.2",
+  "Version": "0.0.0.3",
   "Codes": [
     {
       "CodeID": "code-dc43b68e",
@@ -102,6 +102,7 @@
     {
       "CodeID": "code-PB-a434a800",
       "CodeType": "Meta",
+      "MetaCode": "push_back",
       "DisplayText": "push back",
       "NumericValue": -100000,
       "StringValue": "push_back",
@@ -110,6 +111,7 @@
     {
       "CodeID": "code-SQ-5e8f0122",
       "CodeType": "Meta",
+      "MetaCode": "showtime_question",
       "DisplayText": "showtime question",
       "NumericValue": -100030,
       "StringValue": "showtime_question",
@@ -118,6 +120,7 @@
     {
       "CodeID": "code-Q-a5d3700d",
       "CodeType": "Meta",
+      "MetaCode": "question",
       "DisplayText": "question",
       "NumericValue": -100010,
       "StringValue": "question",
@@ -126,9 +129,19 @@
     {
       "CodeID": "code-G-97cb3199",
       "CodeType": "Meta",
+      "MetaCode": "greeting",
       "DisplayText": "greeting",
       "NumericValue": -100020,
       "StringValue": "greeting",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-OI-c5f1d054",
+      "CodeType": "Meta",
+      "MetaCode": "opt-in",
+      "DisplayText": "opt-in",
+      "NumericValue": -100040,
+      "StringValue": "opt_in",
       "VisibleInCoda": true
     }
   ]
