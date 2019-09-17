@@ -145,7 +145,8 @@ def fetch_from_shaqadoon_csv(user, google_cloud_credentials_file_path, raw_data_
                              shaqadoon_csv_source):
     log.info("Fetching data from a Shaqadoon CSV...")
     for blob_url in shaqadoon_csv_source.activation_flow_urls + shaqadoon_csv_source.survey_flow_urls:
-        traced_runs_output_path = f"{raw_data_dir}/{blob_url.split('/')[-1].split('.')[0]}.jsonl"
+        flow_name = blob_url.split('/')[-1].split('.')[0]  # Takes the name between the last '/' and the '.csv' ending 
+        traced_runs_output_path = f"{raw_data_dir}/{flow_name}.jsonl"
         if os.path.exists(traced_runs_output_path):
             log.info(f"File '{traced_runs_output_path}' for blob '{blob_url}' already exists; skipping download")
             continue
