@@ -113,7 +113,7 @@ class WSCorrection(object):
                 if plan.raw_field not in td or plan.coda_filename is None:
                     continue
                 ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(td[f"{plan.raw_field}_WS_correct_dataset"]["CodeID"])
-                if ws_code.code_type == "Normal":
+                if ws_code.code_type == "Normal" or ws_code.control_code == Codes.NOT_CODED:
                     if ws_code.code_id in ws_code_to_raw_field_map:
                         survey_moves[plan.raw_field] = ws_code_to_raw_field_map[ws_code.code_id]
                     else:
@@ -129,7 +129,7 @@ class WSCorrection(object):
                     if plan.raw_field not in td or plan.coda_filename is None:
                         continue
                     ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(td[f"{plan.raw_field}_WS_correct_dataset"]["CodeID"])
-                    if ws_code.code_type == "Normal":
+                    if ws_code.code_type == "Normal" or ws_code.control_code == Codes.NOT_CODED:
                         if ws_code.code_id in ws_code_to_raw_field_map:
                             rqa_moves[(i, plan.raw_field)] = ws_code_to_raw_field_map[ws_code.code_id]
                         else:
