@@ -89,7 +89,7 @@ class TranslateRapidProKeys(object):
         log.info(f"Remapped {remapped_count} messages to show {show_pipeline_key_to_remap_to}")
 
     @classmethod
-    def remap_radio_shows(cls, user, data, coda_input_dir):
+    def remap_radio_shows(cls, user, data):
         """
         Remaps radio shows which were in the wrong flow, and therefore have the wrong key/values set, to have the
         key/values they would have had if they had been received by the correct flow.
@@ -98,11 +98,14 @@ class TranslateRapidProKeys(object):
         :type user: str
         :param data: TracedData objects to move the radio show messages in.
         :type data: iterable of TracedData
-        :param coda_input_dir: Directory to read coded coda files from.
-        :type coda_input_dir: str
         """
-        # No implementation needed yet, because no flow is yet to go wrong in production.
-        pass
+        # TODO: Move this method to JSON configuration
+
+        # Redirect recovered Hormud messages from the failure that occurred during the first week of radio shows
+        cls._remap_radio_show_by_time_range(
+            user, data, "received_on", "rqa_s04e01_raw",
+            range_start=isoparse("2019-08-29T00:00:00+03:00"), range_end=isoparse("2019-08-30T11:48:01+03:00")
+        )
 
     @classmethod
     def remap_key_names(cls, user, data, pipeline_configuration):
@@ -152,7 +155,7 @@ class TranslateRapidProKeys(object):
                                Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
     @classmethod
-    def translate_rapid_pro_keys(cls, user, data, pipeline_configuration, coda_input_dir):
+    def translate_rapid_pro_keys(cls, user, data, pipeline_configuration):
         """
         Remaps the keys of rqa messages in the wrong flow into the correct one, and remaps all Rapid Pro keys to
         more usable keys that can be used by the rest of the pipeline.
@@ -166,7 +169,7 @@ class TranslateRapidProKeys(object):
         cls.set_show_ids(user, data, pipeline_configuration)
 
         # Move rqa messages which ended up in the wrong flow to the correct one.
-        cls.remap_radio_shows(user, data, coda_input_dir)
+        cls.remap_radio_shows(user, data)
 
         # Remap the keys used by Rapid Pro to more usable key names that will be used by the rest of the pipeline.
         cls.remap_key_names(user, data, pipeline_configuration)

@@ -291,6 +291,37 @@
       ]
     },
     {
+      "CodeID": "code-de134fc1",
+      "CodeType": "Normal",
+      "DisplayText": "have_voice",
+      "StringValue": "have_voice",
+      "NumericValue": 27,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "have_voice"
+      ]
+    },
+    {
+      "CodeID": "code-82af0326",
+      "CodeType": "Normal",
+      "DisplayText": "suggestions",
+      "StringValue": "suggestions",
+      "NumericValue": 28,
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "suggestions"
+      ]
+    },
+    {
+      "CodeID": "code-NC-42f1d983",
+      "CodeType": "Control",
+      "ControlCode": "NC",
+      "DisplayText": "NC (not coded)",
+      "NumericValue": -30,
+      "StringValue": "NC",
+      "VisibleInCoda": true
+    },
+    {
       "CodeID": "code-NR-5e3eee23",
       "CodeType": "Control",
       "ControlCode": "NR",

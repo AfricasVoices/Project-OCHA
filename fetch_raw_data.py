@@ -1,19 +1,54 @@
 import argparse
+import csv
 import json
+import os
+from datetime import datetime
+from io import StringIO
 
+import pytz
+from core_data_modules.cleaners import Codes, PhoneCleaner
+from core_data_modules.cleaners.cleaning_utils import CleaningUtils
 from core_data_modules.logging import Logger
+from core_data_modules.traced_data import Metadata, TracedData
 from core_data_modules.traced_data.io import TracedDataJsonIO
-from core_data_modules.util import IOUtils
+from core_data_modules.util import IOUtils, TimeUtils, SHAUtils
 from id_infrastructure.firestore_uuid_table import FirestoreUuidTable
 from rapid_pro_tools.rapid_pro_client import RapidProClient
 from storage.google_cloud import google_cloud_utils
 from temba_client.v2 import Contact, Run
 
-from src.lib import PipelineConfiguration
-from src.lib.pipeline_configuration import RapidProSource, GCloudBucketSource
+from src.lib import PipelineConfiguration, CodeSchemes
+from src.lib.pipeline_configuration import RapidProSource, GCloudBucketSource, ShaqadoonCSVSource
 
 Logger.set_project_name("OCHA")
 log = Logger(__name__)
+
+
+def label_somalia_operator(user, traced_runs, phone_number_uuid_table):
+    # Set the operator codes for each message.
+    uuids = {td["avf_phone_id"] for td in traced_runs}
+    uuid_to_phone_lut = phone_number_uuid_table.uuid_to_data_batch(uuids)
+    for td in traced_runs:
+        operator_raw = uuid_to_phone_lut[td["avf_phone_id"]][:5]  # Returns the country code 252 and the next two digits
+
+        operator_code = PhoneCleaner.clean_operator(operator_raw)
+        if operator_code == Codes.NOT_CODED:
+            operator_label = CleaningUtils.make_label_from_cleaner_code(
+                CodeSchemes.SOMALIA_OPERATOR,
+                CodeSchemes.SOMALIA_OPERATOR.get_code_with_control_code(Codes.NOT_CODED),
+                Metadata.get_call_location()
+            )
+        else:
+            operator_label = CleaningUtils.make_label_from_cleaner_code(
+                CodeSchemes.SOMALIA_OPERATOR,
+                CodeSchemes.SOMALIA_OPERATOR.get_code_with_match_value(operator_code),
+                Metadata.get_call_location()
+            )
+
+        td.append_data({
+            "operator_raw": operator_raw,
+            "operator_coded": operator_label.to_dict()
+        }, Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
 
 def fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir, phone_number_uuid_table,
@@ -70,6 +105,9 @@ def fetch_from_rapid_pro(user, google_cloud_credentials_file_path, raw_data_dir,
         traced_runs = rapid_pro.convert_runs_to_traced_data(
             user, raw_runs, raw_contacts, phone_number_uuid_table, rapid_pro_source.test_contact_uuids)
 
+        if flow in rapid_pro_source.activation_flow_names:
+            label_somalia_operator(user, traced_runs, phone_number_uuid_table)
+
         log.info(f"Saving {len(raw_runs)} raw runs to {raw_runs_path}...")
         with open(raw_runs_path, "w") as raw_runs_file:
             json.dump([run.serialize() for run in raw_runs], raw_runs_file)
@@ -93,10 +131,63 @@ def fetch_from_gcloud_bucket(google_cloud_credentials_file_path, raw_data_dir, g
         flow = blob_url.split("/")[-1]
 
         traced_runs_output_path = f"{raw_data_dir}/{flow}"
-        log.info(f"Saving {flow} to file '{traced_runs_output_path}'...")
+        if os.path.exists(traced_runs_output_path):
+            log.info(f"File '{traced_runs_output_path}' for flow '{flow}' already exists; skipping download")
+            continue
+        
+        log.info(f"Saving '{flow}' to file '{traced_runs_output_path}'...")
         with open(traced_runs_output_path, "wb") as traced_runs_output_file:
             google_cloud_utils.download_blob_to_file(
                 google_cloud_credentials_file_path, blob_url, traced_runs_output_file)
+
+
+def fetch_from_shaqadoon_csv(user, google_cloud_credentials_file_path, raw_data_dir, phone_number_uuid_table,
+                             shaqadoon_csv_source):
+    log.info("Fetching data from a Shaqadoon CSV...")
+    for blob_url in shaqadoon_csv_source.activation_flow_urls + shaqadoon_csv_source.survey_flow_urls:
+        flow_name = blob_url.split('/')[-1].split('.')[0]  # Takes the name between the last '/' and the '.csv' ending 
+        traced_runs_output_path = f"{raw_data_dir}/{flow_name}.jsonl"
+        if os.path.exists(traced_runs_output_path):
+            log.info(f"File '{traced_runs_output_path}' for blob '{blob_url}' already exists; skipping download")
+            continue
+
+        log.info(f"Downloading recovered data from '{blob_url}'...")
+        raw_csv_string = StringIO(google_cloud_utils.download_blob_to_string(
+            google_cloud_credentials_file_path, blob_url))
+        raw_data = list(csv.DictReader(raw_csv_string))
+        log.info(f"Downloaded {len(raw_data)} recovered messages")
+
+        log.info("Converting the recovered messages to TracedData...")
+        traced_runs = []
+        for i, row in enumerate(raw_data):
+            raw_date = row["ReceivedOn"]
+            parsed_raw_date = datetime.strptime(raw_date, "%d/%m/%Y %H:%M")
+            localized_date = pytz.timezone("Africa/Mogadishu").localize(parsed_raw_date)
+
+            assert row["Sender"].startswith("avf-phone-uuid-"), \
+                f"The 'Sender' column for '{blob_url} contains an item that has not been de-identified " \
+                f"into Africa's Voices Foundation's de-identification format. This may be done with de_identify_csv.py."
+
+            d = {
+                "avf_phone_id": row["Sender"],
+                "message": row["Message"],
+                "received_on": localized_date.isoformat(),
+                "run_id": SHAUtils.sha_dict(row)
+            }
+
+            traced_runs.append(
+                TracedData(d, Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+            )
+        log.info("Converted the recovered messages to TracedData")
+
+        if blob_url in shaqadoon_csv_source.activation_flow_urls:
+            label_somalia_operator(user, traced_runs, phone_number_uuid_table)
+
+        log.info(f"Exporting {len(traced_runs)} TracedData items to {traced_runs_output_path}...")
+        IOUtils.ensure_dirs_exist_for_file(traced_runs_output_path)
+        with open(traced_runs_output_path, "w") as f:
+            TracedDataJsonIO.export_traced_data_iterable_to_jsonl(traced_runs, f)
+        log.info(f"Exported TracedData")
 
 
 def main(user, google_cloud_credentials_file_path, pipeline_configuration_file_path, raw_data_dir):
@@ -126,6 +217,10 @@ def main(user, google_cloud_credentials_file_path, pipeline_configuration_file_p
                                  raw_data_source)
         elif isinstance(raw_data_source, GCloudBucketSource):
             fetch_from_gcloud_bucket(google_cloud_credentials_file_path, raw_data_dir, raw_data_source)
+        elif isinstance(raw_data_source, ShaqadoonCSVSource):
+            fetch_from_shaqadoon_csv(user, google_cloud_credentials_file_path, raw_data_dir, phone_number_uuid_table,
+                                     raw_data_source)
+
         else:
             assert False, f"Unknown raw_data_source type {type(raw_data_source)}"
 

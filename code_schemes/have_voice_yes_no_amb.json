@@ -1,10 +1,10 @@
 {
-  "SchemeID": "Scheme-e1aa9330",
-  "Name": "Recently Displaced",
-  "Version": "0.0.0.3",
+  "SchemeID": "Scheme-539ec95d",
+  "Name": "Have Voice Yes/No/Amb",
+  "Version": "0.0.0.1",
   "Codes": [
     {
-      "CodeID": "code-2b565901",
+      "CodeID": "code-1e67ea39",
       "CodeType": "Normal",
       "DisplayText": "yes",
       "NumericValue": 1,
@@ -16,7 +16,7 @@
       ]
     },
     {
-      "CodeID": "code-d67739e0",
+      "CodeID": "code-11aba0e0",
       "CodeType": "Normal",
       "DisplayText": "no",
       "Shortcut": "n",
@@ -25,6 +25,18 @@
       "VisibleInCoda": true,
       "MatchValues": [
         "no"
+      ]
+    },
+    {
+      "CodeID": "code-2d0c42e9",
+      "CodeType": "Normal",
+      "DisplayText": "ambivalent",
+      "Shortcut": "a",
+      "NumericValue": 3,
+      "StringValue": "ambivalent",
+      "VisibleInCoda": true,
+      "MatchValues": [
+        "ambivalent"
       ]
     },
     {

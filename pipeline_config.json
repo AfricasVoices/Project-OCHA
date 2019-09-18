@@ -28,13 +28,21 @@
       "TokenFileURL": "gs://avf-credentials/csap-secondary-text-it-token.txt",
       "ContactsFileName": "csap_secondary_contacts",
       "ActivationFlowNames": [
-        "csap_s04e01_activation"
+        "csap_s04e01_activation",
+        "csap_s04e02_activation"
       ],
       "SurveyFlowNames": [
-        "csap_s04_demog"
+        "csap_s04_demog",
+        "csap_s04_evaluation"
       ],
       "TestContactUUIDs": [
         "61e74e0b-1b4a-41fe-9e78-712f2a048f4e"
+      ]
+    },
+    {
+      "SourceType": "ShaqadoonCSV",
+      "ActivationFlowURLs": [
+        "gs://avf-project-datasets/2019/OCHA/hormud-recovery-1.csv"
       ]
     }
   ],
@@ -52,9 +60,9 @@
     {"RapidProKey": "Rqa_S04E02 (Run ID) - csap_s04e02_activation", "PipelineKey": "rqa_s04e02_run_id"},
     {"RapidProKey": "Rqa_S04E02 (Time) - csap_s04e02_activation", "PipelineKey": "sent_on"},
 
-    {"RapidProKey": "Rqa_S03W05 (Text) - csap_s03w05_activation", "PipelineKey": "rqa_s03w05_raw", "IsActivationMessage": true},
-    {"RapidProKey": "Rqa_S03W05 (Run ID) - csap_s03w05_activation", "PipelineKey": "rqa_s03w05_run_id"},
-    {"RapidProKey": "Rqa_S03W05 (Time) - csap_s03w05_activation", "PipelineKey": "sent_on"},
+    {"RapidProKey": "message", "PipelineKey": "recovered_raw", "IsActivationMessage": true},
+    {"RapidProKey": "received_on", "PipelineKey": "sent_on"},
+    {"RapidProKey": "run_id", "PipelineKey": "recovered_run_id"},
 
     {"RapidProKey": "Mog_Sub_District (Text) - csap_demog", "PipelineKey": "location_raw"},
     {"RapidProKey": "Mog_Sub_District (Time) - csap_demog", "PipelineKey": "location_time"},
@@ -98,11 +106,17 @@
     {"RapidProKey": "Recently_Displaced (Text) - csap_s04_demog", "PipelineKey": "recently_displaced_raw"},
     {"RapidProKey": "Recently_Displaced (Time) - csap_s04_demog", "PipelineKey": "recently_displaced_time"},
     {"RapidProKey": "Idp_Camp (Text) - csap_s04_demog", "PipelineKey": "in_idp_camp_raw"},
-    {"RapidProKey": "Idp_Camp (Time) - csap_s04_demog", "PipelineKey": "in_idp_camp_time"}
+    {"RapidProKey": "Idp_Camp (Time) - csap_s04_demog", "PipelineKey": "in_idp_camp_time"},
+
+    {"RapidProKey": "Have_Voice (Text) - csap_s04_evaluation", "PipelineKey": "have_voice_raw"},
+    {"RapidProKey": "Have_Voice (Time) - csap_s04_evaluation", "PipelineKey": "have_voice_time"},
+    {"RapidProKey": "Suggestions (Text) - csap_s04_evaluation", "PipelineKey": "suggestions_raw"},
+    {"RapidProKey": "Suggestions (Time) - csap_s04_evaluation", "PipelineKey": "suggestions_time"}
   ],
-  "ProjectStartDate": "2000-01-01T00:00:00+03:00",
-  "ProjectEndDate": "2100-12-31T24:00:00+03:00",
-  "FilterTestMessages": false,
+  "ProjectStartDate": "2019-08-25T00:00:00+03:00",
+  "ProjectEndDate": "2019-09-07T24:00:00+03:00",
+  "FilterTestMessages": true,
+  "MoveWSMessages": true,
   "DriveUpload": {
     "DriveCredentialsFileURL": "gs://avf-credentials/pipeline-runner-service-acct-avf-data-core-64cc71459fe7.json",
     "ProductionUploadPath": "ocha_analysis_outputs/csap_s04_production.csv",
@@ -110,7 +124,7 @@
     "IndividualsUploadPath": "ocha_analysis_outputs/csap_s04_individuals.csv",
     "MessagesTracedDataUploadPath": "ocha_analysis_outputs/csap_s04_traced_data_messages.jsonl",
     "IndividualsTracedDataUploadPath": "ocha_analysis_outputs/csap_s04_traced_data_individuals.jsonl",
-    "AnalysisGraphsDir"
+    "AnalysisGraphsDir": "ocha_analysis_outputs/csap_s04_graphs"
   },
   "FlowDefinitionsUploadURLPrefix": "gs://avf-flow-definitions-test/OCHA-test-",
   "MemoryProfileUploadURLPrefix": "gs://avf-pipeline-logs-performance-nearline/2019/OCHA/memory-",

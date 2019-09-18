@@ -3,6 +3,7 @@ import time
 from core_data_modules.cleaners import Codes
 from core_data_modules.cleaners.cleaning_utils import CleaningUtils
 from core_data_modules.cleaners.location_tools import SomaliaLocations
+from core_data_modules.data_models.scheme import CodeTypes
 from core_data_modules.traced_data import Metadata
 
 from src.lib.code_schemes import CodeSchemes
@@ -38,7 +39,7 @@ def impute_somalia_location_codes(user, data, location_configurations):
 
         # If a control code was found, set all other location keys to that control code,
         # otherwise convert the provided location to the other locations in the hierarchy.
-        if location_code.code_type == "Control":
+        if location_code.code_type == CodeTypes.CONTROL:
             for cc in location_configurations:
                 td.append_data({
                     cc.coded_field: CleaningUtils.make_label_from_cleaner_code(
@@ -47,7 +48,17 @@ def impute_somalia_location_codes(user, data, location_configurations):
                         Metadata.get_call_location()
                     ).to_dict()
                 }, Metadata(user, Metadata.get_call_location(), time.time()))
+        elif location_code.code_type == CodeTypes.META:
+            for cc in location_configurations:
+                td.append_data({
+                    cc.coded_field: CleaningUtils.make_label_from_cleaner_code(
+                        cc.code_scheme,
+                        cc.code_scheme.get_code_with_meta_code(location_code.meta_code),
+                        Metadata.get_call_location()
+                    ).to_dict()
+                }, Metadata(user, Metadata.get_call_location(), time.time()))
         else:
+            assert location_code.code_type == CodeTypes.NORMAL
             location = location_code.match_values[0]
             td.append_data({
                 "mogadishu_sub_district_coded": CleaningUtils.make_label_from_cleaner_code(
@@ -74,5 +85,18 @@ def impute_somalia_location_codes(user, data, location_configurations):
                     CodeSchemes.SOMALIA_ZONE,
                     make_location_code(CodeSchemes.SOMALIA_ZONE,
                                        SomaliaLocations.zone_for_location_code(location)),
+                    Metadata.get_call_location()).to_dict()
+            }, Metadata(user, Metadata.get_call_location(), time.time()))
+
+        # Impute zone from operator
+        if "location_raw" not in td:
+            operator_str = CodeSchemes.SOMALIA_OPERATOR.get_code_with_id(td["operator_coded"]["CodeID"]).string_value
+            zone_str = SomaliaLocations.zone_for_operator_code(operator_str)
+
+            td.append_data({
+                "zone_coded": CleaningUtils.make_label_from_cleaner_code(
+                    CodeSchemes.SOMALIA_ZONE,
+                    make_location_code(CodeSchemes.SOMALIA_ZONE,
+                                       SomaliaLocations.state_for_location_code(zone_str)),
                     Metadata.get_call_location()).to_dict()
             }, Metadata(user, Metadata.get_call_location(), time.time()))

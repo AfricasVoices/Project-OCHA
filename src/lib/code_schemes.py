@@ -10,6 +10,8 @@ def _open_scheme(filename):
 
 
 class CodeSchemes(object):
+    SOMALIA_OPERATOR = _open_scheme("somalia_operator.json")
+
     S04E01_REASONS = _open_scheme("s04e01_reasons.json")
     S04E02_REASONS = _open_scheme("s04e02_reasons.json")
 
@@ -22,5 +24,8 @@ class CodeSchemes(object):
     AGE = _open_scheme("age.json")
     RECENTLY_DISPLACED = _open_scheme("recently_displaced.json")
     IN_IDP_CAMP = _open_scheme("in_idp_camp.json")
+
+    HAVE_VOICE_YES_NO_AMB = _open_scheme("have_voice_yes_no_amb.json")
+    SUGGESTIONS = _open_scheme("suggestions.json")
 
     WS_CORRECT_DATASET = _open_scheme("ws_correct_dataset.json")
