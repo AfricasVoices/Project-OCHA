@@ -1,7 +1,9 @@
 import json
 from abc import ABC, abstractmethod
+from datetime import datetime
 from urllib.parse import urlparse
 
+import pytz
 from core_data_modules.cleaners import Codes, swahili, somali
 from core_data_modules.data_models import validators
 from dateutil.parser import isoparse
@@ -266,7 +268,7 @@ class PipelineConfiguration(object):
                    raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
     ]
 
-    def __init__(self, raw_data_sources, phone_number_uuid_table,
+    def __init__(self, raw_data_sources, phone_number_uuid_table, timestamp_remappings,
                  rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages, move_ws_messages,
                  flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
                  drive_upload=None):
@@ -303,6 +305,7 @@ class PipelineConfiguration(object):
         """
         self.raw_data_sources = raw_data_sources
         self.phone_number_uuid_table = phone_number_uuid_table
+        self.timestamp_remappings = timestamp_remappings
         self.rapid_pro_key_remappings = rapid_pro_key_remappings
         self.project_start_date = project_start_date
         self.project_end_date = project_end_date
@@ -332,6 +335,10 @@ class PipelineConfiguration(object):
         phone_number_uuid_table = PhoneNumberUuidTable.from_configuration_dict(
             configuration_dict["PhoneNumberUuidTable"])
 
+        timestamp_remappings = []
+        for remapping_dict in configuration_dict.get("TimestampRemappings", []):
+            timestamp_remappings.append(TimestampRemapping.from_configuration_dict(remapping_dict))
+
         rapid_pro_key_remappings = []
         for remapping_dict in configuration_dict["RapidProKeyRemappings"]:
             rapid_pro_key_remappings.append(RapidProKeyRemapping.from_configuration_dict(remapping_dict))
@@ -350,7 +357,7 @@ class PipelineConfiguration(object):
         memory_profile_upload_url_prefix = configuration_dict["MemoryProfileUploadURLPrefix"]
         data_archive_upload_url_prefix = configuration_dict["DataArchiveUploadURLPrefix"]
 
-        return cls(raw_data_sources, phone_number_uuid_table,
+        return cls(raw_data_sources, phone_number_uuid_table, timestamp_remappings,
                    rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages,
                    move_ws_messages,
                    flow_definitions_upload_url_prefix, memory_profile_upload_url_prefix, data_archive_upload_url_prefix,
@@ -532,6 +539,69 @@ class PhoneNumberUuidTable(object):
     def validate(self):
         validators.validate_url(self.firebase_credentials_file_url, "firebase_credentials_file_url", scheme="gs")
         validators.validate_string(self.table_name, "table_name")
+
+
+class TimestampRemapping(object):
+    def __init__(self, time_key, show_pipeline_key_to_remap_to, range_start_inclusive=None, range_end_exclusive=None,
+                 time_to_adjust_to=None):
+        """
+        Specifies a remapping of messages received within the given time range to another radio show field.
+        Optionally specifies an adjustment of all affected timestamps to a constant datetime.
+
+        :param time_key: Key in each TracedData of an ISO 8601-formatted datetime string to read the message sent on
+                         time from.
+        :type time_key: str
+        :param show_pipeline_key_to_remap_to: Pipeline key to assign to messages received within the given time range.
+        :type show_pipeline_key_to_remap_to: str
+        :param range_start_inclusive: Start datetime for the time range to remap radio show messages from, inclusive.
+                                      If None, defaults to the beginning of time.
+        :type range_start_inclusive: datetime | None
+        :param range_end_exclusive: End datetime for the time range to remap radio show messages from, exclusive.
+                                    If None, defaults to the end of time.
+        :type range_end_exclusive: datetime | None
+        :param time_to_adjust_to: Datetime to assign to the 'sent_on' field of re-mapped shows.
+                                  If None, re-mapped shows will not have timestamps re-adjusted.
+        :type time_to_adjust_to: datetime | None
+        """
+        if range_start_inclusive is None:
+            range_start_inclusive = pytz.utc.localize(datetime.min)
+        if range_end_exclusive is None:
+            range_end_exclusive = pytz.utc.localize(datetime.max)
+
+        self.time_key = time_key
+        self.show_pipeline_key_to_remap_to = show_pipeline_key_to_remap_to
+        self.range_start_inclusive = range_start_inclusive
+        self.range_end_exclusive = range_end_exclusive
+        self.time_to_adjust_to = time_to_adjust_to
+
+        self.validate()
+
+    @classmethod
+    def from_configuration_dict(cls, configuration_dict):
+        time_key = configuration_dict["TimeKey"]
+        show_pipeline_key_to_remap_to = configuration_dict["ShowPipelineKeyToRemapTo"]
+        range_start_inclusive = configuration_dict.get("RangeStartInclusive")
+        range_end_exclusive = configuration_dict.get("RangeEndExclusive")
+        time_to_adjust_to = configuration_dict.get("TimeToAdjustTo")
+
+        if range_start_inclusive is not None:
+            range_start_inclusive = isoparse(range_start_inclusive)
+        if range_end_exclusive is not None:
+            range_end_exclusive = isoparse(range_end_exclusive)
+        if time_to_adjust_to is not None:
+            time_to_adjust_to = isoparse(time_to_adjust_to)
+
+        return cls(time_key, show_pipeline_key_to_remap_to, range_start_inclusive, range_end_exclusive,
+                   time_to_adjust_to)
+
+    def validate(self):
+        validators.validate_string(self.time_key, "time_key")
+        validators.validate_string(self.show_pipeline_key_to_remap_to, "show_pipeline_key_to_remap_to")
+        validators.validate_datetime(self.range_start_inclusive, "range_start_inclusive")
+        validators.validate_datetime(self.range_end_exclusive, "range_end_exclusive")
+
+        if self.time_to_adjust_to is not None:
+            validators.validate_datetime(self.time_to_adjust_to, "time_to_adjust_to")
 
 
 class RapidProKeyRemapping(object):
