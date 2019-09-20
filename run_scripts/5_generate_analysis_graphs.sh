@@ -18,7 +18,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ $# -ne 4 ]]; then
-    echo "Usage: ./generate_analysis_graphs.sh [--profile-cpu <cpu-profile-output-path>] <user> <google-cloud-credentials-file-path> <pipeline-configuration-file-path> <data-root>"
+    echo "Usage: ./5_generate_analysis_graphs.sh [--profile-cpu <cpu-profile-output-path>] <user> <google-cloud-credentials-file-path> <pipeline-configuration-file-path> <data-root>"
     echo "Generates the analysis graphs using the traced data produced by 3_generate_outputs.sh"
     exit
 fi
