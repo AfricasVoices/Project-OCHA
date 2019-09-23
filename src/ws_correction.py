@@ -13,9 +13,9 @@ log = Logger(__name__)
 
 
 class _WSUpdate(object):
-    def __init__(self, message, sent_on, source):
+    def __init__(self, message, timestamp, source):
         self.message = message
-        self.sent_on = sent_on
+        self.timestamp = timestamp
         self.source = source
 
 
@@ -207,7 +207,7 @@ class WSCorrection(object):
 
                     if len(plan_updates) > 0:
                         flattened_survey_updates[plan.raw_field] = "; ".join([u.message for u in plan_updates])
-                        flattened_survey_updates[plan.time_field] = sorted([u.sent_on for u in plan_updates])[0]
+                        flattened_survey_updates[plan.time_field] = sorted([u.timestamp for u in plan_updates])[0]
                         flattened_survey_updates[f"{plan.raw_field}_source"] = "; ".join([u.source for u in plan_updates])
                     else:
                         flattened_survey_updates[plan.raw_field] = None
@@ -237,7 +237,7 @@ class WSCorrection(object):
 
                 rqa_dict = {
                     target_field: update.message,
-                    plan.time_field: update.sent_on,
+                    plan.time_field: update.timestamp,
                     f"{target_field}_source": update.source
                 }
 
