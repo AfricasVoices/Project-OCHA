@@ -3,7 +3,78 @@
   "Name": "Suggestions",
   "Version": "0.0.0.1",
   "Codes": [
-
+    {
+      "CodeID": "code-07d9b846",
+      "CodeType": "Normal",
+      "DisplayText": "consistent radio shows",
+      "NumericValue": 1,
+      "StringValue": "consistent_radio_shows",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-99de6d2f",
+      "CodeType": "Normal",
+      "DisplayText": "improve quality of hage",
+      "NumericValue": 2,
+      "StringValue": "improve_quality_of_hage",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-1b07196d",
+      "CodeType": "Normal",
+      "DisplayText": "honesty from radio broadcast",
+      "NumericValue": 3,
+      "StringValue": "honesty_from_radio_broadcast",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-cc1fdbc5",
+      "CodeType": "Normal",
+      "DisplayText": "improved participation",
+      "NumericValue": 4,
+      "StringValue": "improved_participation",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-de8895af",
+      "CodeType": "Normal",
+      "DisplayText": "improve radio stations",
+      "NumericValue": 5,
+      "StringValue": "improve_radio_stations",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-4ecf138f",
+      "CodeType": "Normal",
+      "DisplayText": "increase frequency of shows",
+      "NumericValue": 6,
+      "StringValue": "increase_frequency_of_shows",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-90bcb12f",
+      "CodeType": "Normal",
+      "DisplayText": "more religious messaging",
+      "NumericValue": 7,
+      "StringValue": "more_religious_messaging",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-2771b4d4",
+      "CodeType": "Normal",
+      "DisplayText": "avoid political content",
+      "NumericValue": 8,
+      "StringValue": "avoid_political_content",
+      "VisibleInCoda": true
+    },
+    {
+      "CodeID": "code-02e44dff",
+      "CodeType": "Normal",
+      "DisplayText": "other",
+      "NumericValue": 9,
+      "StringValue": "other",
+      "VisibleInCoda": true
+    },
     {
       "CodeID": "code-NA-f93d3eb7",
       "CodeType": "Control",
