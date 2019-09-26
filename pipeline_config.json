@@ -55,7 +55,7 @@
     {
       "TimeKey": "received_on",
       "ShowPipelineKeyToRemapTo":  "rqa_s04e01_raw",
-      "RangeStartInclusive": "2019-08-29T00:00:00+03:00",
+      "RangeStartInclusive": "2019-08-28T13:46:27+03:00",
       "RangeEndExclusive": "2019-08-30T11:48:01+03:00"
     }
   ],
