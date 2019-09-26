@@ -161,7 +161,10 @@ def fetch_from_shaqadoon_csv(user, google_cloud_credentials_file_path, raw_data_
         traced_runs = []
         for i, row in enumerate(raw_data):
             raw_date = row["ReceivedOn"]
-            parsed_raw_date = datetime.strptime(raw_date, "%d/%m/%Y %H:%M")
+            if len(raw_date) == len("dd/mm/YYYY HH:MM"):
+                parsed_raw_date = datetime.strptime(raw_date, "%d/%m/%Y %H:%M")
+            else:
+                parsed_raw_date = datetime.strptime(raw_date, "%d/%m/%Y %H:%M:%S")
             localized_date = pytz.timezone("Africa/Mogadishu").localize(parsed_raw_date)
 
             assert row["Sender"].startswith("avf-phone-uuid-"), \
