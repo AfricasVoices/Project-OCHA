@@ -42,8 +42,8 @@
     {
       "SourceType": "ShaqadoonCSV",
       "ActivationFlowURLs": [
-        "gs://avf-project-datasets/2019/OCHA/hormud-recovery-1.csv",
-        "gs://avf-project-datasets/2019/OCHA/hormud-recovery-1b.csv"
+        "gs://avf-project-datasets/2019/OCHA/recovered-hormud-s04e01-wednesday.csv",
+        "gs://avf-project-datasets/2019/OCHA/recovered-hormud-s04e01-thursday-friday.csv"
       ]
     }
   ],
