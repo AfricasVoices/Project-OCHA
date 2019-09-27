@@ -77,7 +77,8 @@ class MessageFilters(object):
         :rtype: list of TracedData
         """
         # De-duplicate time_keys
-        time_keys = set(time_keys)
+        assert isinstance(time_keys, set)
+        time_keys = time_keys
 
         log.debug(f"Filtering out messages sent outside the time range "
                   f"{start_time_inclusive.isoformat()} to {end_time_inclusive.isoformat()} "
