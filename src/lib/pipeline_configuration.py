@@ -295,8 +295,6 @@ class PipelineConfiguration(object):
                                                  This prefix will be appended by the id of the pipeline run (provided
                                                  as a command line argument), and the ".profile" file extension.
         :type memory_profile_upload_url_prefix: str
-        :param recovery_csv_urls: GS URLs to CSVs in Shaqadoon's recovery format, or None.
-        :type recovery_csv_urls: list of str | None
         :param drive_upload: Configuration for uploading to Google Drive, or None.
                              If None, does not upload to Google Drive.
         :type drive_upload: DriveUploadPaths | None
