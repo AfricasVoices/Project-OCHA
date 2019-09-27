@@ -228,12 +228,9 @@ class WSCorrection(object):
 
             # For each rqa message, create a copy of this td, append the rqa message, and add this to the
             # list of TracedData.
+            raw_field_to_rqa_plan_map = {plan.raw_field: plan for plan in PipelineConfiguration.RQA_CODING_PLANS}
             for target_field, update in rqa_updates:
-                for plan in PipelineConfiguration.RQA_CODING_PLANS:
-                    if plan.raw_field == update.source:
-                        break
-                else:
-                    assert False, f"No matching RQA plan found for source {update.source}"
+                plan = raw_field_to_rqa_plan_map[update.source]
 
                 rqa_dict = {
                     target_field: update.message,
