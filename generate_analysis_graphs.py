@@ -4,6 +4,7 @@ import json
 from collections import OrderedDict
 
 import altair
+from core_data_modules.cleaners import Codes
 from core_data_modules.logging import Logger
 from core_data_modules.traced_data.io import TracedDataJsonIO
 from core_data_modules.util import IOUtils
@@ -11,6 +12,7 @@ from storage.google_cloud import google_cloud_utils
 from storage.google_drive import drive_client_wrapper
 
 from src.lib import PipelineConfiguration
+from src.lib.pipeline_configuration import CodingModes
 
 Logger.set_project_name("OCHA")
 log = Logger(__name__)
@@ -113,7 +115,7 @@ if __name__ == "__main__":
     chart.save(f"{output_dir}/individuals_per_show.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Plot the per-season distribution of responses for each survey question, per individual
-    for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+    for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
         for cc in plan.coding_configurations:
             if cc.analysis_file_key is None:
                 continue
@@ -123,8 +125,15 @@ if __name__ == "__main__":
             for code in cc.code_scheme.codes:
                 label_counts[code.string_value] = 0
 
-            for ind in individuals:
-                label_counts[ind[cc.analysis_file_key]] += 1
+            if cc.coding_mode == CodingModes.SINGLE:
+                for ind in individuals:
+                    label_counts[ind[cc.analysis_file_key]] += 1
+            else:
+                assert cc.coding_mode == CodingModes.MULTIPLE
+                for ind in individuals:
+                    for code in cc.code_scheme.codes:
+                        if ind[f"{cc.analysis_file_key}{code.string_value}"] == Codes.MATRIX_1:
+                            label_counts[code.string_value] += 1
 
             chart = altair.Chart(
                 altair.Data(values=[{"label": k, "count": v} for k, v in label_counts.items()])
