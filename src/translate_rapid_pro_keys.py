@@ -62,7 +62,7 @@ class TranslateRapidProKeys(object):
         :param range_end: End datetime for the time range to remap radio show messages from, exclusive.
                           If None, defaults to the end of time.
         :type range_end: datetime | None
-        :param time_to_adjust_to: Datetime to assign to the 'sent_on' field of re-mapped shows.
+        :param time_to_adjust_to: Datetime to assign to the `time_key` field of re-mapped shows.
                                   If None, re-mapped shows will not have timestamps re-adjusted.
         :type time_to_adjust_to: datetime | None
         """

@@ -13,9 +13,9 @@ log = Logger(__name__)
 
 
 class _WSUpdate(object):
-    def __init__(self, message, sent_on, source):
+    def __init__(self, message, timestamp, source):
         self.message = message
-        self.sent_on = sent_on
+        self.timestamp = timestamp
         self.source = source
 
 
@@ -207,7 +207,7 @@ class WSCorrection(object):
 
                     if len(plan_updates) > 0:
                         flattened_survey_updates[plan.raw_field] = "; ".join([u.message for u in plan_updates])
-                        flattened_survey_updates[plan.time_field] = sorted([u.sent_on for u in plan_updates])[0]
+                        flattened_survey_updates[plan.time_field] = sorted([u.timestamp for u in plan_updates])[0]
                         flattened_survey_updates[f"{plan.raw_field}_source"] = "; ".join([u.source for u in plan_updates])
                     else:
                         flattened_survey_updates[plan.raw_field] = None
@@ -228,10 +228,13 @@ class WSCorrection(object):
 
             # For each rqa message, create a copy of this td, append the rqa message, and add this to the
             # list of TracedData.
+            raw_field_to_rqa_plan_map = {plan.raw_field: plan for plan in PipelineConfiguration.RQA_CODING_PLANS}
             for target_field, update in rqa_updates:
+                plan = raw_field_to_rqa_plan_map[update.source]
+
                 rqa_dict = {
                     target_field: update.message,
-                    "sent_on": update.sent_on,
+                    plan.time_field: update.timestamp,
                     f"{target_field}_source": update.source
                 }
 

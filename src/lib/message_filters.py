@@ -57,15 +57,16 @@ class MessageFilters(object):
         return filtered
 
     @staticmethod
-    def filter_time_range(messages, time_key, start_time_inclusive, end_time_inclusive):
+    def filter_time_range(messages, time_keys, start_time_inclusive, end_time_inclusive):
         """
         Filters a list of messages for messages received within the given time range.
 
         :param messages: List of message objects to filter.
         :type messages: list of TracedData
-        :param time_key: Key in each TracedData object that contains the time the message was sent.
-                         The values must be strings in ISO 8601 format.
-        :type time_key: str
+        :param time_keys: Keys in each TracedData object that contain the time the message was sent.
+                          Each TracedData should have exactly one match for each key.
+                          The values must be strings in ISO 8601 format.
+        :type time_keys: set of str
         :param start_time_inclusive: Inclusive start time of the time range to keep.
                            Messages sent before this time will be dropped. 
         :type start_time_inclusive: datetime.datetime
@@ -75,12 +76,34 @@ class MessageFilters(object):
         :return: Filtered list.
         :rtype: list of TracedData
         """
+        # De-duplicate time_keys
+        assert isinstance(time_keys, set)
+        time_keys = time_keys
+
         log.debug(f"Filtering out messages sent outside the time range "
-                  f"{start_time_inclusive.isoformat()} to {end_time_inclusive.isoformat()}...")
-        filtered = [td for td in messages if start_time_inclusive <= isoparse(td[time_key]) < end_time_inclusive]
+                  f"{start_time_inclusive.isoformat()} to {end_time_inclusive.isoformat()} "
+                  f"for time keys {time_keys}...")
+
+        # Validate the input data
+        for td in messages:
+            matching_time_keys = 0
+            for time_key in time_keys:
+                if time_key in td:
+                    matching_time_keys += 1
+            assert matching_time_keys == 1, matching_time_keys
+
+        # Perform the actual filtering
+        filtered = []
+        for td in messages:
+            for time_key in time_keys:
+                if time_key in td and start_time_inclusive <= isoparse(td[time_key]) < end_time_inclusive:
+                    filtered.append(td)
+                    break
+
         log.info(f"Filtered out messages sent outside the time range "
                  f"{start_time_inclusive.isoformat()} to {end_time_inclusive.isoformat()}. "
                  f"Returning {len(filtered)}/{len(messages)} messages.")
+
         return filtered
 
     @staticmethod

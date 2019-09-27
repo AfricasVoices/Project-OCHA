@@ -12,7 +12,6 @@ log = Logger(__name__)
 
 
 class AutoCode(object):
-    SENT_ON_KEY = "sent_on"
     NOISE_KEY = "noise"
     ICR_MESSAGES_COUNT = 200
     ICR_SEED = 0
@@ -67,7 +66,8 @@ class AutoCode(object):
                                                     [plan.raw_field for plan in PipelineConfiguration.RQA_CODING_PLANS])
 
         # Filter out runs sent outwith the project start and end dates
-        data = MessageFilters.filter_time_range(data, cls.SENT_ON_KEY, project_start_date, project_end_date)
+        time_keys = {plan.time_field for plan in PipelineConfiguration.RQA_CODING_PLANS}
+        data = MessageFilters.filter_time_range(data, time_keys, project_start_date, project_end_date)
 
         return data
 
