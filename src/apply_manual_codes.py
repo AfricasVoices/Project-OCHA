@@ -25,11 +25,11 @@ class ApplyManualCodes(object):
                     if cc.coding_mode == CodingModes.SINGLE:
                         if cc.coded_field in td:
                             label = td[cc.coded_field]
-                            rqa_codes.append(cc.code_scheme.get_code_with_id(label["CodeID"]))
+                            rqa_codes.append(cc.code_scheme.get_code_with_code_id(label["CodeID"]))
                     else:
                         assert cc.coding_mode == CodingModes.MULTIPLE
                         for label in td.get(cc.coded_field, []):
-                            rqa_codes.append(cc.code_scheme.get_code_with_id(label["CodeID"]))
+                            rqa_codes.append(cc.code_scheme.get_code_with_code_id(label["CodeID"]))
 
                 has_ws_code_in_code_scheme = False
                 for code in rqa_codes:
@@ -38,7 +38,7 @@ class ApplyManualCodes(object):
 
                 has_ws_code_in_ws_scheme = False
                 if f"{plan.raw_field}_correct_dataset" in td:
-                    ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(
+                    ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_code_id(
                         td[f"{plan.raw_field}_correct_dataset"]["CodeID"])
                     has_ws_code_in_ws_scheme = ws_code.code_type == "Normal" or ws_code.control_code == Codes.NOT_CODED
 

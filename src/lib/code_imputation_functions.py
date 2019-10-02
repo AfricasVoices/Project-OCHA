@@ -3,7 +3,7 @@ import time
 from core_data_modules.cleaners import Codes
 from core_data_modules.cleaners.cleaning_utils import CleaningUtils
 from core_data_modules.cleaners.location_tools import SomaliaLocations
-from core_data_modules.data_models.scheme import CodeTypes
+from core_data_modules.data_models.code_scheme import CodeTypes
 from core_data_modules.traced_data import Metadata
 
 from src.lib.code_schemes import CodeSchemes
@@ -24,7 +24,7 @@ def impute_somalia_location_codes(user, data, location_configurations):
         location_code = None
 
         for cc in location_configurations:
-            coda_code = cc.code_scheme.get_code_with_id(td[cc.coded_field]["CodeID"])
+            coda_code = cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"])
             if location_code is not None:
                 if not (
                         coda_code.code_id == location_code.code_id or coda_code.control_code == Codes.NOT_REVIEWED):
@@ -90,7 +90,7 @@ def impute_somalia_location_codes(user, data, location_configurations):
 
         # Impute zone from operator
         if "location_raw" not in td:
-            operator_str = CodeSchemes.SOMALIA_OPERATOR.get_code_with_id(td["operator_coded"]["CodeID"]).string_value
+            operator_str = CodeSchemes.SOMALIA_OPERATOR.get_code_with_code_id(td["operator_coded"]["CodeID"]).string_value
             zone_str = SomaliaLocations.zone_for_operator_code(operator_str)
 
             td.append_data({

@@ -67,7 +67,7 @@ class AnalysisFile(object):
 
                     if cc.coding_mode == CodingModes.SINGLE:
                         analysis_dict[cc.analysis_file_key] = \
-                            cc.code_scheme.get_code_with_id(td[cc.coded_field]["CodeID"]).string_value
+                            cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"]).string_value
                     else:
                         assert cc.coding_mode == CodingModes.MULTIPLE
                         show_matrix_keys = []
@@ -75,7 +75,7 @@ class AnalysisFile(object):
                             show_matrix_keys.append(f"{cc.analysis_file_key}{code.string_value}")
 
                         for label in td.get(cc.coded_field, []):
-                            code_string_value = cc.code_scheme.get_code_with_id(label['CodeID']).string_value
+                            code_string_value = cc.code_scheme.get_code_with_code_id(label['CodeID']).string_value
                             analysis_dict[f"{cc.analysis_file_key}{code_string_value}"] = Codes.MATRIX_1
 
                         for key in show_matrix_keys:
