@@ -91,7 +91,7 @@ class TranslateRapidProKeys(object):
         log.info(f"Remapped {remapped_count} messages to show {show_pipeline_key_to_remap_to}")
 
     @classmethod
-    def remap_radio_shows(cls, user, data):
+    def remap_radio_shows(cls, user, data, pipeline_configuration):
         """
         Remaps radio shows which were in the wrong flow, and therefore have the wrong key/values set, to have the
         key/values they would have had if they had been received by the correct flow.
@@ -100,14 +100,14 @@ class TranslateRapidProKeys(object):
         :type user: str
         :param data: TracedData objects to move the radio show messages in.
         :type data: iterable of TracedData
+        :param pipeline_configuration: Pipeline configuration.
+        :type pipeline_configuration: PipelineConfiguration
         """
-        # TODO: Move this method to JSON configuration
-
-        # Redirect recovered Hormud messages from the failure that occurred during the first week of radio shows
-        cls._remap_radio_show_by_time_range(
-            user, data, "received_on", "rqa_s04e01_raw",
-            range_start=isoparse("2019-08-28T13:46:27+03:00"), range_end=isoparse("2019-08-30T11:48:01+03:00")
-        )
+        for remapping in pipeline_configuration.timestamp_remappings:
+            cls._remap_radio_show_by_time_range(
+                user, data, remapping.time_key, remapping.show_pipeline_key_to_remap_to,
+                remapping.range_start_inclusive, remapping.range_end_exclusive, remapping.time_to_adjust_to
+            )
 
     @classmethod
     def remap_key_names(cls, user, data, pipeline_configuration):
@@ -188,7 +188,7 @@ class TranslateRapidProKeys(object):
         cls.set_show_ids(user, data, pipeline_configuration)
 
         # Move rqa messages which ended up in the wrong flow to the correct one.
-        cls.remap_radio_shows(user, data)
+        cls.remap_radio_shows(user, data, pipeline_configuration)
 
         # Remap the keys used by Rapid Pro to more usable key names that will be used by the rest of the pipeline.
         cls.remap_key_names(user, data, pipeline_configuration)
