@@ -13,9 +13,9 @@ log = Logger(__name__)
 
 
 class _WSUpdate(object):
-    def __init__(self, message, sent_on, source):
+    def __init__(self, message, timestamp, source):
         self.message = message
-        self.sent_on = sent_on
+        self.timestamp = timestamp
         self.source = source
 
 
@@ -70,8 +70,9 @@ class WSCorrection(object):
 
                 has_ws_code_in_ws_scheme = False
                 if f"{plan.raw_field}_WS_correct_dataset" in td:
-                    has_ws_code_in_ws_scheme = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(
-                        td[f"{plan.raw_field}_WS_correct_dataset"]["CodeID"]).code_type == "Normal"
+                    ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(
+                        td[f"{plan.raw_field}_WS_correct_dataset"]["CodeID"])
+                    has_ws_code_in_ws_scheme = ws_code.code_type == "Normal" or ws_code.control_code == Codes.NOT_CODED
 
                 if has_ws_code_in_code_scheme != has_ws_code_in_ws_scheme:
                     log.warning(f"Coding Error: {plan.raw_field}: {td[plan.raw_field]}")
@@ -113,7 +114,7 @@ class WSCorrection(object):
                 if plan.raw_field not in td or plan.coda_filename is None:
                     continue
                 ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(td[f"{plan.raw_field}_WS_correct_dataset"]["CodeID"])
-                if ws_code.code_type == "Normal":
+                if ws_code.code_type == "Normal" or ws_code.control_code == Codes.NOT_CODED:
                     if ws_code.code_id in ws_code_to_raw_field_map:
                         survey_moves[plan.raw_field] = ws_code_to_raw_field_map[ws_code.code_id]
                     else:
@@ -129,7 +130,7 @@ class WSCorrection(object):
                     if plan.raw_field not in td or plan.coda_filename is None:
                         continue
                     ws_code = CodeSchemes.WS_CORRECT_DATASET.get_code_with_id(td[f"{plan.raw_field}_WS_correct_dataset"]["CodeID"])
-                    if ws_code.code_type == "Normal":
+                    if ws_code.code_type == "Normal" or ws_code.control_code == Codes.NOT_CODED:
                         if ws_code.code_id in ws_code_to_raw_field_map:
                             rqa_moves[(i, plan.raw_field)] = ws_code_to_raw_field_map[ws_code.code_id]
                         else:
@@ -207,7 +208,7 @@ class WSCorrection(object):
 
                     if len(plan_updates) > 0:
                         flattened_survey_updates[plan.raw_field] = "; ".join([u.message for u in plan_updates])
-                        flattened_survey_updates[plan.time_field] = sorted([u.sent_on for u in plan_updates])[0]
+                        flattened_survey_updates[plan.time_field] = sorted([u.timestamp for u in plan_updates])[0]
                         flattened_survey_updates[f"{plan.raw_field}_source"] = "; ".join([u.source for u in plan_updates])
                     else:
                         flattened_survey_updates[plan.raw_field] = None
@@ -228,10 +229,13 @@ class WSCorrection(object):
 
             # For each rqa message, create a copy of this td, append the rqa message, and add this to the
             # list of TracedData.
+            raw_field_to_rqa_plan_map = {plan.raw_field: plan for plan in PipelineConfiguration.RQA_CODING_PLANS}
             for target_field, update in rqa_updates:
+                plan = raw_field_to_rqa_plan_map[update.source]
+
                 rqa_dict = {
                     target_field: update.message,
-                    "sent_on": update.sent_on,
+                    plan.time_field: update.timestamp,
                     f"{target_field}_source": update.source
                 }
 

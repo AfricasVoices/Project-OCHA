@@ -6,6 +6,8 @@ from core_data_modules.traced_data import Metadata
 from core_data_modules.util import TimeUtils
 from dateutil.parser import isoparse
 
+from src.lib import PipelineConfiguration
+
 log = Logger(__name__)
 
 
@@ -60,7 +62,7 @@ class TranslateRapidProKeys(object):
         :param range_end: End datetime for the time range to remap radio show messages from, exclusive.
                           If None, defaults to the end of time.
         :type range_end: datetime | None
-        :param time_to_adjust_to: Datetime to assign to the 'sent_on' field of re-mapped shows.
+        :param time_to_adjust_to: Datetime to assign to the `time_key` field of re-mapped shows.
                                   If None, re-mapped shows will not have timestamps re-adjusted.
         :type time_to_adjust_to: datetime | None
         """
@@ -89,7 +91,7 @@ class TranslateRapidProKeys(object):
         log.info(f"Remapped {remapped_count} messages to show {show_pipeline_key_to_remap_to}")
 
     @classmethod
-    def remap_radio_shows(cls, user, data):
+    def remap_radio_shows(cls, user, data, pipeline_configuration):
         """
         Remaps radio shows which were in the wrong flow, and therefore have the wrong key/values set, to have the
         key/values they would have had if they had been received by the correct flow.
@@ -98,14 +100,14 @@ class TranslateRapidProKeys(object):
         :type user: str
         :param data: TracedData objects to move the radio show messages in.
         :type data: iterable of TracedData
+        :param pipeline_configuration: Pipeline configuration.
+        :type pipeline_configuration: PipelineConfiguration
         """
-        # TODO: Move this method to JSON configuration
-
-        # Redirect recovered Hormud messages from the failure that occurred during the first week of radio shows
-        cls._remap_radio_show_by_time_range(
-            user, data, "received_on", "rqa_s04e01_raw",
-            range_start=isoparse("2019-08-29T00:00:00+03:00"), range_end=isoparse("2019-08-30T11:48:01+03:00")
-        )
+        for remapping in pipeline_configuration.timestamp_remappings:
+            cls._remap_radio_show_by_time_range(
+                user, data, remapping.time_key, remapping.show_pipeline_key_to_remap_to,
+                remapping.range_start_inclusive, remapping.range_end_exclusive, remapping.time_to_adjust_to
+            )
 
     @classmethod
     def remap_key_names(cls, user, data, pipeline_configuration):
@@ -129,7 +131,7 @@ class TranslateRapidProKeys(object):
                 old_key = remapping.rapid_pro_key
                 new_key = remapping.pipeline_key
                 
-                if td.get(old_key) is not None and new_key not in td:
+                if old_key in td and new_key not in td:
                     remapped[new_key] = td[old_key]
 
             td.append_data(remapped, Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
@@ -155,6 +157,23 @@ class TranslateRapidProKeys(object):
                                Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
     @classmethod
+    def hide_null_messages(cls, user, data):
+        """
+        Hides messages which were null in Rapid Pro.
+
+        :param user: Identifier of the user running this program, for TracedData Metadata.
+        :type user: str
+        :param data: TracedData objects to search for null messages in and hide.
+        :type data: iterable of TracedData
+        """
+        for td in data:
+            null_keys = set()
+            for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
+                if plan.raw_field in td and td[plan.raw_field] is None:
+                    null_keys.update({plan.raw_field, plan.time_field})
+            td.hide_keys(null_keys, Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+
+    @classmethod
     def translate_rapid_pro_keys(cls, user, data, pipeline_configuration):
         """
         Remaps the keys of rqa messages in the wrong flow into the correct one, and remaps all Rapid Pro keys to
@@ -169,12 +188,16 @@ class TranslateRapidProKeys(object):
         cls.set_show_ids(user, data, pipeline_configuration)
 
         # Move rqa messages which ended up in the wrong flow to the correct one.
-        cls.remap_radio_shows(user, data)
+        cls.remap_radio_shows(user, data, pipeline_configuration)
 
         # Remap the keys used by Rapid Pro to more usable key names that will be used by the rest of the pipeline.
         cls.remap_key_names(user, data, pipeline_configuration)
 
         # Convert from the new show key format to the raw field format still used by the rest of the pipeline.
         cls.set_rqa_raw_keys_from_show_ids(user, data)
+
+        # Some Text inputs in Rapid Pro can be null. We don't know why, but there's no useful messages in those
+        # cases so hide them (which means the rest of the pipeline will treat those as NA).
+        cls.hide_null_messages(user, data)
 
         return data
