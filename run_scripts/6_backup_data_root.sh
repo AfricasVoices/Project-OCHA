@@ -3,7 +3,7 @@
 set -e
 
 if [[ $# -ne 2 ]]; then
-    echo "Usage: ./5_backup_data_root <data-root> <backup-location>"
+    echo "Usage: ./6_backup_data_root <data-root> <backup-location>"
     echo "Backs-up the data root directory to a compressed file in at the specified location"
     exit
 fi
