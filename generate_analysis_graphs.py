@@ -141,9 +141,10 @@ if __name__ == "__main__":
                     code_type = codes[0].code_type
                     for code in codes:
                         assert code.code_type == code_type
-                            
+
                     if code_type == CodeTypes.NORMAL:
                         weekly_counts[plan.raw_field]["Relevant Messages"] += 1
+                        weekly_counts["Total"]["Relevant Messages"] += 1
 
     # Compute, per week and across the season:
     #  - Total Participants, by counting the number of individuals objects that contain the raw_field key each week.
