@@ -114,6 +114,7 @@ if __name__ == "__main__":
         "% Relevant Messages": None
     }
 
+    # TODO: Re-check all of these description messages
     # Compute, per week and across the season:
     #  - Total Messages, by counting the number of message objects that contain the raw_field key each week.
     #  - Relevant Messages, by counting the number of message objects which are coded with codes of type
@@ -127,18 +128,19 @@ if __name__ == "__main__":
                     weekly_counts["Total"]["Total Messages"] += 1
 
                     # Check all the code schemes for this variable contain the same code type
-                    code_type = None
+                    codes = []
                     for cc in plan.coding_configurations:
                         if cc.coding_mode == CodingModes.SINGLE:
-                            scheme_code_type = cc.code_scheme.get_code_with_id(msg[cc.coded_field]["CodeID"]).code_type
+                            codes.append(cc.code_scheme.get_code_with_id(msg[cc.coded_field]["CodeID"]))
                         else:
                             assert cc.coding_mode == CodingModes.MULTIPLE
-                            assert len(msg[cc.coded_field]) == 1
-                            scheme_code_type = cc.code_scheme.get_code_with_id(msg[cc.coded_field][0]["CodeID"]).code_type
-                        if code_type is None:
-                            code_type = scheme_code_type
-                        else:
-                            assert code_type == scheme_code_type
+                            for label in msg[cc.coded_field]:
+                                codes.append(cc.code_scheme.get_code_with_id(label["CodeID"]))
+
+                    assert len(codes) > 0
+                    code_type = codes[0].code_type
+                    for code in codes:
+                        assert code.code_type == code_type
                             
                     if code_type == CodeTypes.NORMAL:
                         weekly_counts[plan.raw_field]["Relevant Messages"] += 1
