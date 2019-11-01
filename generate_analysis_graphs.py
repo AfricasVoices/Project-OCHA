@@ -162,10 +162,10 @@ if __name__ == "__main__":
 
     # Export the weekly counts to a csv.
     with open(f"{output_dir}/weekly_counts.csv", "w") as f:
-        writer = csv.DictWriter(f, fieldnames=["Episode", "Total Messages", "Relevant Messages", "% Relevant Messages",
-                                               "Total Participants"],
-                                lineterminator="\n")
+        headers = ["Episode", "Total Messages", "Relevant Messages", "% Relevant Messages", "Total Participants"]
+        writer = csv.DictWriter(f, fieldnames=headers,lineterminator="\n")
         writer.writeheader()
+
         for row in weekly_counts.values():
             writer.writerow(row)
             
