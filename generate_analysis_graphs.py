@@ -121,8 +121,8 @@ if __name__ == "__main__":
     #    CodeTypes.NORMAL. If a message was coded under multiple schemes, an additional assert is performed to ensure
     #    the message was labelled with the same code type across all of those schemes.
     for msg in messages:
-        for plan in PipelineConfiguration.RQA_CODING_PLANS:
-            if msg["consent_withdrawn"] == Codes.FALSE:
+        if msg["consent_withdrawn"] == Codes.FALSE:
+            for plan in PipelineConfiguration.RQA_CODING_PLANS:
                 if plan.raw_field in msg and msg[plan.raw_field] != "":
                     weekly_counts[plan.raw_field]["Total Messages"] += 1
                     weekly_counts["Total"]["Total Messages"] += 1
