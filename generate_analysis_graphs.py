@@ -149,11 +149,11 @@ if __name__ == "__main__":
     # Compute, per week and across the season:
     #  - Total Participants, by counting the number of individuals objects that contain the raw_field key each week.
     for ind in individuals:
-        for plan in PipelineConfiguration.RQA_CODING_PLANS:
-            if ind["consent_withdrawn"] == Codes.FALSE:
+        if ind["consent_withdrawn"] == Codes.FALSE:
+            weekly_counts["Total"]["Total Participants"] += 1
+            for plan in PipelineConfiguration.RQA_CODING_PLANS:
                 if ind.get(plan.raw_field, "") != "":
                     weekly_counts[plan.raw_field]["Total Participants"] += 1
-                    weekly_counts["Total"]["Total Participants"] += 1
 
     # Compute:
     #  - % Relevant Messages, by computing Relevant Messages / Total Messages * 100, to 1 decimal place.
