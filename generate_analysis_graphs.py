@@ -123,7 +123,7 @@ if __name__ == "__main__":
     for msg in messages:
         if msg["consent_withdrawn"] == Codes.FALSE:
             for plan in PipelineConfiguration.RQA_CODING_PLANS:
-                if plan.raw_field in msg and msg[plan.raw_field] != "":
+                if plan.raw_field in msg:
                     engagement_counts[plan.raw_field]["Total Messages"] += 1
                     engagement_counts["Total"]["Total Messages"] += 1
 
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         if ind["consent_withdrawn"] == Codes.FALSE:
             engagement_counts["Total"]["Total Participants"] += 1
             for plan in PipelineConfiguration.RQA_CODING_PLANS:
-                if ind.get(plan.raw_field, "") != "":
+                if plan.raw_field in ind:
                     engagement_counts[plan.raw_field]["Total Participants"] += 1
 
     # Compute:
