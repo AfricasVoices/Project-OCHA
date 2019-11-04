@@ -172,6 +172,37 @@ if __name__ == "__main__":
     # TODO: Update the graph generation code to use the engagement_counts dict rather than performing additional local
     #       derivations of the participation figures
 
+    log.info("Computing the participation frequencies...")
+    participation_frequency = []
+    for i in range(0, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
+        participation_frequency.append({
+            "Shows Participated In": len(participation_frequency),
+            "Number of Individuals": 0,
+            "% of Individuals": None
+        })
+        
+    for ind in individuals:
+        if ind["consent_withdrawn"] == Codes.FALSE:
+            weeks_participated = 0
+            for plan in PipelineConfiguration.RQA_CODING_PLANS:
+                if plan.raw_field in ind and ind[plan.raw_field] != "":
+                    weeks_participated += 1
+            participation_frequency[weeks_participated]["Number of Individuals"] += 1
+
+    total_individuals = len([td for td in individuals if td["consent_withdrawn"] == Codes.FALSE])
+    for pf in participation_frequency:
+        pf["% of Individuals"] = round(pf["Number of Individuals"] / total_individuals * 100, 1)
+
+    with open(f"{output_dir}/participation_frequency.csv", "w") as f:
+        headers = ["Shows Participated In", "Number of Individuals", "% of Individuals"]
+        writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
+        writer.writeheader()
+
+        for row in participation_frequency:
+            writer.writerow(row)
+
+    exit(0)
+    
     # Compute the number of individuals in each show and graph
     log.info(f"Graphing the number of individuals who responded to each show...")
     individuals_per_show = OrderedDict()  # Of radio show index to individuals count
