@@ -95,18 +95,18 @@ if __name__ == "__main__":
     chart.save(f"{output_dir}/messages_per_show.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Compute the number of messages, individuals, and relevant messages per week
-    log.info("Computing the weekly counts...")
-    weekly_counts = OrderedDict()
+    log.info("Computing the weekly and total engagement counts...")
+    engagement_counts = OrderedDict()
     for plan in PipelineConfiguration.RQA_CODING_PLANS:
         # TODO: Add another field to CodingPlan so that we can give the weeks better names than the raw_field
-        weekly_counts[plan.raw_field] = {
+        engagement_counts[plan.raw_field] = {
             "Episode": plan.raw_field,
             "Total Messages": 0,
             "Relevant Messages": 0,
             "Total Participants": 0,
             "% Relevant Messages": None
         }
-    weekly_counts["Total"] = {
+    engagement_counts["Total"] = {
         "Episode": "Total",
         "Total Messages": 0,
         "Relevant Messages": 0,
@@ -124,8 +124,8 @@ if __name__ == "__main__":
         if msg["consent_withdrawn"] == Codes.FALSE:
             for plan in PipelineConfiguration.RQA_CODING_PLANS:
                 if plan.raw_field in msg and msg[plan.raw_field] != "":
-                    weekly_counts[plan.raw_field]["Total Messages"] += 1
-                    weekly_counts["Total"]["Total Messages"] += 1
+                    engagement_counts[plan.raw_field]["Total Messages"] += 1
+                    engagement_counts["Total"]["Total Messages"] += 1
 
                     # Check all the code schemes for this variable contain the same code type
                     codes = []
@@ -143,33 +143,33 @@ if __name__ == "__main__":
                         assert code.code_type == code_type
 
                     if code_type == CodeTypes.NORMAL:
-                        weekly_counts[plan.raw_field]["Relevant Messages"] += 1
-                        weekly_counts["Total"]["Relevant Messages"] += 1
+                        engagement_counts[plan.raw_field]["Relevant Messages"] += 1
+                        engagement_counts["Total"]["Relevant Messages"] += 1
 
     # Compute, per week and across the season:
     #  - Total Participants, by counting the number of individuals objects that contain the raw_field key each week.
     for ind in individuals:
         if ind["consent_withdrawn"] == Codes.FALSE:
-            weekly_counts["Total"]["Total Participants"] += 1
+            engagement_counts["Total"]["Total Participants"] += 1
             for plan in PipelineConfiguration.RQA_CODING_PLANS:
                 if ind.get(plan.raw_field, "") != "":
-                    weekly_counts[plan.raw_field]["Total Participants"] += 1
+                    engagement_counts[plan.raw_field]["Total Participants"] += 1
 
     # Compute:
     #  - % Relevant Messages, by computing Relevant Messages / Total Messages * 100, to 1 decimal place.
-    for count in weekly_counts.values():
+    for count in engagement_counts.values():
         count["% Relevant Messages"] = round(count["Relevant Messages"] / count["Total Messages"] * 100, 1)
 
     # Export the weekly counts to a csv.
-    with open(f"{output_dir}/weekly_counts.csv", "w") as f:
+    with open(f"{output_dir}/engagement_counts.csv", "w") as f:
         headers = ["Episode", "Total Messages", "Relevant Messages", "% Relevant Messages", "Total Participants"]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
-        for row in weekly_counts.values():
+        for row in engagement_counts.values():
             writer.writerow(row)
             
-    # TODO: Update the graph generation code to use the weekly_counts dict rather than performing additional local
+    # TODO: Update the graph generation code to use the engagement_counts dict rather than performing additional local
     #       derivations of the participation figures
     exit(0)
 
