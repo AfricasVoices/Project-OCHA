@@ -171,7 +171,6 @@ if __name__ == "__main__":
             
     # TODO: Update the graph generation code to use the engagement_counts dict rather than performing additional local
     #       derivations of the participation figures
-    exit(0)
 
     # Compute the number of individuals in each show and graph
     log.info(f"Graphing the number of individuals who responded to each show...")
