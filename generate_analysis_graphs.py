@@ -94,8 +94,8 @@ if __name__ == "__main__":
     chart.save(f"{output_dir}/messages_per_show.html")
     chart.save(f"{output_dir}/messages_per_show.png", scale_factor=IMG_SCALE_FACTOR)
 
-    # Compute the number of messages, individuals, and relevant messages per week
-    log.info("Computing the weekly and total engagement counts...")
+    # Compute the number of messages, individuals, and relevant messages per episode and overall.
+    log.info("Computing the per-episode and per-season engagement counts...")
     engagement_counts = OrderedDict()
     for plan in PipelineConfiguration.RQA_CODING_PLANS:
         # TODO: Add another field to CodingPlan so that we can give the weeks better names than the raw_field
@@ -114,10 +114,9 @@ if __name__ == "__main__":
         "% Relevant Messages": None
     }
 
-    # TODO: Re-check all of these description messages
-    # Compute, per week and across the season:
-    #  - Total Messages, by counting the number of message objects that contain the raw_field key each week.
-    #  - Relevant Messages, by counting the number of message objects which are coded with codes of type
+    # Compute, per episode and across the season:
+    #  - Total Messages, by counting the number of consenting message objects that contain the raw_field key each week.
+    #  - Relevant Messages, by counting the number of consenting message objects which are coded with codes of type
     #    CodeTypes.NORMAL. If a message was coded under multiple schemes, an additional assert is performed to ensure
     #    the message was labelled with the same code type across all of those schemes.
     for msg in messages:
@@ -146,8 +145,9 @@ if __name__ == "__main__":
                         engagement_counts[plan.raw_field]["Relevant Messages"] += 1
                         engagement_counts["Total"]["Relevant Messages"] += 1
 
-    # Compute, per week and across the season:
-    #  - Total Participants, by counting the number of individuals objects that contain the raw_field key each week.
+    # Compute, per episode and across the season:
+    #  - Total Participants, by counting the number of consenting individuals objects that contain the raw_field key
+    #    each week.
     for ind in individuals:
         if ind["consent_withdrawn"] == Codes.FALSE:
             engagement_counts["Total"]["Total Participants"] += 1
@@ -160,7 +160,7 @@ if __name__ == "__main__":
     for count in engagement_counts.values():
         count["% Relevant Messages"] = round(count["Relevant Messages"] / count["Total Messages"] * 100, 1)
 
-    # Export the weekly counts to a csv.
+    # Export the engagement counts to a csv.
     with open(f"{output_dir}/engagement_counts.csv", "w") as f:
         headers = ["Episode", "Total Messages", "Relevant Messages", "% Relevant Messages", "Total Participants"]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
