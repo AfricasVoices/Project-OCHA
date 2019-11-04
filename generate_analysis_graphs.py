@@ -185,7 +185,7 @@ if __name__ == "__main__":
         if ind["consent_withdrawn"] == Codes.FALSE:
             weeks_participated = 0
             for plan in PipelineConfiguration.RQA_CODING_PLANS:
-                if plan.raw_field in ind and ind[plan.raw_field] != "":
+                if plan.raw_field in ind:
                     weeks_participated += 1
             participation_frequency[weeks_participated]["Number of Individuals"] += 1
 
