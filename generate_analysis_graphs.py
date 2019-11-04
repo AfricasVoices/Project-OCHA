@@ -173,13 +173,13 @@ if __name__ == "__main__":
     #       derivations of the participation figures
 
     log.info("Computing the participation frequencies...")
-    participation_frequency = []
-    for i in range(0, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
-        participation_frequency.append({
-            "Shows Participated In": len(participation_frequency),
+    participation_frequency = OrderedDict()
+    for i in range(1, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
+        participation_frequency[i] = {
+            "Shows Participated In": i,
             "Number of Individuals": 0,
             "% of Individuals": None
-        })
+        }
         
     for ind in individuals:
         if ind["consent_withdrawn"] == Codes.FALSE:
@@ -187,10 +187,11 @@ if __name__ == "__main__":
             for plan in PipelineConfiguration.RQA_CODING_PLANS:
                 if plan.raw_field in ind:
                     weeks_participated += 1
+            assert weeks_participated != 0, f"Found individual '{ind['uid']}' with no participation in any week"
             participation_frequency[weeks_participated]["Number of Individuals"] += 1
 
     total_individuals = len([td for td in individuals if td["consent_withdrawn"] == Codes.FALSE])
-    for pf in participation_frequency:
+    for pf in participation_frequency.values():
         pf["% of Individuals"] = round(pf["Number of Individuals"] / total_individuals * 100, 1)
 
     with open(f"{output_dir}/participation_frequency.csv", "w") as f:
@@ -198,7 +199,7 @@ if __name__ == "__main__":
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
-        for row in participation_frequency:
+        for row in participation_frequency.values():
             writer.writerow(row)
 
     exit(0)
