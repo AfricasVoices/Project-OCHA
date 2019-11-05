@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
         for row in engagement_counts.values():
             writer.writerow(row)
-            
+
     log.info("Computing the participation frequencies...")
     repeat_participations = OrderedDict()
     for i in range(1, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
@@ -183,6 +183,42 @@ if __name__ == "__main__":
         for row in repeat_participations.values():
             writer.writerow(row)
 
+    log.info("Computing the demographic distributions...")
+    demographic_distributions = OrderedDict()  # of analysis_file_key -> code string_value -> number of individuals
+    for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
+        for cc in plan.coding_configurations:
+            if cc.analysis_file_key is None:
+                continue
+
+            demographic_distributions[cc.analysis_file_key] = OrderedDict()
+            for code in cc.code_scheme.codes:
+                demographic_distributions[cc.analysis_file_key][code.string_value] = 0
+
+    for ind in individuals:
+        if ind["consent_withdrawn"] == Codes.FALSE:
+            for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
+                for cc in plan.coding_configurations:
+                    if cc.analysis_file_key is None:
+                        continue
+
+                    code = cc.code_scheme.get_code_with_id(ind[cc.coded_field]["CodeID"])
+                    demographic_distributions[cc.analysis_file_key][code.string_value] += 1
+
+    with open(f"{output_dir}/demographic_distributions.csv", "w") as f:
+        headers = ["Variable", "Code", "Number of Individuals"]
+        writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
+        writer.writeheader()
+
+        for demographic, counts in demographic_distributions.items():
+            for code_string_value, number_of_individuals in counts.items():
+                writer.writerow({
+                    "Variable": demographic,
+                    "Code": code_string_value,
+                    "Number of Individuals": number_of_individuals
+                })
+
+    chart = altair.Chart(
+        altair.Data(values=[{"show": k, "count": v} for k, v in individuals_per_show.items()])
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each episode
     altair.Chart(
