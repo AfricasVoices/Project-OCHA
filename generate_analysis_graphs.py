@@ -180,7 +180,10 @@ if __name__ == "__main__":
             "Number of Individuals": 0,
             "% of Individuals": None
         }
-        
+
+    # Compute the number of individuals who participated each possible number of times, from 1 to <number of RQAs>
+    # An individual is considered to have participated if they sent a message and didn't opt-out, regardless of the
+    # relevance of any of their messages.
     for ind in individuals:
         if ind["consent_withdrawn"] == Codes.FALSE:
             weeks_participated = 0
@@ -190,10 +193,13 @@ if __name__ == "__main__":
             assert weeks_participated != 0, f"Found individual '{ind['uid']}' with no participation in any week"
             participation_frequency[weeks_participated]["Number of Individuals"] += 1
 
+    # Compute the percentage of individuals who participated each possible number of times.
+    # Percentages are computed after excluding individuals who opted out.
     total_individuals = len([td for td in individuals if td["consent_withdrawn"] == Codes.FALSE])
     for pf in participation_frequency.values():
         pf["% of Individuals"] = round(pf["Number of Individuals"] / total_individuals * 100, 1)
 
+    # Export the participation frequency data to a csv
     with open(f"{output_dir}/participation_frequency.csv", "w") as f:
         headers = ["Shows Participated In", "Number of Individuals", "% of Individuals"]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
