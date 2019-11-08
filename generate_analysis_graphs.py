@@ -148,7 +148,7 @@ if __name__ == "__main__":
             writer.writerow(row)
             
     log.info("Graphing the per-episode engagement counts...")
-    # Graph the number of messages in each show
+    # Graph the number of messages in each episode
     altair.Chart(
         altair.Data(values=[{"episode": x["Episode"], "count": x["Total Messages"]}
                             for x in engagement_counts.values() if x["Episode"] != "Total"])
