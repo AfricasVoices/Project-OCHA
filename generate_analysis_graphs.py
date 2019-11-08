@@ -156,7 +156,7 @@ if __name__ == "__main__":
         x=altair.X("episode:N", title="Episode"),
         y=altair.Y("count:Q", title="Number of Messages")
     ).properties(
-        title="Messages per episode"
+        title="Messages per Episode"
     ).save(f"{output_dir}/messages_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Graph the number of individuals in each episode
@@ -167,8 +167,8 @@ if __name__ == "__main__":
         x=altair.X("episode:N", title="Episode"),
         y=altair.Y("count:Q", title="Number of Individuals")
     ).properties(
-        title="Individuals per Show"
-    ).save(f"{output_dir}/individuals_per_show.png", scale_factor=IMG_SCALE_FACTOR)
+        title="Individuals per Episode"
+    ).save(f"{output_dir}/individuals_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Plot the per-season distribution of responses for each survey question, per individual
     for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
