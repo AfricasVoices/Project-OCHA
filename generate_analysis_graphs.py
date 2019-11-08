@@ -150,21 +150,21 @@ if __name__ == "__main__":
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each show
     altair.Chart(
-        altair.Data(values=[{"show": x["Episode"], "count": x["Total Participants"]}
+        altair.Data(values=[{"episode": x["Episode"], "count": x["Total Participants"]}
                             for x in engagement_counts.values() if x["Episode"] != "Total"])
     ).mark_bar().encode(
-        x=altair.X("show:N", title="Show"),
+        x=altair.X("episode:N", title="Episode"),
         y=altair.Y("count:Q", title="Number of Individuals")
     ).properties(
-        title="Individuals per Show"
-    ).save(f"{output_dir}/individuals_per_show.png", scale_factor=IMG_SCALE_FACTOR)
+        title="Individuals per episode"
+    ).save(f"{output_dir}/individuals_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
-    # Graph the number of individuals in each show
+    # Graph the number of individuals in each episode
     altair.Chart(
-        altair.Data(values=[{"show": x["Episode"], "count": x["Total Participants"]}
+        altair.Data(values=[{"episode": x["Episode"], "count": x["Total Participants"]}
                             for x in engagement_counts.values() if x["Episode"] != "Total"])
     ).mark_bar().encode(
-        x=altair.X("show:N", title="Show"),
+        x=altair.X("episode:N", title="Episode"),
         y=altair.Y("count:Q", title="Number of Individuals")
     ).properties(
         title="Individuals per Show"
