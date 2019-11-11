@@ -197,7 +197,7 @@ if __name__ == "__main__":
     # Percentages are computed after excluding individuals who opted out.
     total_individuals = len([td for td in individuals if td["consent_withdrawn"] == Codes.FALSE])
     for rp in repeat_participations.values():
-        rp["% of Individuals"] = round(pf["Number of Individuals"] / total_individuals * 100, 1)
+        rp["% of Individuals"] = round(rp["Number of Individuals"] / total_individuals * 100, 1)
 
     # Export the participation frequency data to a csv
     with open(f"{output_dir}/participation_frequency.csv", "w") as f:
