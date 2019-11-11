@@ -159,7 +159,7 @@ if __name__ == "__main__":
         title="Messages per Episode"
     ).save(f"{output_dir}/messages_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
-    # Graph the number of individuals in each episode
+    # Graph the number of participants in each episode
     altair.Chart(
         altair.Data(values=[{"episode": x["Episode"], "count": x["Total Participants"]}
                             for x in engagement_counts.values() if x["Episode"] != "Total"])
