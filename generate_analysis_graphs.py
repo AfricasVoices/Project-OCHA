@@ -173,9 +173,9 @@ if __name__ == "__main__":
     #       derivations of the participation figures
 
     log.info("Computing the participation frequencies...")
-    participation_frequency = OrderedDict()
+    repeat_participations = OrderedDict()
     for i in range(1, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
-        participation_frequency[i] = {
+        repeat_participations[i] = {
             "Shows Participated In": i,
             "Number of Individuals": 0,
             "% of Individuals": None
@@ -191,12 +191,12 @@ if __name__ == "__main__":
                 if plan.raw_field in ind:
                     weeks_participated += 1
             assert weeks_participated != 0, f"Found individual '{ind['uid']}' with no participation in any week"
-            participation_frequency[weeks_participated]["Number of Individuals"] += 1
+            repeat_participations[weeks_participated]["Number of Individuals"] += 1
 
     # Compute the percentage of individuals who participated each possible number of times.
     # Percentages are computed after excluding individuals who opted out.
     total_individuals = len([td for td in individuals if td["consent_withdrawn"] == Codes.FALSE])
-    for pf in participation_frequency.values():
+    for pf in repeat_participations.values():
         pf["% of Individuals"] = round(pf["Number of Individuals"] / total_individuals * 100, 1)
 
     # Export the participation frequency data to a csv
@@ -205,7 +205,7 @@ if __name__ == "__main__":
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
-        for row in participation_frequency.values():
+        for row in repeat_participations.values():
             writer.writerow(row)
 
     # Compute the number of individuals in each show and graph
