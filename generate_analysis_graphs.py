@@ -165,10 +165,10 @@ if __name__ == "__main__":
                             for x in engagement_counts.values() if x["Episode"] != "Total"])
     ).mark_bar().encode(
         x=altair.X("episode:N", title="Episode"),
-        y=altair.Y("count:Q", title="Number of Individuals")
+        y=altair.Y("count:Q", title="Number of Participants")
     ).properties(
-        title="Individuals per Episode"
-    ).save(f"{output_dir}/individuals_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
+        title="Participants per Episode"
+    ).save(f"{output_dir}/participants_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Plot the per-season distribution of responses for each survey question, per individual
     for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
