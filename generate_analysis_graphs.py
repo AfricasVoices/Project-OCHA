@@ -176,7 +176,7 @@ if __name__ == "__main__":
     repeat_participations = OrderedDict()
     for i in range(1, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
         repeat_participations[i] = {
-            "Shows Participated In": i,
+            "Episodes Participated In": i,
             "Number of Individuals": 0,
             "% of Individuals": None
         }
@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
     # Export the participation frequency data to a csv
     with open(f"{output_dir}/repeat_participations.csv", "w") as f:
-        headers = ["Shows Participated In", "Number of Individuals", "% of Individuals"]
+        headers = ["Episodes Participated In", "Number of Individuals", "% of Individuals"]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
