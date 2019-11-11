@@ -200,7 +200,7 @@ if __name__ == "__main__":
         rp["% of Individuals"] = round(rp["Number of Individuals"] / total_individuals * 100, 1)
 
     # Export the participation frequency data to a csv
-    with open(f"{output_dir}/participation_frequency.csv", "w") as f:
+    with open(f"{output_dir}/repeat_participations.csv", "w") as f:
         headers = ["Shows Participated In", "Number of Individuals", "% of Individuals"]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
