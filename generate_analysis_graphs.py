@@ -208,8 +208,6 @@ if __name__ == "__main__":
         for row in participation_frequency.values():
             writer.writerow(row)
 
-    exit(0)
-    
     # Compute the number of individuals in each show and graph
     log.info(f"Graphing the number of individuals who responded to each show...")
     individuals_per_show = OrderedDict()  # Of radio show index to individuals count
