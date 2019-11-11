@@ -112,6 +112,8 @@ if __name__ == "__main__":
         coalesced_survey_datasets.append(CombineRawDatasets.coalesce_traced_runs_by_key(user, dataset, "avf_phone_id"))
     data = CombineRawDatasets.combine_raw_datasets(user, activation_datasets, coalesced_survey_datasets)
 
+    data = [td for td in data if td["avf_phone_id"].startswith("avf-phone-uuid-0")]
+
     log.info("Translating Rapid Pro Keys...")
     data = TranslateRapidProKeys.translate_rapid_pro_keys(user, data, pipeline_configuration)
 
