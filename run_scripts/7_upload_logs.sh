@@ -3,7 +3,7 @@
 set -e
 
 if [[ $# -ne 6 ]]; then
-    echo "Usage: ./6_upload_logs <user> <google-cloud-credentials-file-path> <pipeline-configuration-file-path> <run-id> <memory-profile-file-path> <data-archive-file-path>"
+    echo "Usage: ./7_upload_logs <user> <google-cloud-credentials-file-path> <pipeline-configuration-file-path> <run-id> <memory-profile-file-path> <data-archive-file-path>"
     echo "Uploads the pipeline logs"
     exit
 fi

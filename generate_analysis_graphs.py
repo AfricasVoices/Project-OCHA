@@ -1,10 +1,12 @@
 import argparse
+import csv
 import glob
 import json
 from collections import OrderedDict
 
 import altair
 from core_data_modules.cleaners import Codes
+from core_data_modules.data_models.scheme import CodeTypes
 from core_data_modules.logging import Logger
 from core_data_modules.traced_data.io import TracedDataJsonIO
 from core_data_modules.util import IOUtils
@@ -91,6 +93,84 @@ if __name__ == "__main__":
     )
     chart.save(f"{output_dir}/messages_per_show.html")
     chart.save(f"{output_dir}/messages_per_show.png", scale_factor=IMG_SCALE_FACTOR)
+
+    # Compute the number of messages, individuals, and relevant messages per episode and overall.
+    log.info("Computing the per-episode and per-season engagement counts...")
+    engagement_counts = OrderedDict()
+    for plan in PipelineConfiguration.RQA_CODING_PLANS:
+        # TODO: Add another field to CodingPlan so that we can give the weeks better names than the raw_field
+        engagement_counts[plan.raw_field] = {
+            "Episode": plan.raw_field,
+            "Total Messages": 0,
+            "Relevant Messages": 0,
+            "Total Participants": 0,
+            "% Relevant Messages": None
+        }
+    engagement_counts["Total"] = {
+        "Episode": "Total",
+        "Total Messages": 0,
+        "Relevant Messages": 0,
+        "Total Participants": 0,
+        "% Relevant Messages": None
+    }
+
+    # Compute, per episode and across the season:
+    #  - Total Messages, by counting the number of consenting message objects that contain the raw_field key each week.
+    #  - Relevant Messages, by counting the number of consenting message objects which are coded with codes of type
+    #    CodeTypes.NORMAL. If a message was coded under multiple schemes, an additional assert is performed to ensure
+    #    the message was labelled with the same code type across all of those schemes.
+    for msg in messages:
+        if msg["consent_withdrawn"] == Codes.FALSE:
+            for plan in PipelineConfiguration.RQA_CODING_PLANS:
+                if plan.raw_field in msg:
+                    engagement_counts[plan.raw_field]["Total Messages"] += 1
+                    engagement_counts["Total"]["Total Messages"] += 1
+
+                    # Check all the code schemes for this variable contain the same code type
+                    codes = []
+                    for cc in plan.coding_configurations:
+                        if cc.coding_mode == CodingModes.SINGLE:
+                            codes.append(cc.code_scheme.get_code_with_id(msg[cc.coded_field]["CodeID"]))
+                        else:
+                            assert cc.coding_mode == CodingModes.MULTIPLE
+                            for label in msg[cc.coded_field]:
+                                codes.append(cc.code_scheme.get_code_with_id(label["CodeID"]))
+
+                    assert len(codes) > 0
+                    code_type = codes[0].code_type
+                    for code in codes:
+                        assert code.code_type == code_type
+
+                    if code_type == CodeTypes.NORMAL:
+                        engagement_counts[plan.raw_field]["Relevant Messages"] += 1
+                        engagement_counts["Total"]["Relevant Messages"] += 1
+
+    # Compute, per episode and across the season:
+    #  - Total Participants, by counting the number of consenting individuals objects that contain the raw_field key
+    #    each week.
+    for ind in individuals:
+        if ind["consent_withdrawn"] == Codes.FALSE:
+            engagement_counts["Total"]["Total Participants"] += 1
+            for plan in PipelineConfiguration.RQA_CODING_PLANS:
+                if plan.raw_field in ind:
+                    engagement_counts[plan.raw_field]["Total Participants"] += 1
+
+    # Compute:
+    #  - % Relevant Messages, by computing Relevant Messages / Total Messages * 100, to 1 decimal place.
+    for count in engagement_counts.values():
+        count["% Relevant Messages"] = round(count["Relevant Messages"] / count["Total Messages"] * 100, 1)
+
+    # Export the engagement counts to a csv.
+    with open(f"{output_dir}/engagement_counts.csv", "w") as f:
+        headers = ["Episode", "Total Messages", "Relevant Messages", "% Relevant Messages", "Total Participants"]
+        writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
+        writer.writeheader()
+
+        for row in engagement_counts.values():
+            writer.writerow(row)
+            
+    # TODO: Update the graph generation code to use the engagement_counts dict rather than performing additional local
+    #       derivations of the participation figures
 
     # Compute the number of individuals in each show and graph
     log.info(f"Graphing the number of individuals who responded to each show...")
