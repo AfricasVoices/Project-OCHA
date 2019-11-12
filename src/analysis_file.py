@@ -96,6 +96,9 @@ class AnalysisFile(object):
         for td in data:
             to_be_folded.append(td.copy())
 
+        # Convert the *_keys variables to a dictionary of fold strategies for each key. 
+        # This is a temporary measure to adapt the project pipeline to the new folding interface in Core.
+        # TODO: Replace the *_keys variables by assigning to fold_strategies earlier in this script instead.
         fold_strategies = dict()
         fold_strategies.update({k: FoldStrategies.assert_equal for k in equal_keys})
         fold_strategies.update({k: FoldStrategies.concatenate for k in concat_keys})
@@ -107,15 +110,11 @@ class AnalysisFile(object):
             user, data, lambda td: td["uid"], fold_strategies
         )
 
-        # folded_data = FoldTracedData.fold_iterable_of_traced_data(
-        #     user, data, fold_id_fn=lambda td: td["uid"],
-        #     equal_keys=equal_keys, concat_keys=concat_keys, matrix_keys=matrix_keys, bool_keys=bool_keys,
-        #     binary_keys=binary_keys
-        # )
-
         # Fix-up _NA and _NC keys, which are currently being set incorrectly by
         # FoldTracedData.fold_iterable_of_traced_data when there are multiple radio shows
         # TODO: Update FoldTracedData to handle NA and NC correctly under multiple radio shows
+        #       This is probably best done by updating Core to support folding lists of labels, then updating this
+        #       file to convert from labels to matrix representation and other string values after folding.
         for td in folded_data:
             for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
                 for cc in plan.coding_configurations:
