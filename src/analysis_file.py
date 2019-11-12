@@ -30,7 +30,6 @@ class AnalysisFile(object):
         fold_strategies[consent_withdrawn_key] = FoldStrategies.boolean_or
 
         export_keys = ["uid", consent_withdrawn_key]
-        concat_keys = []
         matrix_keys = []
         binary_keys = []
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
@@ -55,7 +54,7 @@ class AnalysisFile(object):
 
             export_keys.append(plan.raw_field)
             if plan.raw_field_folding_mode == FoldingModes.CONCATENATE:
-                concat_keys.append(plan.raw_field)
+                fold_strategies[plan.raw_field] = FoldStrategies.concatenate
             elif plan.raw_field_folding_mode == FoldingModes.ASSERT_EQUAL:
                 fold_strategies[plan.raw_field] = FoldStrategies.assert_equal
             else:
@@ -102,7 +101,6 @@ class AnalysisFile(object):
         # Convert the *_keys variables to a dictionary of fold strategies for each key. 
         # This is a temporary measure to adapt the project pipeline to the new folding interface in Core.
         # TODO: Replace the *_keys variables by assigning to fold_strategies earlier in this script instead.
-        fold_strategies.update({k: FoldStrategies.concatenate for k in concat_keys})
         fold_strategies.update({k: FoldStrategies.matrix for k in matrix_keys})
         fold_strategies.update({k: FoldStrategies.yes_no_amb for k in binary_keys})
         
