@@ -40,6 +40,7 @@ class AnalysisFile(object):
                     export_keys.append(cc.analysis_file_key)
 
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
+                        fold_strategies[cc.coded_field] = FoldStrategies.assert_label_ids_equal
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.yes_no_amb
