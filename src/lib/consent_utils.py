@@ -22,7 +22,7 @@ class ConsentUtils(object):
         for plan in coding_plans:
             for cc in plan.coding_configurations:
                 if cc.coding_mode == CodingModes.SINGLE:
-                    if cc.code_scheme.get_code_with_id(td[cc.coded_field]["CodeID"]).control_code == Codes.STOP:
+                    if cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"]).control_code == Codes.STOP:
                         return True
                 else:
                     if td[f"{cc.analysis_file_key}{Codes.STOP}"] == Codes.MATRIX_1:
