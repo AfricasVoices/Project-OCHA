@@ -30,7 +30,7 @@ class AnalysisFile(object):
         fold_strategies[consent_withdrawn_key] = FoldStrategies.boolean_or
 
         export_keys = ["uid", consent_withdrawn_key]
-        binary_keys = []
+
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
@@ -42,7 +42,7 @@ class AnalysisFile(object):
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
-                        binary_keys.append(cc.analysis_file_key)
+                        fold_strategies[cc.analysis_file_key] = FoldStrategies.yes_no_amb
                     else:
                         assert False, f"Incompatible folding_mode {plan.folding_mode}"
                 else:
@@ -97,11 +97,6 @@ class AnalysisFile(object):
         for td in data:
             to_be_folded.append(td.copy())
 
-        # Convert the *_keys variables to a dictionary of fold strategies for each key. 
-        # This is a temporary measure to adapt the project pipeline to the new folding interface in Core.
-        # TODO: Replace the *_keys variables by assigning to fold_strategies earlier in this script instead.
-        fold_strategies.update({k: FoldStrategies.yes_no_amb for k in binary_keys})
-        
         folded_data = FoldTracedData.fold_iterable_of_traced_data(
             user, data, lambda td: td["uid"], fold_strategies
         )
