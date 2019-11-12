@@ -1,4 +1,5 @@
 import time
+from collections import OrderedDict
 
 from core_data_modules.cleaners import Codes
 from core_data_modules.traced_data import Metadata
@@ -24,9 +25,11 @@ class AnalysisFile(object):
                            Metadata(user, Metadata.get_call_location(), time.time()))
 
         # Set the list of keys to be exported and how they are to be handled when folding
+        fold_strategies = OrderedDict()
+        fold_strategies["uid"] = FoldStrategies.assert_equal
+
         export_keys = ["uid", consent_withdrawn_key]
         bool_keys = [consent_withdrawn_key]
-        equal_keys = ["uid"]
         concat_keys = []
         matrix_keys = []
         binary_keys = []
@@ -39,7 +42,7 @@ class AnalysisFile(object):
                     export_keys.append(cc.analysis_file_key)
 
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
-                        equal_keys.append(cc.analysis_file_key)
+                        fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
                         binary_keys.append(cc.analysis_file_key)
                     else:
@@ -54,7 +57,7 @@ class AnalysisFile(object):
             if plan.raw_field_folding_mode == FoldingModes.CONCATENATE:
                 concat_keys.append(plan.raw_field)
             elif plan.raw_field_folding_mode == FoldingModes.ASSERT_EQUAL:
-                equal_keys.append(plan.raw_field)
+                fold_strategies[plan.raw_field] = FoldStrategies.assert_equal
             else:
                 assert False, f"Incompatible raw_field_folding_mode {plan.raw_field_folding_mode}"
 
@@ -99,8 +102,6 @@ class AnalysisFile(object):
         # Convert the *_keys variables to a dictionary of fold strategies for each key. 
         # This is a temporary measure to adapt the project pipeline to the new folding interface in Core.
         # TODO: Replace the *_keys variables by assigning to fold_strategies earlier in this script instead.
-        fold_strategies = dict()
-        fold_strategies.update({k: FoldStrategies.assert_equal for k in equal_keys})
         fold_strategies.update({k: FoldStrategies.concatenate for k in concat_keys})
         fold_strategies.update({k: FoldStrategies.matrix for k in matrix_keys})
         fold_strategies.update({k: FoldStrategies.boolean_or for k in bool_keys})
