@@ -27,9 +27,9 @@ class AnalysisFile(object):
         # Set the list of keys to be exported and how they are to be handled when folding
         fold_strategies = OrderedDict()
         fold_strategies["uid"] = FoldStrategies.assert_equal
+        fold_strategies[consent_withdrawn_key] = FoldStrategies.boolean_or
 
         export_keys = ["uid", consent_withdrawn_key]
-        bool_keys = [consent_withdrawn_key]
         concat_keys = []
         matrix_keys = []
         binary_keys = []
@@ -104,7 +104,6 @@ class AnalysisFile(object):
         # TODO: Replace the *_keys variables by assigning to fold_strategies earlier in this script instead.
         fold_strategies.update({k: FoldStrategies.concatenate for k in concat_keys})
         fold_strategies.update({k: FoldStrategies.matrix for k in matrix_keys})
-        fold_strategies.update({k: FoldStrategies.boolean_or for k in bool_keys})
         fold_strategies.update({k: FoldStrategies.yes_no_amb for k in binary_keys})
         
         folded_data = FoldTracedData.fold_iterable_of_traced_data(
