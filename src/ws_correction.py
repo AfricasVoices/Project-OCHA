@@ -226,16 +226,18 @@ class WSCorrection(object):
             # Hide all the RQA fields (they will be added back, in turn, in the next step).
             td.hide_keys({plan.raw_field for plan in PipelineConfiguration.RQA_CODING_PLANS}.intersection(td.keys()),
                          Metadata(user, Metadata.get_call_location(), time.time()))
+            td.hide_keys({plan.time_field for plan in PipelineConfiguration.RQA_CODING_PLANS}.intersection(td.keys()),
+                         Metadata(user, Metadata.get_call_location(), time.time()))
 
             # For each rqa message, create a copy of this td, append the rqa message, and add this to the
             # list of TracedData.
             raw_field_to_rqa_plan_map = {plan.raw_field: plan for plan in PipelineConfiguration.RQA_CODING_PLANS}
             for target_field, update in rqa_updates:
-                plan = raw_field_to_rqa_plan_map[update.source]
+                target_coding_plan = raw_field_to_rqa_plan_map[target_field]
 
                 rqa_dict = {
                     target_field: update.message,
-                    plan.time_field: update.timestamp,
+                    target_coding_plan.time_field: update.timestamp,
                     f"{target_field}_source": update.source
                 }
 
