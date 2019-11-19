@@ -51,7 +51,7 @@ class AnalysisFile(object):
                     for code in cc.code_scheme.codes:
                         export_keys.append(f"{cc.analysis_file_key}{code.string_value}")
                         fold_strategies[f"{cc.analysis_file_key}{code.string_value}"] = FoldStrategies.matrix
-                        fold_strategies[cc.coded_field] = FoldStrategies.list_of_labels
+                        fold_strategies[cc.coded_field] = lambda x, y: FoldStrategies.list_of_labels(cc.code_scheme, x, y)
 
             export_keys.append(plan.raw_field)
             if plan.raw_field_folding_mode == FoldingModes.CONCATENATE:
