@@ -205,7 +205,7 @@ if __name__ == "__main__":
                     if cc.analysis_file_key is None:
                         continue
 
-                    code = cc.code_scheme.get_code_with_id(ind[cc.coded_field]["CodeID"])
+                    code = cc.code_scheme.get_code_with_code_id(ind[cc.coded_field]["CodeID"])
                     demographic_distributions[cc.analysis_file_key][code.string_value] += 1
 
     with open(f"{output_dir}/demographic_distributions.csv", "w") as f:
@@ -221,8 +221,6 @@ if __name__ == "__main__":
                     "Number of Individuals": number_of_individuals
                 })
 
-    chart = altair.Chart(
-        altair.Data(values=[{"show": k, "count": v} for k, v in individuals_per_show.items()])
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each episode
     altair.Chart(
