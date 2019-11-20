@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 import altair
 from core_data_modules.cleaners import Codes
-from core_data_modules.data_models.scheme import CodeTypes
+from core_data_modules.data_models.code_scheme import CodeTypes
 from core_data_modules.logging import Logger
 from core_data_modules.traced_data.io import TracedDataJsonIO
 from core_data_modules.util import IOUtils
@@ -29,7 +29,7 @@ if __name__ == "__main__":
                         help="Path to a Google Cloud service account credentials file to use to access the "
                              "credentials bucket")
     parser.add_argument("pipeline_configuration_file_path", metavar="pipeline-configuration-file",
-                       help="Path to the pipeline configuration json file")
+                        help="Path to the pipeline configuration json file")
 
     parser.add_argument("messages_json_input_path", metavar="messages-json-input-path",
                         help="Path to a JSONL file to read the TracedData of the messages data from")
@@ -108,11 +108,11 @@ if __name__ == "__main__":
                     codes = []
                     for cc in plan.coding_configurations:
                         if cc.coding_mode == CodingModes.SINGLE:
-                            codes.append(cc.code_scheme.get_code_with_id(msg[cc.coded_field]["CodeID"]))
+                            codes.append(cc.code_scheme.get_code_with_code_id(msg[cc.coded_field]["CodeID"]))
                         else:
                             assert cc.coding_mode == CodingModes.MULTIPLE
                             for label in msg[cc.coded_field]:
-                                codes.append(cc.code_scheme.get_code_with_id(label["CodeID"]))
+                                codes.append(cc.code_scheme.get_code_with_code_id(label["CodeID"]))
 
                     assert len(codes) > 0
                     code_type = codes[0].code_type
