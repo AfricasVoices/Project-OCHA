@@ -147,6 +147,42 @@ if __name__ == "__main__":
         for row in engagement_counts.values():
             writer.writerow(row)
             
+    log.info("Computing the participation frequencies...")
+    repeat_participations = OrderedDict()
+    for i in range(1, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
+        repeat_participations[i] = {
+            "Episodes Participated In": i,
+            "Number of Individuals": 0,
+            "% of Individuals": None
+        }
+
+    # Compute the number of individuals who participated each possible number of times, from 1 to <number of RQAs>
+    # An individual is considered to have participated if they sent a message and didn't opt-out, regardless of the
+    # relevance of any of their messages.
+    for ind in individuals:
+        if ind["consent_withdrawn"] == Codes.FALSE:
+            weeks_participated = 0
+            for plan in PipelineConfiguration.RQA_CODING_PLANS:
+                if plan.raw_field in ind:
+                    weeks_participated += 1
+            assert weeks_participated != 0, f"Found individual '{ind['uid']}' with no participation in any week"
+            repeat_participations[weeks_participated]["Number of Individuals"] += 1
+
+    # Compute the percentage of individuals who participated each possible number of times.
+    # Percentages are computed after excluding individuals who opted out.
+    total_individuals = len([td for td in individuals if td["consent_withdrawn"] == Codes.FALSE])
+    for rp in repeat_participations.values():
+        rp["% of Individuals"] = round(rp["Number of Individuals"] / total_individuals * 100, 1)
+
+    # Export the participation frequency data to a csv
+    with open(f"{output_dir}/repeat_participations.csv", "w") as f:
+        headers = ["Episodes Participated In", "Number of Individuals", "% of Individuals"]
+        writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
+        writer.writeheader()
+
+        for row in repeat_participations.values():
+            writer.writerow(row)
+
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each episode
     altair.Chart(
