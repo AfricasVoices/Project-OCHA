@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 import altair
 from core_data_modules.cleaners import Codes
-from core_data_modules.data_models.scheme import CodeTypes
+from core_data_modules.data_models.code_scheme import CodeTypes
 from core_data_modules.logging import Logger
 from core_data_modules.traced_data.io import TracedDataJsonIO
 from core_data_modules.util import IOUtils
@@ -29,7 +29,7 @@ if __name__ == "__main__":
                         help="Path to a Google Cloud service account credentials file to use to access the "
                              "credentials bucket")
     parser.add_argument("pipeline_configuration_file_path", metavar="pipeline-configuration-file",
-                       help="Path to the pipeline configuration json file")
+                        help="Path to the pipeline configuration json file")
 
     parser.add_argument("messages_json_input_path", metavar="messages-json-input-path",
                         help="Path to a JSONL file to read the TracedData of the messages data from")
@@ -72,28 +72,6 @@ if __name__ == "__main__":
         individuals = TracedDataJsonIO.import_jsonl_to_traced_data_iterable(f)
     log.info(f"Loaded {len(individuals)} individuals")
 
-    # Compute the number of messages in each show and graph
-    log.info(f"Graphing the number of messages received in response to each show...")
-    messages_per_show = OrderedDict()  # Of radio show index to messages count
-    for plan in PipelineConfiguration.RQA_CODING_PLANS:
-        messages_per_show[plan.raw_field] = 0
-
-    for msg in messages:
-        for plan in PipelineConfiguration.RQA_CODING_PLANS:
-            if msg.get(plan.raw_field, "") != "" and msg["consent_withdrawn"] == "false":
-                messages_per_show[plan.raw_field] += 1
-
-    chart = altair.Chart(
-        altair.Data(values=[{"show": k, "count": v} for k, v in messages_per_show.items()])
-    ).mark_bar().encode(
-        x=altair.X("show:N", title="Show", sort=list(messages_per_show.keys())),
-        y=altair.Y("count:Q", title="Number of Messages")
-    ).properties(
-        title="Messages per Show"
-    )
-    chart.save(f"{output_dir}/messages_per_show.html")
-    chart.save(f"{output_dir}/messages_per_show.png", scale_factor=IMG_SCALE_FACTOR)
-
     # Compute the number of messages, individuals, and relevant messages per episode and overall.
     log.info("Computing the per-episode and per-season engagement counts...")
     engagement_counts = OrderedDict()
@@ -130,11 +108,11 @@ if __name__ == "__main__":
                     codes = []
                     for cc in plan.coding_configurations:
                         if cc.coding_mode == CodingModes.SINGLE:
-                            codes.append(cc.code_scheme.get_code_with_id(msg[cc.coded_field]["CodeID"]))
+                            codes.append(cc.code_scheme.get_code_with_code_id(msg[cc.coded_field]["CodeID"]))
                         else:
                             assert cc.coding_mode == CodingModes.MULTIPLE
                             for label in msg[cc.coded_field]:
-                                codes.append(cc.code_scheme.get_code_with_id(label["CodeID"]))
+                                codes.append(cc.code_scheme.get_code_with_code_id(label["CodeID"]))
 
                     assert len(codes) > 0
                     code_type = codes[0].code_type
@@ -169,30 +147,64 @@ if __name__ == "__main__":
         for row in engagement_counts.values():
             writer.writerow(row)
             
-    # TODO: Update the graph generation code to use the engagement_counts dict rather than performing additional local
-    #       derivations of the participation figures
+    log.info("Computing the participation frequencies...")
+    repeat_participations = OrderedDict()
+    for i in range(1, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
+        repeat_participations[i] = {
+            "Episodes Participated In": i,
+            "Number of Individuals": 0,
+            "% of Individuals": None
+        }
 
-    # Compute the number of individuals in each show and graph
-    log.info(f"Graphing the number of individuals who responded to each show...")
-    individuals_per_show = OrderedDict()  # Of radio show index to individuals count
-    for plan in PipelineConfiguration.RQA_CODING_PLANS:
-        individuals_per_show[plan.raw_field] = 0
-
+    # Compute the number of individuals who participated each possible number of times, from 1 to <number of RQAs>
+    # An individual is considered to have participated if they sent a message and didn't opt-out, regardless of the
+    # relevance of any of their messages.
     for ind in individuals:
-        for plan in PipelineConfiguration.RQA_CODING_PLANS:
-            if ind.get(plan.raw_field, "") != "" and ind["consent_withdrawn"] == "false":
-                individuals_per_show[plan.raw_field] += 1
+        if ind["consent_withdrawn"] == Codes.FALSE:
+            weeks_participated = 0
+            for plan in PipelineConfiguration.RQA_CODING_PLANS:
+                if plan.raw_field in ind:
+                    weeks_participated += 1
+            assert weeks_participated != 0, f"Found individual '{ind['uid']}' with no participation in any week"
+            repeat_participations[weeks_participated]["Number of Individuals"] += 1
 
-    chart = altair.Chart(
-        altair.Data(values=[{"show": k, "count": v} for k, v in individuals_per_show.items()])
+    # Compute the percentage of individuals who participated each possible number of times.
+    # Percentages are computed after excluding individuals who opted out.
+    total_individuals = len([td for td in individuals if td["consent_withdrawn"] == Codes.FALSE])
+    for rp in repeat_participations.values():
+        rp["% of Individuals"] = round(rp["Number of Individuals"] / total_individuals * 100, 1)
+
+    # Export the participation frequency data to a csv
+    with open(f"{output_dir}/repeat_participations.csv", "w") as f:
+        headers = ["Episodes Participated In", "Number of Individuals", "% of Individuals"]
+        writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
+        writer.writeheader()
+
+        for row in repeat_participations.values():
+            writer.writerow(row)
+
+    log.info("Graphing the per-episode engagement counts...")
+    # Graph the number of messages in each episode
+    altair.Chart(
+        altair.Data(values=[{"episode": x["Episode"], "count": x["Total Messages"]}
+                            for x in engagement_counts.values() if x["Episode"] != "Total"])
     ).mark_bar().encode(
-        x=altair.X("show:N", title="Show", sort=list(individuals_per_show.keys())),
-        y=altair.Y("count:Q", title="Number of Individuals")
+        x=altair.X("episode:N", title="Episode"),
+        y=altair.Y("count:Q", title="Number of Messages")
     ).properties(
-        title="Individuals per Show"
-    )
-    chart.save(f"{output_dir}/individuals_per_show.html")
-    chart.save(f"{output_dir}/individuals_per_show.png", scale_factor=IMG_SCALE_FACTOR)
+        title="Messages per Episode"
+    ).save(f"{output_dir}/messages_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
+
+    # Graph the number of participants in each episode
+    altair.Chart(
+        altair.Data(values=[{"episode": x["Episode"], "count": x["Total Participants"]}
+                            for x in engagement_counts.values() if x["Episode"] != "Total"])
+    ).mark_bar().encode(
+        x=altair.X("episode:N", title="Episode"),
+        y=altair.Y("count:Q", title="Number of Participants")
+    ).properties(
+        title="Participants per Episode"
+    ).save(f"{output_dir}/participants_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Plot the per-season distribution of responses for each survey question, per individual
     for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
