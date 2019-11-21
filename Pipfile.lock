@@ -61,7 +61,7 @@
         "coredatamodules": {
             "editable": true,
             "git": "https://www.github.com/AfricasVoices/CoreDataModules",
-            "ref": "01279068f1dce41030c47ae720ff088796bb4216"
+            "ref": "49fdd1166873e576a9a4900ffc9e83d9727e2261"
         },
         "deprecation": {
             "hashes": [
