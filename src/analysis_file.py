@@ -149,7 +149,7 @@ class AnalysisFile(object):
                     for label in td[cc.coded_field]:
                         new_matrix_values[label["CodeID"]] = Codes.MATRIX_1
 
-                    assert new_matrix_values == old_matrix_values, f"{old_matrix_values}\n{new_matrix_values}"
+                    assert new_matrix_values == old_matrix_values, f"{td['uid']}\n{old_matrix_values}\n{new_matrix_values}"
 
         # Process consent
         ConsentUtils.set_stopped(user, data, consent_withdrawn_key, additional_keys=export_keys)
