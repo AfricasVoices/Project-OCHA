@@ -4,6 +4,7 @@ from core_data_modules.cleaners import Codes
 from core_data_modules.traced_data import Metadata
 from core_data_modules.traced_data.io import TracedDataCSVIO
 from core_data_modules.traced_data.util import FoldTracedData
+from core_data_modules.traced_data.util.fold_traced_data import FoldStrategies
 from core_data_modules.util import TimeUtils
 
 from src.lib import PipelineConfiguration, ConsentUtils
@@ -95,15 +96,25 @@ class AnalysisFile(object):
         for td in data:
             to_be_folded.append(td.copy())
 
+        # Convert the *_keys variables to a dictionary of fold strategies for each key. 
+        # This is a temporary measure to adapt the project pipeline to the new folding interface in Core.
+        # TODO: Replace the *_keys variables by assigning to fold_strategies earlier in this script instead.
+        fold_strategies = dict()
+        fold_strategies.update({k: FoldStrategies.assert_equal for k in equal_keys})
+        fold_strategies.update({k: FoldStrategies.concatenate for k in concat_keys})
+        fold_strategies.update({k: FoldStrategies.matrix for k in matrix_keys})
+        fold_strategies.update({k: FoldStrategies.boolean_or for k in bool_keys})
+        fold_strategies.update({k: FoldStrategies.yes_no_amb for k in binary_keys})
+        
         folded_data = FoldTracedData.fold_iterable_of_traced_data(
-            user, data, fold_id_fn=lambda td: td["uid"],
-            equal_keys=equal_keys, concat_keys=concat_keys, matrix_keys=matrix_keys, bool_keys=bool_keys,
-            binary_keys=binary_keys
+            user, data, lambda td: td["uid"], fold_strategies
         )
 
         # Fix-up _NA and _NC keys, which are currently being set incorrectly by
         # FoldTracedData.fold_iterable_of_traced_data when there are multiple radio shows
         # TODO: Update FoldTracedData to handle NA and NC correctly under multiple radio shows
+        #       This is probably best done by updating Core to support folding lists of labels, then updating this
+        #       file to convert from labels to matrix representation and other string values after folding.
         for td in folded_data:
             for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
                 for cc in plan.coding_configurations:
@@ -120,7 +131,10 @@ class AnalysisFile(object):
                             if key.startswith(cc.analysis_file_key) and not key.endswith(Codes.NOT_CODED) \
                                     and td.get(key) == Codes.MATRIX_1:
                                 contains_non_nc_key = True
-                        if not contains_non_nc_key:
+                        if contains_non_nc_key:
+                            td.append_data({f"{cc.analysis_file_key}{Codes.NOT_CODED}": Codes.MATRIX_0},
+                                           Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+                        else:
                             td.append_data({f"{cc.analysis_file_key}{Codes.NOT_CODED}": Codes.MATRIX_1},
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
