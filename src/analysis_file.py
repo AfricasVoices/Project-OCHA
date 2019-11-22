@@ -1,4 +1,5 @@
 import time
+from collections import OrderedDict
 
 from core_data_modules.cleaners import Codes
 from core_data_modules.traced_data import Metadata
@@ -24,12 +25,12 @@ class AnalysisFile(object):
                            Metadata(user, Metadata.get_call_location(), time.time()))
 
         # Set the list of keys to be exported and how they are to be handled when folding
+        fold_strategies = OrderedDict()
+        fold_strategies["uid"] = FoldStrategies.assert_equal
+        fold_strategies[consent_withdrawn_key] = FoldStrategies.boolean_or
+
         export_keys = ["uid", consent_withdrawn_key]
-        bool_keys = [consent_withdrawn_key]
-        equal_keys = ["uid"]
-        concat_keys = []
-        matrix_keys = []
-        binary_keys = []
+
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
@@ -39,22 +40,22 @@ class AnalysisFile(object):
                     export_keys.append(cc.analysis_file_key)
 
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
-                        equal_keys.append(cc.analysis_file_key)
+                        fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
-                        binary_keys.append(cc.analysis_file_key)
+                        fold_strategies[cc.analysis_file_key] = FoldStrategies.yes_no_amb
                     else:
                         assert False, f"Incompatible folding_mode {plan.folding_mode}"
                 else:
                     assert cc.folding_mode == FoldingModes.MATRIX
                     for code in cc.code_scheme.codes:
                         export_keys.append(f"{cc.analysis_file_key}{code.string_value}")
-                        matrix_keys.append(f"{cc.analysis_file_key}{code.string_value}")
+                        fold_strategies[f"{cc.analysis_file_key}{code.string_value}"] = FoldStrategies.matrix
 
             export_keys.append(plan.raw_field)
             if plan.raw_field_folding_mode == FoldingModes.CONCATENATE:
-                concat_keys.append(plan.raw_field)
+                fold_strategies[plan.raw_field] = FoldStrategies.concatenate
             elif plan.raw_field_folding_mode == FoldingModes.ASSERT_EQUAL:
-                equal_keys.append(plan.raw_field)
+                fold_strategies[plan.raw_field] = FoldStrategies.assert_equal
             else:
                 assert False, f"Incompatible raw_field_folding_mode {plan.raw_field_folding_mode}"
 
@@ -96,16 +97,6 @@ class AnalysisFile(object):
         for td in data:
             to_be_folded.append(td.copy())
 
-        # Convert the *_keys variables to a dictionary of fold strategies for each key. 
-        # This is a temporary measure to adapt the project pipeline to the new folding interface in Core.
-        # TODO: Replace the *_keys variables by assigning to fold_strategies earlier in this script instead.
-        fold_strategies = dict()
-        fold_strategies.update({k: FoldStrategies.assert_equal for k in equal_keys})
-        fold_strategies.update({k: FoldStrategies.concatenate for k in concat_keys})
-        fold_strategies.update({k: FoldStrategies.matrix for k in matrix_keys})
-        fold_strategies.update({k: FoldStrategies.boolean_or for k in bool_keys})
-        fold_strategies.update({k: FoldStrategies.yes_no_amb for k in binary_keys})
-        
         folded_data = FoldTracedData.fold_iterable_of_traced_data(
             user, data, lambda td: td["uid"], fold_strategies
         )
@@ -127,9 +118,9 @@ class AnalysisFile(object):
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
                         contains_non_nc_key = False
-                        for key in matrix_keys:
-                            if key.startswith(cc.analysis_file_key) and not key.endswith(Codes.NOT_CODED) \
-                                    and td.get(key) == Codes.MATRIX_1:
+                        for code in cc.code_scheme.codes:
+                            if td.get(f"{cc.analysis_file_key}{code.string_value}") == Codes.MATRIX_1 and \
+                                    code.control_code != Codes.NOT_CODED:
                                 contains_non_nc_key = True
                         if contains_non_nc_key:
                             td.append_data({f"{cc.analysis_file_key}{Codes.NOT_CODED}": Codes.MATRIX_0},
