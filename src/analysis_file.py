@@ -132,6 +132,25 @@ class AnalysisFile(object):
                             td.append_data({f"{cc.analysis_file_key}{Codes.NOT_CODED}": Codes.MATRIX_1},
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
+        # Check that the new and old strategies of folding RQAs give the same response
+        # TODO: Remove this when the old strategies are removed, as this will serve no purpose then.
+        for td in folded_data:
+            for plan in PipelineConfiguration.RQA_CODING_PLANS:
+                for cc in plan.coding_configurations:
+                    assert cc.coding_mode == CodingModes.MULTIPLE
+
+                    old_matrix_values = dict()
+                    for code in cc.code_scheme.codes:
+                        old_matrix_values[code.code_id] = td[f"{cc.analysis_file_key}{code.string_value}"]
+
+                    new_matrix_values = dict()
+                    for code in cc.code_scheme.codes:
+                        new_matrix_values[code.code_id] = Codes.MATRIX_0
+                    for label in td[cc.coded_field]:
+                        new_matrix_values[label["CodeID"]] = Codes.MATRIX_1
+
+                    assert new_matrix_values == old_matrix_values, f"{old_matrix_values}\n{new_matrix_values}"
+
         # Process consent
         ConsentUtils.set_stopped(user, data, consent_withdrawn_key, additional_keys=export_keys)
         ConsentUtils.set_stopped(user, folded_data, consent_withdrawn_key, additional_keys=export_keys)
