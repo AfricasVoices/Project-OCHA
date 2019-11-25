@@ -183,6 +183,75 @@ if __name__ == "__main__":
         for row in repeat_participations.values():
             writer.writerow(row)
 
+    # Compute the theme distributions
+    log.info("Computing the theme distributions...")
+
+    def make_demog_counts_dict():
+        demog_counts = OrderedDict()
+        demog_counts["Total"] = 0
+        for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+            for cc in plan.coding_configurations:
+                if cc.analysis_file_key is None:
+                    continue
+                for code in cc.code_scheme.codes:
+                    demog_counts[code.string_value] = 0
+        return demog_counts
+
+    def update_demog_counts(counts, td):
+        for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+            for cc in plan.coding_configurations:
+                if cc.analysis_file_key is None:
+                    continue
+                if cc.coding_mode == CodingModes.SINGLE:
+                    code = cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"])
+                    counts[code.string_value] += 1
+
+
+    episodes = OrderedDict()
+    for episode_plan in PipelineConfiguration.RQA_CODING_PLANS:
+        # Prepare empty counts of the demogs for each variable
+        themes = OrderedDict()
+        episodes[episode_plan.raw_field] = themes
+        for cc in episode_plan.coding_configurations:
+            if cc.coding_mode == CodingModes.SINGLE:
+                themes[cc.analysis_file_key] = make_demog_counts_dict()
+            else:
+                assert cc.coding_mode == CodingModes.MULTIPLE
+                for code in cc.code_scheme.codes:
+                    themes[f"{cc.analysis_file_key}{code.string_value}"] = make_demog_counts_dict()
+
+        # Fill in the counts by iterating over every individual
+        for td in individuals:
+            if td["consent_withdrawn"] == Codes.TRUE:
+                continue
+            
+            for cc in episode_plan.coding_configurations:
+                if cc.coding_mode == CodingModes.SINGLE:
+                    themes[cc.analysis_file_key]["Total"] += 1
+                    update_demog_counts(themes[cc.analysis_file_key], td)
+                else:
+                    assert cc.coding_mode == CodingModes.MULTIPLE
+                    for label in td[cc.coded_field]:
+                        code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
+                        themes[f"{cc.analysis_file_key}{code.string_value}"]["Total"] += 1
+                        update_demog_counts(themes[f"{cc.analysis_file_key}{code.string_value}"], td)
+
+    with open(f"{output_dir}/theme_distributions.csv", "w") as f:
+        headers = ["Question", "Variable"] + list(make_demog_counts_dict().keys())
+        writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
+        writer.writeheader()
+
+        for episode, themes in episodes.items():
+            for theme, demog_counts in themes.items():
+                row = {
+                    "Question": episode,
+                    "Variable": theme,
+                }
+                row.update(demog_counts)
+                writer.writerow(row)
+                
+    exit(0)
+
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each episode
     altair.Chart(
