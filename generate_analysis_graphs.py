@@ -241,14 +241,16 @@ if __name__ == "__main__":
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
+        last_row_episode = None
         for episode, themes in episodes.items():
             for theme, demog_counts in themes.items():
                 row = {
-                    "Question": episode,
+                    "Question": episode if episode != last_row_episode else "",
                     "Variable": theme,
                 }
                 row.update(demog_counts)
                 writer.writerow(row)
+                last_row_episode = episode
                 
     exit(0)
 
