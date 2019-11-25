@@ -194,7 +194,7 @@ if __name__ == "__main__":
                 if cc.analysis_file_key is None:
                     continue
                 for code in cc.code_scheme.codes:
-                    demog_counts[code.string_value] = 0
+                    demog_counts[f"{cc.analysis_file_key}:{code.string_value}"] = 0
         return demog_counts
 
     def update_demog_counts(counts, td):
@@ -204,7 +204,7 @@ if __name__ == "__main__":
                     continue
                 if cc.coding_mode == CodingModes.SINGLE:
                     code = cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"])
-                    counts[code.string_value] += 1
+                    counts[f"{cc.analysis_file_key}:{code.string_value}"] += 1
 
 
     episodes = OrderedDict()
