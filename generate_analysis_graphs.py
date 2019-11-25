@@ -217,6 +217,7 @@ if __name__ == "__main__":
                 themes[cc.analysis_file_key] = make_demog_counts_dict()
             else:
                 assert cc.coding_mode == CodingModes.MULTIPLE
+                themes["Total"] = make_demog_counts_dict()
                 for code in cc.code_scheme.codes:
                     themes[f"{cc.analysis_file_key}{code.string_value}"] = make_demog_counts_dict()
 
@@ -231,6 +232,8 @@ if __name__ == "__main__":
                     update_demog_counts(themes[cc.analysis_file_key], td)
                 else:
                     assert cc.coding_mode == CodingModes.MULTIPLE
+                    themes["Total"]["Total"] += 1
+                    update_demog_counts(themes["Total"], td)
                     for label in td[cc.coded_field]:
                         code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
                         themes[f"{cc.analysis_file_key}{code.string_value}"]["Total"] += 1
