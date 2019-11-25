@@ -194,6 +194,8 @@ if __name__ == "__main__":
                 if cc.analysis_file_key is None:
                     continue
                 for code in cc.code_scheme.codes:
+                    if code.control_code == Codes.STOP:
+                        continue  # Ignore STOP codes because we already excluded everyone who opted out.
                     demog_counts[f"{cc.analysis_file_key}:{code.string_value}"] = 0
         return demog_counts
 
@@ -204,7 +206,11 @@ if __name__ == "__main__":
                     continue
                 if cc.coding_mode == CodingModes.SINGLE:
                     code = cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"])
+                    if code.control_code == Codes.STOP:
+                        continue
                     counts[f"{cc.analysis_file_key}:{code.string_value}"] += 1
+                else:
+                    pass  # TODO: Implement
 
 
     episodes = OrderedDict()
@@ -219,6 +225,8 @@ if __name__ == "__main__":
                 assert cc.coding_mode == CodingModes.MULTIPLE
                 themes["Total"] = make_demog_counts_dict()
                 for code in cc.code_scheme.codes:
+                    if code.control_code == Codes.STOP:
+                        continue
                     themes[f"{cc.analysis_file_key}{code.string_value}"] = make_demog_counts_dict()
 
         # Fill in the counts by iterating over every individual
@@ -236,6 +244,8 @@ if __name__ == "__main__":
                     update_demog_counts(themes["Total"], td)
                     for label in td[cc.coded_field]:
                         code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
+                        if code.control_code == Codes.STOP:
+                            continue
                         themes[f"{cc.analysis_file_key}{code.string_value}"]["Total"] += 1
                         update_demog_counts(themes[f"{cc.analysis_file_key}{code.string_value}"], td)
 
