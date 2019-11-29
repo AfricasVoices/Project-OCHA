@@ -29,16 +29,12 @@ class AnalysisFile(object):
         fold_strategies["uid"] = FoldStrategies.assert_equal
         fold_strategies[consent_withdrawn_key] = FoldStrategies.boolean_or
 
-        export_keys = ["uid", consent_withdrawn_key]
-
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
                     continue
 
                 if cc.coding_mode == CodingModes.SINGLE:
-                    export_keys.append(cc.analysis_file_key)
-
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
                         fold_strategies[cc.coded_field] = FoldStrategies.assert_label_ids_equal
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
@@ -49,10 +45,8 @@ class AnalysisFile(object):
                 else:
                     assert cc.folding_mode == FoldingModes.MATRIX
                     for code in cc.code_scheme.codes:
-                        export_keys.append(f"{cc.analysis_file_key}{code.string_value}")
                         fold_strategies[f"{cc.analysis_file_key}{code.string_value}"] = FoldStrategies.matrix
 
-            export_keys.append(plan.raw_field)
             if plan.raw_field_folding_mode == FoldingModes.CONCATENATE:
                 fold_strategies[plan.raw_field] = FoldStrategies.concatenate
             elif plan.raw_field_folding_mode == FoldingModes.ASSERT_EQUAL:
@@ -86,6 +80,8 @@ class AnalysisFile(object):
                                 analysis_dict[key] = Codes.MATRIX_0
             td.append_data(analysis_dict,
                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+
+        export_keys = list(fold_strategies.keys())
 
         # Set consent withdrawn based on presence of data coded as "stop"
         ConsentUtils.determine_consent_withdrawn(
