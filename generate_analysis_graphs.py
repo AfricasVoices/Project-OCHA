@@ -212,13 +212,15 @@ if __name__ == "__main__":
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
+        last_demographic = None
         for demographic, counts in demographic_distributions.items():
             for code_string_value, number_of_individuals in counts.items():
                 writer.writerow({
-                    "Variable": demographic,
+                    "Variable": demographic if demographic != last_demographic else "",
                     "Code": code_string_value,
                     "Number of Individuals": number_of_individuals
                 })
+                last_demographic = demographic
 
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each episode
