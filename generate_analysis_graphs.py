@@ -184,9 +184,9 @@ if __name__ == "__main__":
             writer.writerow(row)
 
     log.info("Computing the demographic distributions...")
-    # TODO: Report percentages
+    # TODO: Report percentages?
     # TODO: Handle distributions for other variables too or just demographics?
-    # TODO: Categorise age?
+    # TODO: Categorise age
     demographic_distributions = OrderedDict()  # of analysis_file_key -> code string_value -> number of individuals
     for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
         for cc in plan.coding_configurations:
