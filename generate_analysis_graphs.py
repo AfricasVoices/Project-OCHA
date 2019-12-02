@@ -198,14 +198,16 @@ if __name__ == "__main__":
                 demographic_distributions[cc.analysis_file_key][code.string_value] = 0
 
     for ind in individuals:
-        if ind["consent_withdrawn"] == Codes.FALSE:
-            for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
-                for cc in plan.coding_configurations:
-                    if cc.analysis_file_key is None:
-                        continue
+        if ind["consent_withdrawn"] == Codes.TRUE:
+            continue
 
-                    code = cc.code_scheme.get_code_with_code_id(ind[cc.coded_field]["CodeID"])
-                    demographic_distributions[cc.analysis_file_key][code.string_value] += 1
+        for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
+            for cc in plan.coding_configurations:
+                if cc.analysis_file_key is None:
+                    continue
+
+                code = cc.code_scheme.get_code_with_code_id(ind[cc.coded_field]["CodeID"])
+                demographic_distributions[cc.analysis_file_key][code.string_value] += 1
 
     with open(f"{output_dir}/demographic_distributions.csv", "w") as f:
         headers = ["Variable", "Code", "Number of Individuals"]
