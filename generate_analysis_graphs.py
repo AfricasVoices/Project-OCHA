@@ -184,6 +184,9 @@ if __name__ == "__main__":
             writer.writerow(row)
 
     log.info("Computing the demographic distributions...")
+    # Compute the number of individuals with each demographic code.
+    # Count excludes individuals who withdrew consent.  STOP codes in each scheme are not exported, as it would look
+    # like 0 individuals opted out otherwise, which could be confusing.
     # TODO: Report percentages?
     # TODO: Handle distributions for other variables too or just demographics?
     # TODO: Categorise age
@@ -195,6 +198,8 @@ if __name__ == "__main__":
 
             demographic_distributions[cc.analysis_file_key] = OrderedDict()
             for code in cc.code_scheme.codes:
+                if code.control_code == Codes.STOP:
+                    continue
                 demographic_distributions[cc.analysis_file_key][code.string_value] = 0
 
     for ind in individuals:
@@ -207,6 +212,8 @@ if __name__ == "__main__":
                     continue
 
                 code = cc.code_scheme.get_code_with_code_id(ind[cc.coded_field]["CodeID"])
+                if code.control_code == Codes.STOP:
+                    continue
                 demographic_distributions[cc.analysis_file_key][code.string_value] += 1
 
     with open(f"{output_dir}/demographic_distributions.csv", "w") as f:
