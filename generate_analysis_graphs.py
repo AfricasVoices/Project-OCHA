@@ -185,7 +185,6 @@ if __name__ == "__main__":
 
     log.info("Computing the demographic distributions...")
     # TODO: Report percentages
-    # TODO: Report just the normal codes?
     # TODO: Handle distributions for other variables too or just demographics?
     # TODO: Categorise age?
     demographic_distributions = OrderedDict()  # of analysis_file_key -> code string_value -> number of individuals
