@@ -210,7 +210,7 @@ if __name__ == "__main__":
                 demographic_distributions[cc.analysis_file_key][code.string_value] += 1
 
     with open(f"{output_dir}/demographic_distributions.csv", "w") as f:
-        headers = ["Variable", "Code", "Number of Individuals"]
+        headers = ["Demographic", "Code", "Number of Individuals"]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
@@ -218,7 +218,7 @@ if __name__ == "__main__":
         for demographic, counts in demographic_distributions.items():
             for code_string_value, number_of_individuals in counts.items():
                 writer.writerow({
-                    "Variable": demographic if demographic != last_demographic else "",
+                    "Demographic": demographic if demographic != last_demographic else "",
                     "Code": code_string_value,
                     "Number of Individuals": number_of_individuals
                 })
