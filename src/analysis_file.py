@@ -109,7 +109,7 @@ class AnalysisFile(object):
                         continue
 
                     if cc.coding_mode == CodingModes.MULTIPLE:
-                        if td.get(plan.raw_field, "") != "":
+                        if plan.raw_field in td:
                             td.append_data({f"{cc.analysis_file_key}{Codes.TRUE_MISSING}": Codes.MATRIX_0},
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
