@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
     log.info("Computing the demographic distributions...")
     # Compute the number of individuals with each demographic code.
-    # Count excludes individuals who withdrew consent.  STOP codes in each scheme are not exported, as it would look
+    # Count excludes individuals who withdrew consent. STOP codes in each scheme are not exported, as it would look
     # like 0 individuals opted out otherwise, which could be confusing.
     # TODO: Report percentages?
     # TODO: Handle distributions for other variables too or just demographics?
