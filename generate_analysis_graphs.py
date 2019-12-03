@@ -210,7 +210,10 @@ if __name__ == "__main__":
                         continue
                     counts[f"{cc.analysis_file_key}:{code.string_value}"] += 1
                 else:
-                    pass  # TODO: Implement
+                    assert cc.coding_mode == CodingModes.MULTIPLE
+                    for label in td[cc.coded_field]:
+                        code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
+                        counts[f"{cc.analysis_file_key}:{code.string_value}"] += 1
 
 
     episodes = OrderedDict()
