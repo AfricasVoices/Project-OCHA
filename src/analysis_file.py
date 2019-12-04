@@ -40,6 +40,7 @@ class AnalysisFile(object):
                     export_keys.append(cc.analysis_file_key)
 
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
+                        fold_strategies[cc.coded_field] = FoldStrategies.assert_label_ids_equal
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
                         fold_strategies[cc.coded_field] = FoldStrategies.yes_no_amb_label
@@ -114,7 +115,7 @@ class AnalysisFile(object):
                         continue
 
                     if cc.coding_mode == CodingModes.MULTIPLE:
-                        if td.get(plan.raw_field, "") != "":
+                        if plan.raw_field in td:
                             td.append_data({f"{cc.analysis_file_key}{Codes.TRUE_MISSING}": Codes.MATRIX_0},
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
@@ -139,12 +140,19 @@ class AnalysisFile(object):
                         continue
 
                     if cc.coding_mode == CodingModes.SINGLE:
-                        if cc.folding_mode == FoldingModes.YES_NO_AMB:
+                        if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
                             assert cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"]).string_value == \
-                                td[cc.analysis_file_key], \
+                                td[cc.analysis_file_key]
+                        else:
+                            assert cc.folding_mode == FoldingModes.YES_NO_AMB
+                            assert cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"]).string_value == \
+                                   td[cc.analysis_file_key], \
                                 f"{td['uid']}: " \
                                 f"{cc.code_scheme.get_code_with_code_id(td[cc.coded_field]['CodeID']).string_value}, " \
                                 f"{td[cc.analysis_file_key]}"
+                    else:
+                        # TODO: Implement check for CodingModes.MULTIPLE once implemented above and in Core Data
+                        pass
 
         # Process consent
         ConsentUtils.set_stopped(user, data, consent_withdrawn_key, additional_keys=export_keys)
