@@ -43,7 +43,8 @@ class AnalysisFile(object):
                         fold_strategies[cc.coded_field] = FoldStrategies.assert_label_ids_equal
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
-                        fold_strategies[cc.coded_field] = FoldStrategies.yes_no_amb_label
+                        fold_strategies[cc.coded_field] = \
+                            lambda x, y, code_scheme=cc.code_scheme: FoldStrategies.yes_no_amb_label(code_scheme, x, y)
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.yes_no_amb
                     else:
                         assert False, f"Incompatible folding_mode {plan.folding_mode}"
