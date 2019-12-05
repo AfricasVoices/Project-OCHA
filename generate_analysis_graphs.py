@@ -254,10 +254,28 @@ if __name__ == "__main__":
         title="Participants per Episode"
     ).save(f"{output_dir}/participants_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
+    log.info("Graphing the demographic distributions...")
+    for demographic, counts in demographic_distributions.items():
+        log.info(f"Graphing the distribution of codes for {demographic}...")
+        altair.Chart(
+            altair.Data(values=[{"code_string_value": code_string_value, "number_of_individuals": number_of_individuals}
+                                for code_string_value, number_of_individuals in counts.items()])
+        ).mark_bar().encode(
+            x=altair.X("code_string_value:N", title="Code", sort=list(counts.keys())),
+            y=altair.Y("number_of_individuals:Q", title="Number of Individuals")
+        ).properties(
+            title=f"Season Distribution: {demographic}"
+        ).save(f"{output_dir}/season_distribution_{demographic}.html", scale_factor=IMG_SCALE_FACTOR)
+
     # Plot the per-season distribution of responses for each survey question, per individual
     for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
         for cc in plan.coding_configurations:
             if cc.analysis_file_key is None:
+                continue
+
+            # Don't generate graphs for the demographics, as they were already generated above.
+            # TODO: Update the demographic_distributions to include the distributions for all variables?
+            if cc.analysis_file_key in demographic_distributions:
                 continue
 
             log.info(f"Graphing the distribution of codes for {cc.analysis_file_key}...")
@@ -296,4 +314,3 @@ if __name__ == "__main__":
     else:
         log.info("Skipping uploading to Google Drive (because the pipeline configuration json does not contain the key "
                  "'DriveUploadPaths')")
-
