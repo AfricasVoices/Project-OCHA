@@ -112,7 +112,7 @@ class PipelineConfiguration(object):
         else:
             return Codes.NOT_CODED
 
-    SURVEY_CODING_PLANS = [
+    OPERATOR_CODING_PLAN = \
         CodingPlan(raw_field="operator_raw",
                    coding_configurations=[
                        CodingConfiguration(
@@ -123,8 +123,9 @@ class PipelineConfiguration(object):
                            folding_mode=FoldingModes.ASSERT_EQUAL
                        )
                    ],
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
+                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
 
+    DEMOG_CODING_PLANS = [
         CodingPlan(raw_field="location_raw",
                    time_field="location_time",
                    coda_filename="location.json",
@@ -234,8 +235,10 @@ class PipelineConfiguration(object):
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("in idp camp"),
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
+                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
+    ]
 
+    FOLLOW_UP_CODING_PLANS = [
         CodingPlan(raw_field="have_voice_raw",
                    time_field="have_voice_time",
                    coda_filename="have_voice.json",
@@ -267,6 +270,8 @@ class PipelineConfiguration(object):
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("suggestions"),
                    raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
     ]
+
+    SURVEY_CODING_PLANS = [OPERATOR_CODING_PLAN] + DEMOG_CODING_PLANS + FOLLOW_UP_CODING_PLANS
 
     def __init__(self, raw_data_sources, phone_number_uuid_table, timestamp_remappings,
                  rapid_pro_key_remappings, project_start_date, project_end_date, filter_test_messages, move_ws_messages,

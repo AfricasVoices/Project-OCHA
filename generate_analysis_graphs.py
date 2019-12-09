@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
         for row in engagement_counts.values():
             writer.writerow(row)
-            
+
     log.info("Computing the participation frequencies...")
     repeat_participations = OrderedDict()
     for i in range(1, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
@@ -182,6 +182,54 @@ if __name__ == "__main__":
 
         for row in repeat_participations.values():
             writer.writerow(row)
+
+    log.info("Computing the demographic distributions...")
+    # Compute the number of individuals with each demographic code.
+    # Count excludes individuals who withdrew consent. STOP codes in each scheme are not exported, as it would look
+    # like 0 individuals opted out otherwise, which could be confusing.
+    # TODO: Report percentages?
+    # TODO: Handle distributions for other variables too or just demographics?
+    # TODO: Categorise age
+    demographic_distributions = OrderedDict()  # of analysis_file_key -> code string_value -> number of individuals
+    for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
+        for cc in plan.coding_configurations:
+            if cc.analysis_file_key is None:
+                continue
+
+            demographic_distributions[cc.analysis_file_key] = OrderedDict()
+            for code in cc.code_scheme.codes:
+                if code.control_code == Codes.STOP:
+                    continue
+                demographic_distributions[cc.analysis_file_key][code.string_value] = 0
+
+    for ind in individuals:
+        if ind["consent_withdrawn"] == Codes.TRUE:
+            continue
+
+        for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
+            for cc in plan.coding_configurations:
+                if cc.analysis_file_key is None:
+                    continue
+
+                code = cc.code_scheme.get_code_with_code_id(ind[cc.coded_field]["CodeID"])
+                if code.control_code == Codes.STOP:
+                    continue
+                demographic_distributions[cc.analysis_file_key][code.string_value] += 1
+
+    with open(f"{output_dir}/demographic_distributions.csv", "w") as f:
+        headers = ["Demographic", "Code", "Number of Individuals"]
+        writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
+        writer.writeheader()
+
+        last_demographic = None
+        for demographic, counts in demographic_distributions.items():
+            for code_string_value, number_of_individuals in counts.items():
+                writer.writerow({
+                    "Demographic": demographic if demographic != last_demographic else "",
+                    "Code": code_string_value,
+                    "Number of Individuals": number_of_individuals
+                })
+                last_demographic = demographic
 
     # Compute the theme distributions
     log.info("Computing the theme distributions...")
@@ -236,7 +284,7 @@ if __name__ == "__main__":
         for td in individuals:
             if td["consent_withdrawn"] == Codes.TRUE:
                 continue
-            
+
             for cc in episode_plan.coding_configurations:
                 if cc.coding_mode == CodingModes.SINGLE:
                     themes[cc.analysis_file_key]["Total"] += 1
@@ -267,7 +315,7 @@ if __name__ == "__main__":
                 row.update(demog_counts)
                 writer.writerow(row)
                 last_row_episode = episode
-                
+
     exit(0)
 
     log.info("Graphing the per-episode engagement counts...")

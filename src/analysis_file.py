@@ -40,6 +40,7 @@ class AnalysisFile(object):
                     export_keys.append(cc.analysis_file_key)
 
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
+                        fold_strategies[cc.coded_field] = FoldStrategies.assert_label_ids_equal
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
                         fold_strategies[cc.analysis_file_key] = FoldStrategies.yes_no_amb
@@ -113,7 +114,7 @@ class AnalysisFile(object):
                         continue
 
                     if cc.coding_mode == CodingModes.MULTIPLE:
-                        if td.get(plan.raw_field, "") != "":
+                        if plan.raw_field in td:
                             td.append_data({f"{cc.analysis_file_key}{Codes.TRUE_MISSING}": Codes.MATRIX_0},
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
@@ -128,6 +129,23 @@ class AnalysisFile(object):
                         else:
                             td.append_data({f"{cc.analysis_file_key}{Codes.NOT_CODED}": Codes.MATRIX_1},
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+
+        # Check that the new and old strategies of folding give the same response
+        # TODO: Remove this when the old strategies are removed, as this will serve no purpose then.
+        for td in folded_data:
+            for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+                for cc in plan.coding_configurations:
+                    if cc.analysis_file_key is None:
+                        continue
+
+                    if cc.coding_mode == CodingModes.SINGLE:
+                        if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
+                            assert cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"]).string_value == \
+                                td[cc.analysis_file_key]
+                        # TODO: Check other folding_modes once implemented above and in Core Data
+                    else:
+                        # TODO: Implement check for CodingModes.MULTIPLE once implemented above and in Core Data
+                        pass
 
         # Process consent
         ConsentUtils.set_stopped(user, data, consent_withdrawn_key, additional_keys=export_keys)
