@@ -273,15 +273,13 @@ if __name__ == "__main__":
         themes = OrderedDict()
         episodes[episode_plan.raw_field] = themes
         for cc in episode_plan.coding_configurations:
-            if cc.coding_mode == CodingModes.SINGLE:
-                themes[cc.analysis_file_key] = make_survey_counts_dict()
-            else:
-                assert cc.coding_mode == CodingModes.MULTIPLE
-                themes["Total"] = make_survey_counts_dict()
-                for code in cc.code_scheme.codes:
-                    if code.control_code == Codes.STOP:
-                        continue
-                    themes[f"{cc.analysis_file_key}{code.string_value}"] = make_survey_counts_dict()
+            # TODO: Add support for CodingModes.SINGLE if we need it e.g. for IMAQAL?
+            assert cc.coding_mode == CodingModes.MULTIPLE, "RQAs with single coding modes not supported"
+            themes["Total"] = make_survey_counts_dict()
+            for code in cc.code_scheme.codes:
+                if code.control_code == Codes.STOP:
+                    continue
+                themes[f"{cc.analysis_file_key}{code.string_value}"] = make_survey_counts_dict()
 
         # Fill in the counts by iterating over every individual
         for td in individuals:
@@ -289,19 +287,15 @@ if __name__ == "__main__":
                 continue
 
             for cc in episode_plan.coding_configurations:
-                if cc.coding_mode == CodingModes.SINGLE:
-                    themes[cc.analysis_file_key]["Total"] += 1
-                    update_survey_counts(themes[cc.analysis_file_key], td)
-                else:
-                    assert cc.coding_mode == CodingModes.MULTIPLE
-                    themes["Total"]["Total"] += 1
-                    update_survey_counts(themes["Total"], td)
-                    for label in td[cc.coded_field]:
-                        code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
-                        if code.control_code == Codes.STOP:
-                            continue
-                        themes[f"{cc.analysis_file_key}{code.string_value}"]["Total"] += 1
-                        update_survey_counts(themes[f"{cc.analysis_file_key}{code.string_value}"], td)
+                assert cc.coding_mode == CodingModes.MULTIPLE
+                themes["Total"]["Total"] += 1
+                update_survey_counts(themes["Total"], td)
+                for label in td[cc.coded_field]:
+                    code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
+                    if code.control_code == Codes.STOP:
+                        continue
+                    themes[f"{cc.analysis_file_key}{code.string_value}"]["Total"] += 1
+                    update_survey_counts(themes[f"{cc.analysis_file_key}{code.string_value}"], td)
 
     with open(f"{output_dir}/theme_distributions.csv", "w") as f:
         f.write("CAUTION: The totals reported here show the number of times each theme was reported not the "
