@@ -241,10 +241,12 @@ if __name__ == "__main__":
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
                     continue
+
                 for code in cc.code_scheme.codes:
                     if code.control_code == Codes.STOP:
                         continue  # Ignore STOP codes because we already excluded everyone who opted out.
                     survey_counts[f"{cc.analysis_file_key}:{code.string_value}"] = 0
+
         return survey_counts
 
     def update_survey_counts(survey_counts, td):
@@ -252,17 +254,18 @@ if __name__ == "__main__":
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
                     continue
+
                 if cc.coding_mode == CodingModes.SINGLE:
-                    code = cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"])
+                    codes = [cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"])]
+                else:
+                    assert cc.coding_mode == CodingModes.MULTIPLE
+                    codes = [cc.code_scheme.get_code_with_code_id(label["CodeID"]) for label in td[cc.coded_field]]
+
+                for code in codes:
                     if code.control_code == Codes.STOP:
                         continue
                     survey_counts[f"{cc.analysis_file_key}:{code.string_value}"] += 1
-                else:
-                    assert cc.coding_mode == CodingModes.MULTIPLE
-                    for label in td[cc.coded_field]:
-                        code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
-                        survey_counts[f"{cc.analysis_file_key}:{code.string_value}"] += 1
-
+                
 
     episodes = OrderedDict()
     for episode_plan in PipelineConfiguration.RQA_CODING_PLANS:
@@ -318,7 +321,7 @@ if __name__ == "__main__":
                 row.update(survey_counts)
                 writer.writerow(row)
                 last_row_episode = episode
-
+    exit(0)
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each episode
     altair.Chart(
