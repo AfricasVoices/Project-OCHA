@@ -1,9 +1,11 @@
 import time
+from collections import OrderedDict
 
 from core_data_modules.cleaners import Codes
 from core_data_modules.traced_data import Metadata
 from core_data_modules.traced_data.io import TracedDataCSVIO
 from core_data_modules.traced_data.util import FoldTracedData
+from core_data_modules.traced_data.util.fold_traced_data import FoldStrategies
 from core_data_modules.util import TimeUtils
 
 from src.lib import PipelineConfiguration, ConsentUtils
@@ -23,12 +25,12 @@ class AnalysisFile(object):
                            Metadata(user, Metadata.get_call_location(), time.time()))
 
         # Set the list of keys to be exported and how they are to be handled when folding
+        fold_strategies = OrderedDict()
+        fold_strategies["uid"] = FoldStrategies.assert_equal
+        fold_strategies[consent_withdrawn_key] = FoldStrategies.boolean_or
+
         export_keys = ["uid", consent_withdrawn_key]
-        bool_keys = [consent_withdrawn_key]
-        equal_keys = ["uid"]
-        concat_keys = []
-        matrix_keys = []
-        binary_keys = []
+
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
@@ -38,22 +40,23 @@ class AnalysisFile(object):
                     export_keys.append(cc.analysis_file_key)
 
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
-                        equal_keys.append(cc.analysis_file_key)
+                        fold_strategies[cc.coded_field] = FoldStrategies.assert_label_ids_equal
+                        fold_strategies[cc.analysis_file_key] = FoldStrategies.assert_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
-                        binary_keys.append(cc.analysis_file_key)
+                        fold_strategies[cc.analysis_file_key] = FoldStrategies.yes_no_amb
                     else:
                         assert False, f"Incompatible folding_mode {plan.folding_mode}"
                 else:
                     assert cc.folding_mode == FoldingModes.MATRIX
                     for code in cc.code_scheme.codes:
                         export_keys.append(f"{cc.analysis_file_key}{code.string_value}")
-                        matrix_keys.append(f"{cc.analysis_file_key}{code.string_value}")
+                        fold_strategies[f"{cc.analysis_file_key}{code.string_value}"] = FoldStrategies.matrix
 
             export_keys.append(plan.raw_field)
             if plan.raw_field_folding_mode == FoldingModes.CONCATENATE:
-                concat_keys.append(plan.raw_field)
+                fold_strategies[plan.raw_field] = FoldStrategies.concatenate
             elif plan.raw_field_folding_mode == FoldingModes.ASSERT_EQUAL:
-                equal_keys.append(plan.raw_field)
+                fold_strategies[plan.raw_field] = FoldStrategies.assert_equal
             else:
                 assert False, f"Incompatible raw_field_folding_mode {plan.raw_field_folding_mode}"
 
@@ -96,14 +99,14 @@ class AnalysisFile(object):
             to_be_folded.append(td.copy())
 
         folded_data = FoldTracedData.fold_iterable_of_traced_data(
-            user, data, fold_id_fn=lambda td: td["uid"],
-            equal_keys=equal_keys, concat_keys=concat_keys, matrix_keys=matrix_keys, bool_keys=bool_keys,
-            binary_keys=binary_keys
+            user, data, lambda td: td["uid"], fold_strategies
         )
 
         # Fix-up _NA and _NC keys, which are currently being set incorrectly by
         # FoldTracedData.fold_iterable_of_traced_data when there are multiple radio shows
         # TODO: Update FoldTracedData to handle NA and NC correctly under multiple radio shows
+        #       This is probably best done by updating Core to support folding lists of labels, then updating this
+        #       file to convert from labels to matrix representation and other string values after folding.
         for td in folded_data:
             for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
                 for cc in plan.coding_configurations:
@@ -111,18 +114,38 @@ class AnalysisFile(object):
                         continue
 
                     if cc.coding_mode == CodingModes.MULTIPLE:
-                        if td.get(plan.raw_field, "") != "":
+                        if plan.raw_field in td:
                             td.append_data({f"{cc.analysis_file_key}{Codes.TRUE_MISSING}": Codes.MATRIX_0},
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
 
                         contains_non_nc_key = False
-                        for key in matrix_keys:
-                            if key.startswith(cc.analysis_file_key) and not key.endswith(Codes.NOT_CODED) \
-                                    and td.get(key) == Codes.MATRIX_1:
+                        for code in cc.code_scheme.codes:
+                            if td.get(f"{cc.analysis_file_key}{code.string_value}") == Codes.MATRIX_1 and \
+                                    code.control_code != Codes.NOT_CODED:
                                 contains_non_nc_key = True
-                        if not contains_non_nc_key:
+                        if contains_non_nc_key:
+                            td.append_data({f"{cc.analysis_file_key}{Codes.NOT_CODED}": Codes.MATRIX_0},
+                                           Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+                        else:
                             td.append_data({f"{cc.analysis_file_key}{Codes.NOT_CODED}": Codes.MATRIX_1},
                                            Metadata(user, Metadata.get_call_location(), TimeUtils.utc_now_as_iso_string()))
+
+        # Check that the new and old strategies of folding give the same response
+        # TODO: Remove this when the old strategies are removed, as this will serve no purpose then.
+        for td in folded_data:
+            for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+                for cc in plan.coding_configurations:
+                    if cc.analysis_file_key is None:
+                        continue
+
+                    if cc.coding_mode == CodingModes.SINGLE:
+                        if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
+                            assert cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"]).string_value == \
+                                td[cc.analysis_file_key]
+                        # TODO: Check other folding_modes once implemented above and in Core Data
+                    else:
+                        # TODO: Implement check for CodingModes.MULTIPLE once implemented above and in Core Data
+                        pass
 
         # Process consent
         ConsentUtils.set_stopped(user, data, consent_withdrawn_key, additional_keys=export_keys)
