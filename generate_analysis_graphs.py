@@ -265,7 +265,7 @@ if __name__ == "__main__":
             y=altair.Y("number_of_individuals:Q", title="Number of Individuals")
         ).properties(
             title=f"Season Distribution: {demographic}"
-        ).save(f"{output_dir}/season_distribution_{demographic}.html", scale_factor=IMG_SCALE_FACTOR)
+        ).save(f"{output_dir}/season_distribution_{demographic}.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Plot the per-season distribution of responses for each survey question, per individual
     for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
