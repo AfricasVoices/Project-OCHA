@@ -9,7 +9,7 @@ from core_data_modules.traced_data.util.fold_traced_data import FoldStrategies
 from core_data_modules.util import TimeUtils
 
 from src.lib import PipelineConfiguration, ConsentUtils
-from src.lib.pipeline_configuration import CodingModes, FoldingModes
+from src.lib.pipeline_configuration import CodingModes
 
 
 class AnalysisFile(object):
@@ -73,28 +73,15 @@ class AnalysisFile(object):
 
                 if cc.coding_mode == CodingModes.SINGLE:
                     export_keys.append(cc.analysis_file_key)
-
-                    if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
-                        fold_strategies[cc.coded_field] = FoldStrategies.assert_label_ids_equal
-                    elif cc.folding_mode == FoldingModes.YES_NO_AMB:
-                        assert False, "Yes/no/ambivalent labels not supported yet"
-                        # fold_strategies[cc.coded_field] = FoldStrategies.yes_no_amb_label
-                    else:
-                        assert False, f"Incompatible folding_mode {plan.folding_mode}"
                 else:
-                    assert cc.folding_mode == FoldingModes.MATRIX
+                    assert cc.coding_mode == CodingModes.MULTIPLE
                     for code in cc.code_scheme.codes:
                         export_keys.append(f"{cc.analysis_file_key}{code.string_value}")
-                    fold_strategies[cc.coded_field] = \
-                        lambda x, y, code_scheme=cc.code_scheme: FoldStrategies.list_of_labels(code_scheme, x, y)
+
+                fold_strategies[cc.coded_field] = cc.fold_strategy
 
             export_keys.append(plan.raw_field)
-            if plan.raw_field_folding_mode == FoldingModes.CONCATENATE:
-                fold_strategies[plan.raw_field] = FoldStrategies.concatenate
-            elif plan.raw_field_folding_mode == FoldingModes.ASSERT_EQUAL:
-                fold_strategies[plan.raw_field] = FoldStrategies.assert_equal
-            else:
-                assert False, f"Incompatible raw_field_folding_mode {plan.raw_field_folding_mode}"
+            fold_strategies[plan.raw_field] = plan.raw_field_fold_strategy
 
         # Set consent withdrawn based on presence of data coded as "stop"
         ConsentUtils.determine_consent_withdrawn(

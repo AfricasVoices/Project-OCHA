@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 import pytz
 from core_data_modules.cleaners import Codes, swahili, somali
 from core_data_modules.data_models import validators
+from core_data_modules.traced_data.util.fold_traced_data import FoldStrategies
 from dateutil.parser import isoparse
 
 from src.lib import CodeSchemes, code_imputation_functions
@@ -16,28 +17,21 @@ class CodingModes(object):
     MULTIPLE = "MULTIPLE"
 
 
-class FoldingModes(object):
-    ASSERT_EQUAL = "ASSERT_EQUAL"
-    YES_NO_AMB = "YES_NO_AMB"
-    CONCATENATE = "CONCATENATE"
-    MATRIX = "MATRIX"
-
-
 class CodingConfiguration(object):
-    def __init__(self, coding_mode, code_scheme, coded_field, folding_mode, analysis_file_key=None, cleaner=None):
+    def __init__(self, coding_mode, code_scheme, coded_field, fold_strategy, analysis_file_key=None, cleaner=None):
         assert coding_mode in {CodingModes.SINGLE, CodingModes.MULTIPLE}
 
         self.coding_mode = coding_mode
         self.code_scheme = code_scheme
         self.coded_field = coded_field
         self.analysis_file_key = analysis_file_key
-        self.folding_mode = folding_mode
+        self.fold_strategy = fold_strategy
         self.cleaner = cleaner
 
 
 # TODO: Rename CodingPlan to something like DatasetConfiguration?
 class CodingPlan(object):
-    def __init__(self, raw_field, coding_configurations, raw_field_folding_mode, coda_filename=None, ws_code=None,
+    def __init__(self, raw_field, coding_configurations, raw_field_fold_strategy, coda_filename=None, ws_code=None,
                  time_field=None, run_id_field=None, icr_filename=None, id_field=None, code_imputation_function=None):
         self.raw_field = raw_field
         self.time_field = time_field
@@ -47,7 +41,7 @@ class CodingPlan(object):
         self.coding_configurations = coding_configurations
         self.code_imputation_function = code_imputation_function
         self.ws_code = ws_code
-        self.raw_field_folding_mode = raw_field_folding_mode
+        self.raw_field_fold_strategy = raw_field_fold_strategy
 
         if id_field is None:
             id_field = "{}_id".format(self.raw_field)
@@ -67,11 +61,11 @@ class PipelineConfiguration(object):
                            code_scheme=CodeSchemes.S04E01_REASONS,
                            coded_field="rqa_s04e01_coded",
                            analysis_file_key="rqa_s04e01_",
-                           folding_mode=FoldingModes.MATRIX
+                           fold_strategy=lambda x, y: FoldStrategies.list_of_labels(CodeSchemes.S04E01_REASONS, x, y)
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("s04e01"),
-                   raw_field_folding_mode=FoldingModes.CONCATENATE),
+                   raw_field_fold_strategy=FoldStrategies.concatenate),
 
         CodingPlan(raw_field="rqa_s04e02_raw",
                    time_field="sent_on",
@@ -84,11 +78,11 @@ class PipelineConfiguration(object):
                            code_scheme=CodeSchemes.S04E02_REASONS,
                            coded_field="rqa_s04e02_coded",
                            analysis_file_key="rqa_s04e02_",
-                           folding_mode=FoldingModes.MATRIX
+                           fold_strategy=lambda x, y: FoldStrategies.list_of_labels(CodeSchemes.S04E02_REASONS, x, y)
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("s04e02"),
-                   raw_field_folding_mode=FoldingModes.CONCATENATE),
+                   raw_field_fold_strategy=FoldStrategies.concatenate)
     ]
 
     @staticmethod
@@ -120,10 +114,10 @@ class PipelineConfiguration(object):
                            code_scheme=CodeSchemes.SOMALIA_OPERATOR,
                            coded_field="operator_coded",
                            analysis_file_key="operator",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        )
                    ],
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
+                   raw_field_fold_strategy=FoldStrategies.assert_equal)
 
     DEMOG_CODING_PLANS = [
         CodingPlan(raw_field="location_raw",
@@ -137,7 +131,7 @@ class PipelineConfiguration(object):
                            coded_field="mogadishu_sub_district_coded",
                            # This code exists for compatibility with the previous CSAP demog datasets.
                            # Not including in the analysis file because this project is not in Mogadishu.
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        ),
                        CodingConfiguration(
                            coding_mode=CodingModes.SINGLE,
@@ -145,33 +139,33 @@ class PipelineConfiguration(object):
                            cleaner=lambda text: PipelineConfiguration.clean_district_if_no_mogadishu_sub_district(text),
                            coded_field="district_coded",
                            analysis_file_key="district",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        ),
                        CodingConfiguration(
                            coding_mode=CodingModes.SINGLE,
                            code_scheme=CodeSchemes.SOMALIA_REGION,
                            coded_field="region_coded",
                            analysis_file_key="region",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        ),
                        CodingConfiguration(
                            coding_mode=CodingModes.SINGLE,
                            code_scheme=CodeSchemes.SOMALIA_STATE,
                            coded_field="state_coded",
                            analysis_file_key="state",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        ),
                        CodingConfiguration(
                            coding_mode=CodingModes.SINGLE,
                            code_scheme=CodeSchemes.SOMALIA_ZONE,
                            coded_field="zone_coded",
                            analysis_file_key="zone",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        )
                    ],
                    code_imputation_function=code_imputation_functions.impute_somalia_location_codes,
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("location"),
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
+                   raw_field_fold_strategy=FoldStrategies.assert_equal),
 
         CodingPlan(raw_field="gender_raw",
                    time_field="gender_time",
@@ -183,11 +177,11 @@ class PipelineConfiguration(object):
                            cleaner=somali.DemographicCleaner.clean_gender,
                            coded_field="gender_coded",
                            analysis_file_key="gender",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("gender"),
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
+                   raw_field_fold_strategy=FoldStrategies.assert_equal),
 
         CodingPlan(raw_field="age_raw",
                    time_field="age_time",
@@ -199,11 +193,11 @@ class PipelineConfiguration(object):
                            cleaner=lambda text: PipelineConfiguration.clean_age_with_range_filter(text),
                            coded_field="age_coded",
                            analysis_file_key="age",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("age"),
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
+                   raw_field_fold_strategy=FoldStrategies.assert_equal),
 
         CodingPlan(raw_field="recently_displaced_raw",
                    time_field="recently_displaced_time",
@@ -215,11 +209,11 @@ class PipelineConfiguration(object):
                            cleaner=somali.DemographicCleaner.clean_yes_no,
                            coded_field="recently_displaced_coded",
                            analysis_file_key="recently_displaced",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("recently displaced"),
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
+                   raw_field_fold_strategy=FoldStrategies.assert_equal),
 
         CodingPlan(raw_field="in_idp_camp_raw",
                    time_field="in_idp_camp_time",
@@ -231,11 +225,11 @@ class PipelineConfiguration(object):
                            cleaner=somali.DemographicCleaner.clean_yes_no,
                            coded_field="in_idp_camp_coded",
                            analysis_file_key="in_idp_camp",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("in idp camp"),
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
+                   raw_field_fold_strategy=FoldStrategies.assert_equal)
     ]
 
     FOLLOW_UP_CODING_PLANS = [
@@ -249,11 +243,11 @@ class PipelineConfiguration(object):
                            cleaner=somali.DemographicCleaner.clean_yes_no,
                            coded_field="have_voice_yes_no_amb_coded",
                            analysis_file_key="have_voice_yes_no_amb",
-                           folding_mode=FoldingModes.ASSERT_EQUAL
+                           fold_strategy=FoldStrategies.assert_label_ids_equal
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("have_voice"),
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
+                   raw_field_fold_strategy=FoldStrategies.assert_equal),
 
         CodingPlan(raw_field="suggestions_raw",
                    time_field="suggestions_time",
@@ -264,11 +258,11 @@ class PipelineConfiguration(object):
                            code_scheme=CodeSchemes.SUGGESTIONS,
                            coded_field="suggestions_coded",
                            analysis_file_key="suggestions_",
-                           folding_mode=FoldingModes.MATRIX
+                           fold_strategy=lambda x, y: FoldStrategies.list_of_labels(CodeSchemes.SUGGESTIONS, x, y)
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("suggestions"),
-                   raw_field_folding_mode=FoldingModes.ASSERT_EQUAL)
+                   raw_field_fold_strategy=FoldStrategies.assert_equal)
     ]
 
     SURVEY_CODING_PLANS = [OPERATOR_CODING_PLAN] + DEMOG_CODING_PLANS + FOLLOW_UP_CODING_PLANS
