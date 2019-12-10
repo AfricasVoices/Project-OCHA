@@ -100,3 +100,43 @@ def impute_somalia_location_codes(user, data, location_configurations):
                                        SomaliaLocations.state_for_location_code(zone_str)),
                     Metadata.get_call_location()).to_dict()
             }, Metadata(user, Metadata.get_call_location(), time.time()))
+
+
+def impute_age_category(user, data, age_configurations):
+    age_cc = age_configurations[0]
+    age_category_cc = age_configurations[1]
+    
+    age_categories = {
+        (0, 13): "0 to 13",
+        (14, 17): "14 to 17",
+        (18, 34): "18 to 34",
+        (35, 53): "35 to 53",
+        (54, 99): "54 to 99"
+    }
+
+    for td in data:
+        age_label = td[age_cc.coded_field]
+        age_code = age_cc.code_scheme.get_code_with_code_id(age_label["CodeID"])
+
+        if age_code.code_type == CodeTypes.NORMAL:
+            age_category = None
+            for age_range, category in age_categories.items():
+                if age_range[0] <= age_code.numeric_value <= age_range[1]:
+                    age_category = category
+            assert age_category is not None
+
+            age_category_code = age_category_cc.code_scheme.get_code_with_match_value(age_category)
+        elif age_code.code_type == CodeTypes.META:
+            age_category_code = age_category_cc.code_scheme.get_code_with_meta_code(age_code.meta_code)
+        else:
+            assert age_code.code_type == CodeTypes.CONTROL
+            age_category_code = age_category_cc.code_scheme.get_code_with_control_code(age_code.control_code)
+
+        age_category_label = CleaningUtils.make_label_from_cleaner_code(
+            age_category_cc.code_scheme, age_category_code, Metadata.get_call_location()
+        )
+
+        td.append_data(
+            {age_category_cc.coded_field: age_category_label.to_dict()},
+            Metadata(user, Metadata.get_call_location(), time.time())
+        )

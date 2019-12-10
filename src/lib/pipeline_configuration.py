@@ -198,10 +198,17 @@ class PipelineConfiguration(object):
                            code_scheme=CodeSchemes.AGE,
                            cleaner=lambda text: PipelineConfiguration.clean_age_with_range_filter(text),
                            coded_field="age_coded",
-                           analysis_file_key="age",
+                           folding_mode=FoldingModes.ASSERT_EQUAL
+                       ),
+                       CodingConfiguration(
+                           coding_mode=CodingModes.SINGLE,
+                           code_scheme=CodeSchemes.AGE_CATEGORY,
+                           coded_field="age_category_coded",
+                           analysis_file_key="age_category",
                            folding_mode=FoldingModes.ASSERT_EQUAL
                        )
                    ],
+                   code_imputation_function=code_imputation_functions.impute_age_category,
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("age"),
                    raw_field_folding_mode=FoldingModes.ASSERT_EQUAL),
 
