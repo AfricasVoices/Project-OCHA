@@ -1,4 +1,3 @@
-import time
 from collections import OrderedDict
 
 from core_data_modules.cleaners import Codes
@@ -56,9 +55,6 @@ class AnalysisFile(object):
 
         # Set consent withdrawn based on presence of data coded as "stop"
         consent_withdrawn_key = "consent_withdrawn"
-        for td in data:
-            td.append_data({consent_withdrawn_key: Codes.FALSE},
-                           Metadata(user, Metadata.get_call_location(), time.time()))
         ConsentUtils.determine_consent_withdrawn(
             user, data, PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS,
             consent_withdrawn_key
