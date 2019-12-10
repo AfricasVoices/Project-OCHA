@@ -103,6 +103,10 @@ def impute_somalia_location_codes(user, data, location_configurations):
 
 
 def impute_age_category(user, data, age_configurations):
+    # TODO: By accepting a list of age_configurations but then requiring that list to contain code schemes in a
+    #       certain order, it looks like we're providing more flexibility than we actually do. We should change this
+    #       to explicitly accept age and age_category configurations, which requires refactoring all of the
+    #       code imputation functions.
     age_cc = age_configurations[0]
     age_category_cc = age_configurations[1]
     
@@ -119,6 +123,7 @@ def impute_age_category(user, data, age_configurations):
         age_code = age_cc.code_scheme.get_code_with_code_id(age_label["CodeID"])
 
         if age_code.code_type == CodeTypes.NORMAL:
+            # TODO: If these age categories are standard across projects, move this to Core as a new cleaner.
             age_category = None
             for age_range, category in age_categories.items():
                 if age_range[0] <= age_code.numeric_value <= age_range[1]:
