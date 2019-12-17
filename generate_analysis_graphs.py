@@ -104,7 +104,7 @@ if __name__ == "__main__":
                     engagement_counts[plan.raw_field]["Total Messages"] += 1
                     engagement_counts["Total"]["Total Messages"] += 1
 
-                    # Check all the code schemes for this variable contain the same code type
+                    # Get all the codes for this message under this code scheme
                     codes = []
                     for cc in plan.coding_configurations:
                         if cc.coding_mode == CodingModes.SINGLE:
@@ -114,12 +114,9 @@ if __name__ == "__main__":
                             for label in msg[cc.coded_field]:
                                 codes.append(cc.code_scheme.get_code_with_code_id(label["CodeID"]))
 
-                    assert len(codes) > 0
-                    code_type = codes[0].code_type
-                    for code in codes:
-                        assert code.code_type == code_type
-
-                    if code_type == CodeTypes.NORMAL:
+                    # Increment the count of relevant messages if the code is labelled with at least one normal code.
+                    code_types = [code.code_type for code in codes]
+                    if CodeTypes.NORMAL in code_types:
                         engagement_counts[plan.raw_field]["Relevant Messages"] += 1
                         engagement_counts["Total"]["Relevant Messages"] += 1
 
