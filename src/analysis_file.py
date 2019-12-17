@@ -51,6 +51,8 @@ class AnalysisFile(object):
                     for code in cc.code_scheme.codes:
                         export_keys.append(f"{cc.analysis_file_key}{code.string_value}")
                         fold_strategies[f"{cc.analysis_file_key}{code.string_value}"] = FoldStrategies.matrix
+                        fold_strategies[cc.coded_field] = \
+                            lambda x, y, code_scheme=cc.code_scheme: FoldStrategies.list_of_labels(code_scheme, x, y)
 
             export_keys.append(plan.raw_field)
             if plan.raw_field_folding_mode == FoldingModes.CONCATENATE:
@@ -133,7 +135,7 @@ class AnalysisFile(object):
         # Check that the new and old strategies of folding give the same response
         # TODO: Remove this when the old strategies are removed, as this will serve no purpose then.
         for td in folded_data:
-            for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+            for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
                 for cc in plan.coding_configurations:
                     if cc.analysis_file_key is None:
                         continue
@@ -144,8 +146,18 @@ class AnalysisFile(object):
                                 td[cc.analysis_file_key]
                         # TODO: Check other folding_modes once implemented above and in Core Data
                     else:
-                        # TODO: Implement check for CodingModes.MULTIPLE once implemented above and in Core Data
-                        pass
+                        assert cc.coding_mode == CodingModes.MULTIPLE
+                        old_matrix_values = dict()
+                        for code in cc.code_scheme.codes:
+                            old_matrix_values[code.code_id] = td[f"{cc.analysis_file_key}{code.string_value}"]
+
+                        new_matrix_values = dict()
+                        for code in cc.code_scheme.codes:
+                            new_matrix_values[code.code_id] = Codes.MATRIX_0
+                        for label in td[cc.coded_field]:
+                            new_matrix_values[label["CodeID"]] = Codes.MATRIX_1
+
+                        assert new_matrix_values == old_matrix_values, f"{td['uid']}\n{old_matrix_values}\n{new_matrix_values}"
 
         # Process consent
         ConsentUtils.set_stopped(user, data, consent_withdrawn_key, additional_keys=export_keys)
