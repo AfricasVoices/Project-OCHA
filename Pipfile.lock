@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e6b84591c33335cab90c584110478876d30d8c256a92368bdb3e600d5faee4ab"
+            "sha256": "253ab8934f487290fabb44d0717dd94e118f9111e19e1ffb0dfee7dcc5a53914"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -61,7 +61,7 @@
         "coredatamodules": {
             "editable": true,
             "git": "https://www.github.com/AfricasVoices/CoreDataModules",
-            "ref": "6f6fead9aa081ade486644bd2314d98b4808f8ee"
+            "ref": "08c3d8bd0763689f320b99001a58dcb1d9f1f2a5"
         },
         "deprecation": {
             "hashes": [
@@ -79,20 +79,20 @@
         },
         "firebase-admin": {
             "hashes": [
-                "sha256:c0af81d62f1d36cc352e69eac8eacef700f31f322074ca86447a5a16240b628c"
+                "sha256:2e9341e2f01d31f8cde0c39a58e34ff0804dc4fa1d3cfe5a5c4043da13098fe0"
             ],
-            "version": "==3.2.0"
+            "version": "==3.2.1"
         },
         "google-api-core": {
             "extras": [
                 "grpc"
             ],
             "hashes": [
-                "sha256:b95895a9398026bc0500cf9b4a3f82c3f72c3f9150b26ff53af40c74e91c264a",
-                "sha256:df8adc4b97f5ab4328a0e745bee77877cf4a7d4601cb1cd5959d2bbf8fba57aa"
+                "sha256:2d661c8d650a1df5805d0e360121cb55c55d8bd29f858fa62cbe943e59ce89f7",
+                "sha256:9006e1641599345056cc690a934e1262107c78d969d72cf96412f6db5d32147f"
             ],
             "markers": "platform_python_implementation != 'PyPy'",
-            "version": "==1.14.3"
+            "version": "==1.15.0"
         },
         "google-api-python-client": {
             "hashes": [
@@ -103,10 +103,10 @@
         },
         "google-auth": {
             "hashes": [
-                "sha256:17c5b7bf7b9f4c188beba5590d170c1546f31f99c1919621422a6a0011323d97",
-                "sha256:44fd26d86e9a04fbb21064a0295288044cb2b920d305501b5f8d546452f246bd"
+                "sha256:038a921618620491502eeb4ed5b7af6a8ee2a7950918a5b3e0d718e841aff4da",
+                "sha256:a977375be9f9c46cd20ffb90f0532a27fa0e171eb47373de270b6028005b8e8b"
             ],
-            "version": "==1.8.1"
+            "version": "==1.9.0"
         },
         "google-auth-httplib2": {
             "hashes": [
