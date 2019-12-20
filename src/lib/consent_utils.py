@@ -25,8 +25,9 @@ class ConsentUtils(object):
                     if cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"]).control_code == Codes.STOP:
                         return True
                 else:
-                    if td[f"{cc.analysis_file_key}{Codes.STOP}"] == Codes.MATRIX_1:
-                        return True
+                    for label in td[cc.coded_field]:
+                        if cc.code_scheme.get_code_with_code_id(label["CodeID"]).control_code == Codes.STOP:
+                            return True
         return False
 
     @classmethod
