@@ -127,17 +127,20 @@ if __name__ == "__main__":
     # An individual is considered to have participated if they sent a message and didn't opt-out, regardless of the
     # relevance of any of their messages.
     for ind in individuals:
-        if ind["consent_withdrawn"] == Codes.FALSE:
-            weeks_participated = 0
-            for plan in PipelineConfiguration.RQA_CODING_PLANS:
-                if plan.raw_field in ind:
-                    weeks_participated += 1
-            assert weeks_participated != 0, f"Found individual '{ind['uid']}' with no participation in any week"
-            repeat_participations[weeks_participated]["Number of Individuals"] += 1
+        if AnalysisUtils.withdrew_consent(ind, CONSENT_WITHDRAWN_KEY):
+            continue
+
+        weeks_participated = 0
+        for plan in PipelineConfiguration.RQA_CODING_PLANS:
+            if AnalysisUtils.opt_in(ind, CONSENT_WITHDRAWN_KEY, plan):
+                weeks_participated += 1
+        assert weeks_participated != 0, f"Found individual '{ind['uid']}' with no participation in any week"
+        repeat_participations[weeks_participated]["Number of Individuals"] += 1
 
     # Compute the percentage of individuals who participated each possible number of times.
-    # Percentages are computed after excluding individuals who opted out.
-    total_individuals = len([td for td in individuals if td["consent_withdrawn"] == Codes.FALSE])
+    # Percentages are computed out of the total number of participants who opted-in.
+    total_individuals = len(AnalysisUtils.filter_opt_ins(
+        individuals, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS))
     for rp in repeat_participations.values():
         rp["% of Individuals"] = round(rp["Number of Individuals"] / total_individuals * 100, 1)
 
