@@ -76,8 +76,8 @@ if __name__ == "__main__":
     log.info("Computing the per-episode and per-season engagement counts...")
     engagement_counts = OrderedDict()
     for plan in PipelineConfiguration.RQA_CODING_PLANS:
-        engagement_counts[plan.analysis_name] = {
-            "Episode": plan.analysis_name,
+        engagement_counts[plan.dataset_name] = {
+            "Episode": plan.dataset_name,
             "Total Messages": 0,
             "Relevant Messages": 0,
             "Total Participants": 0,
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         if msg["consent_withdrawn"] == Codes.FALSE:
             for plan in PipelineConfiguration.RQA_CODING_PLANS:
                 if plan.raw_field in msg:
-                    engagement_counts[plan.analysis_name]["Total Messages"] += 1
+                    engagement_counts[plan.dataset_name]["Total Messages"] += 1
                     engagement_counts["Total"]["Total Messages"] += 1
 
                     # Get all the codes for this message under this code scheme
@@ -116,7 +116,7 @@ if __name__ == "__main__":
                     # Increment the count of relevant messages if the code is labelled with at least one normal code.
                     code_types = [code.code_type for code in codes]
                     if CodeTypes.NORMAL in code_types:
-                        engagement_counts[plan.analysis_name]["Relevant Messages"] += 1
+                        engagement_counts[plan.dataset_name]["Relevant Messages"] += 1
                         engagement_counts["Total"]["Relevant Messages"] += 1
 
     # Compute, per episode and across the season:
@@ -127,7 +127,7 @@ if __name__ == "__main__":
             engagement_counts["Total"]["Total Participants"] += 1
             for plan in PipelineConfiguration.RQA_CODING_PLANS:
                 if plan.raw_field in ind:
-                    engagement_counts[plan.analysis_name]["Total Participants"] += 1
+                    engagement_counts[plan.dataset_name]["Total Participants"] += 1
 
     # Compute:
     #  - % Relevant Messages, by computing Relevant Messages / Total Messages * 100, to 1 decimal place.

@@ -39,7 +39,7 @@ class CodingConfiguration(object):
 class CodingPlan(object):
     def __init__(self, raw_field, coding_configurations, raw_field_folding_mode, coda_filename=None, ws_code=None,
                  time_field=None, run_id_field=None, icr_filename=None, id_field=None, code_imputation_function=None,
-                 analysis_name=None):
+                 dataset_name=None):
         self.raw_field = raw_field
         self.time_field = time_field
         self.run_id_field = run_id_field
@@ -49,7 +49,7 @@ class CodingPlan(object):
         self.code_imputation_function = code_imputation_function
         self.ws_code = ws_code
         self.raw_field_folding_mode = raw_field_folding_mode
-        self.analysis_name = analysis_name
+        self.dataset_name = dataset_name
 
         if id_field is None:
             id_field = "{}_id".format(self.raw_field)
@@ -58,7 +58,8 @@ class CodingPlan(object):
 
 class PipelineConfiguration(object):
     RQA_CODING_PLANS = [
-        CodingPlan(raw_field="rqa_s04e01_raw",
+        CodingPlan(dataset_name="Episode 1",
+                   raw_field="rqa_s04e01_raw",
                    time_field="sent_on",
                    run_id_field="rqa_s04e01_run_id",
                    coda_filename="s04e01.json",
@@ -73,10 +74,10 @@ class PipelineConfiguration(object):
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("s04e01"),
-                   raw_field_folding_mode=FoldingModes.CONCATENATE,
-                   analysis_name="Episode 1"),
+                   raw_field_folding_mode=FoldingModes.CONCATENATE),
 
-        CodingPlan(raw_field="rqa_s04e02_raw",
+        CodingPlan(dataset_name="Episode 2",
+                   raw_field="rqa_s04e02_raw",
                    time_field="sent_on",
                    run_id_field="rqa_s04e02_run_id",
                    coda_filename="s04e02.json",
@@ -91,8 +92,7 @@ class PipelineConfiguration(object):
                        )
                    ],
                    ws_code=CodeSchemes.WS_CORRECT_DATASET.get_code_with_match_value("s04e02"),
-                   raw_field_folding_mode=FoldingModes.CONCATENATE,
-                   analysis_name="Episode 2"),
+                   raw_field_folding_mode=FoldingModes.CONCATENATE),
     ]
 
     @staticmethod
