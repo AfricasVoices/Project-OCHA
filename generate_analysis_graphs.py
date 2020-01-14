@@ -228,6 +228,91 @@ if __name__ == "__main__":
                 })
                 last_demographic = demographic
 
+    # Compute the theme distributions
+    log.info("Computing the theme distributions...")
+
+    def make_survey_counts_dict():
+        survey_counts = OrderedDict()
+        survey_counts["Total"] = 0
+        for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+            for cc in plan.coding_configurations:
+                if cc.analysis_file_key is None:
+                    continue
+
+                for code in cc.code_scheme.codes:
+                    if code.control_code == Codes.STOP:
+                        continue  # Ignore STOP codes because we already excluded everyone who opted out.
+                    survey_counts[f"{cc.analysis_file_key}:{code.string_value}"] = 0
+
+        return survey_counts
+
+    def update_survey_counts(survey_counts, td):
+        for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
+            for cc in plan.coding_configurations:
+                if cc.analysis_file_key is None:
+                    continue
+
+                if cc.coding_mode == CodingModes.SINGLE:
+                    codes = [cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"])]
+                else:
+                    assert cc.coding_mode == CodingModes.MULTIPLE
+                    codes = [cc.code_scheme.get_code_with_code_id(label["CodeID"]) for label in td[cc.coded_field]]
+
+                for code in codes:
+                    if code.control_code == Codes.STOP:
+                        continue
+                    survey_counts[f"{cc.analysis_file_key}:{code.string_value}"] += 1
+                
+
+    episodes = OrderedDict()
+    for episode_plan in PipelineConfiguration.RQA_CODING_PLANS:
+        # Prepare empty counts of the survey responses for each variable
+        themes = OrderedDict()
+        episodes[episode_plan.raw_field] = themes
+        for cc in episode_plan.coding_configurations:
+            # TODO: Add support for CodingModes.SINGLE if we need it e.g. for IMAQAL?
+            assert cc.coding_mode == CodingModes.MULTIPLE, "RQAs with single coding modes not supported"
+            themes["Total"] = make_survey_counts_dict()
+            for code in cc.code_scheme.codes:
+                if code.control_code == Codes.STOP:
+                    continue
+                themes[f"{cc.analysis_file_key}{code.string_value}"] = make_survey_counts_dict()
+
+        # Fill in the counts by iterating over every individual
+        for td in individuals:
+            if td["consent_withdrawn"] == Codes.TRUE:
+                continue
+
+            for cc in episode_plan.coding_configurations:
+                assert cc.coding_mode == CodingModes.MULTIPLE
+                themes["Total"]["Total"] += 1
+                update_survey_counts(themes["Total"], td)
+                for label in td[cc.coded_field]:
+                    code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
+                    if code.control_code == Codes.STOP:
+                        continue
+                    themes[f"{cc.analysis_file_key}{code.string_value}"]["Total"] += 1
+                    update_survey_counts(themes[f"{cc.analysis_file_key}{code.string_value}"], td)
+
+    with open(f"{output_dir}/theme_distributions.csv", "w") as f:
+        f.write("CAUTION: The totals reported here show the number of times each theme was reported not the "
+                "number of individuals or messages. Demographic totals apply to all codes (including NA NC etc.) \n")
+
+        headers = ["Question", "Variable"] + list(make_survey_counts_dict().keys())
+        writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
+        writer.writeheader()
+
+        last_row_episode = None
+        for episode, themes in episodes.items():
+            for theme, survey_counts in themes.items():
+                row = {
+                    "Question": episode if episode != last_row_episode else "",
+                    "Variable": theme,
+                }
+                row.update(survey_counts)
+                writer.writerow(row)
+                last_row_episode = episode
+
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each episode
     altair.Chart(
