@@ -180,13 +180,13 @@ if __name__ == "__main__":
             writer.writerow(row)
 
     log.info("Computing the demographic distributions...")
-    # Compute the number of individuals with each demographic code.
-    # Count excludes individuals who withdrew consent. STOP codes in each scheme are not exported, as it would look
+    # Count the number of individuals with each demographic code.
+    # This count excludes individuals who withdrew consent. STOP codes in each scheme are not exported, as it would look
     # like 0 individuals opted out otherwise, which could be confusing.
-    # TODO: Report percentages?
     # TODO: Handle distributions for other variables too or just demographics?
     # TODO: Categorise age
-    demographic_distributions = OrderedDict()  # of analysis_file_key -> code string_value -> number of individuals
+    demographic_distributions = OrderedDict()  # of analysis_file_key -> code id -> number of individuals
+    total_relevant = OrderedDict()   # of analysis_file_key -> number of relevant individuals
     for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
         for cc in plan.coding_configurations:
             if cc.analysis_file_key is None:
@@ -194,9 +194,8 @@ if __name__ == "__main__":
 
             demographic_distributions[cc.analysis_file_key] = OrderedDict()
             for code in cc.code_scheme.codes:
-                if code.control_code == Codes.STOP:
-                    continue
-                demographic_distributions[cc.analysis_file_key][code.string_value] = 0
+                demographic_distributions[cc.analysis_file_key][code.code_id] = 0
+            total_relevant[cc.analysis_file_key] = 0
 
     for ind in individuals:
         if ind["consent_withdrawn"] == Codes.TRUE:
@@ -207,25 +206,42 @@ if __name__ == "__main__":
                 if cc.analysis_file_key is None:
                     continue
 
+                assert cc.coding_mode == CodingModes.SINGLE
                 code = cc.code_scheme.get_code_with_code_id(ind[cc.coded_field]["CodeID"])
-                if code.control_code == Codes.STOP:
-                    continue
-                demographic_distributions[cc.analysis_file_key][code.string_value] += 1
+                demographic_distributions[cc.analysis_file_key][code.code_id] += 1
+                if code.code_type == CodeTypes.NORMAL:
+                    total_relevant[cc.analysis_file_key] += 1
 
     with open(f"{output_dir}/demographic_distributions.csv", "w") as f:
-        headers = ["Demographic", "Code", "Number of Individuals"]
+        headers = ["Variable", "Category", "Participants with Consent", "Percent"]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
-        last_demographic = None
-        for demographic, counts in demographic_distributions.items():
-            for code_string_value, number_of_individuals in counts.items():
-                writer.writerow({
-                    "Demographic": demographic if demographic != last_demographic else "",
-                    "Code": code_string_value,
-                    "Number of Individuals": number_of_individuals
-                })
-                last_demographic = demographic
+        for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
+            for cc in plan.coding_configurations:
+                if cc.analysis_file_key is None:
+                    continue
+
+                for i, code in enumerate(cc.code_scheme.codes):
+                    # Don't export a row for STOP codes because these have already been excluded, so would
+                    # report 0 here, which could be confusing.
+                    if code.control_code == Codes.STOP:
+                        continue
+                    
+                    participants_with_consent = demographic_distributions[cc.analysis_file_key][code.code_id]
+                    row = {
+                        "Variable": cc.analysis_file_key if i == 0 else "",
+                        "Category": code.string_value,
+                        "Participants with Consent": participants_with_consent,
+                    }
+
+                    # Only compute a percentage for relevant codes.
+                    if code.code_type == CodeTypes.NORMAL:
+                        row["Percent"] = round(participants_with_consent / total_relevant[cc.analysis_file_key] * 100, 1)
+                    else:
+                        row["Percent"] = ""
+
+                    writer.writerow(row)
 
     # Compute the theme distributions
     log.info("Computing the theme distributions...")
@@ -336,17 +352,26 @@ if __name__ == "__main__":
     ).save(f"{output_dir}/participants_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
     log.info("Graphing the demographic distributions...")
-    for demographic, counts in demographic_distributions.items():
-        log.info(f"Graphing the distribution of codes for {demographic}...")
-        altair.Chart(
-            altair.Data(values=[{"code_string_value": code_string_value, "number_of_individuals": number_of_individuals}
-                                for code_string_value, number_of_individuals in counts.items()])
-        ).mark_bar().encode(
-            x=altair.X("code_string_value:N", title="Code", sort=list(counts.keys())),
-            y=altair.Y("number_of_individuals:Q", title="Number of Individuals")
-        ).properties(
-            title=f"Season Distribution: {demographic}"
-        ).save(f"{output_dir}/season_distribution_{demographic}.png", scale_factor=IMG_SCALE_FACTOR)
+    for plan in PipelineConfiguration.DEMOG_CODING_PLANS:
+        for cc in plan.coding_configurations:
+            if cc.analysis_file_key is None:
+                continue
+
+            log.info(f"Graphing the distribution of codes for {cc.analysis_file_key}...")
+            altair.Chart(
+                altair.Data(values=[
+                    {
+                        "category": code.string_value,
+                        "participants_with_consent": demographic_distributions[cc.analysis_file_key][code.code_id]
+                    }
+                    for code in cc.code_scheme.codes if code.control_code != Codes.STOP
+                ])
+            ).mark_bar().encode(
+                x=altair.X("category:N", title="Category", sort=[code.string_value for code in cc.code_scheme.codes]),
+                y=altair.Y("participants_with_consent:Q", title="Participants with Consent")
+            ).properties(
+                title=f"Season Distribution: {cc.analysis_file_key}"
+            ).save(f"{output_dir}/season_distribution_{cc.analysis_file_key}.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Plot the per-season distribution of responses for each survey question, per individual
     for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
