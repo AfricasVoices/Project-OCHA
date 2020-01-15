@@ -1,18 +1,13 @@
 {
   "RawDataSources": [
     {
-      "SourceType": "GCloudBucket",
-      "SurveyFlowURLs": [
-        "gs://avf-project-datasets/2019/UNDP-RCO/csap_demog.jsonl",
-        "gs://avf-project-datasets/2019/UNDP-RCO/csap_s02_demog.jsonl"
-      ]
-    },
-    {
       "SourceType": "RapidPro",
       "Domain": "textit.in",
       "TokenFileURL": "gs://avf-credentials/csap-text-it-token.txt",
       "ContactsFileName": "csap_contacts",
       "SurveyFlowNames": [
+        "csap_demog",
+        "csap_s02_demog",
         "csap_s03_demog"
       ],
       "TestContactUUIDs": [
