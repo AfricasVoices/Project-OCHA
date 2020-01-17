@@ -1,4 +1,3 @@
-import time
 from collections import OrderedDict
 
 from core_data_modules.cleaners import Codes
@@ -54,10 +53,12 @@ class AnalysisFile(object):
         # TODO: Investigate/address the cause of this.
         # sys.setrecursionlimit(15000)
 
+        # Set consent withdrawn based on presence of data coded as "stop"
         consent_withdrawn_key = "consent_withdrawn"
-        for td in data:
-            td.append_data({consent_withdrawn_key: Codes.FALSE},
-                           Metadata(user, Metadata.get_call_location(), time.time()))
+        ConsentUtils.determine_consent_withdrawn(
+            user, data, PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS,
+            consent_withdrawn_key
+        )
 
         # Set the list of keys to be exported and how they are to be handled when folding
         fold_strategies = OrderedDict()
@@ -65,7 +66,7 @@ class AnalysisFile(object):
         fold_strategies[consent_withdrawn_key] = FoldStrategies.boolean_or
 
         export_keys = ["uid", consent_withdrawn_key]
-
+        
         for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
@@ -77,7 +78,7 @@ class AnalysisFile(object):
                     if cc.folding_mode == FoldingModes.ASSERT_EQUAL:
                         fold_strategies[cc.coded_field] = FoldStrategies.assert_label_ids_equal
                     elif cc.folding_mode == FoldingModes.YES_NO_AMB:
-                        assert False, "Yes/no/ambivalent labels not supported yet"
+                        assert False, "Folding yes/no/ambivalent labels is not yet supported"
                         # fold_strategies[cc.coded_field] = FoldStrategies.yes_no_amb_label
                     else:
                         assert False, f"Incompatible folding_mode {plan.folding_mode}"
@@ -95,12 +96,6 @@ class AnalysisFile(object):
                 fold_strategies[plan.raw_field] = FoldStrategies.assert_equal
             else:
                 assert False, f"Incompatible raw_field_folding_mode {plan.raw_field_folding_mode}"
-
-        # Set consent withdrawn based on presence of data coded as "stop"
-        ConsentUtils.determine_consent_withdrawn(
-            user, data, PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS,
-            consent_withdrawn_key
-        )
 
         # Fold data to have one respondent per row
         to_be_folded = []
