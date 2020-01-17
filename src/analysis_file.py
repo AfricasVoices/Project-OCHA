@@ -1,4 +1,3 @@
-import time
 from collections import OrderedDict
 
 from core_data_modules.cleaners import Codes
@@ -54,10 +53,12 @@ class AnalysisFile(object):
         # TODO: Investigate/address the cause of this.
         # sys.setrecursionlimit(15000)
 
+        # Set consent withdrawn based on presence of data coded as "stop"
         consent_withdrawn_key = "consent_withdrawn"
-        for td in data:
-            td.append_data({consent_withdrawn_key: Codes.FALSE},
-                           Metadata(user, Metadata.get_call_location(), time.time()))
+        ConsentUtils.determine_consent_withdrawn(
+            user, data, PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS,
+            consent_withdrawn_key
+        )
 
         # Set the list of keys to be exported and how they are to be handled when folding
         fold_strategies = OrderedDict()
@@ -82,12 +83,6 @@ class AnalysisFile(object):
 
             export_keys.append(plan.raw_field)
             fold_strategies[plan.raw_field] = plan.raw_field_fold_strategy
-
-        # Set consent withdrawn based on presence of data coded as "stop"
-        ConsentUtils.determine_consent_withdrawn(
-            user, data, PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS,
-            consent_withdrawn_key
-        )
 
         # Fold data to have one respondent per row
         to_be_folded = []

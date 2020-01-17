@@ -22,6 +22,7 @@ class CodeSchemes(object):
     SOMALIA_ZONE = _open_scheme("somalia_zone.json")
     GENDER = _open_scheme("gender.json")
     AGE = _open_scheme("age.json")
+    AGE_CATEGORY = _open_scheme("age_category.json")
     RECENTLY_DISPLACED = _open_scheme("recently_displaced.json")
     IN_IDP_CAMP = _open_scheme("in_idp_camp.json")
 
