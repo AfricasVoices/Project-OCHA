@@ -299,9 +299,6 @@ if __name__ == "__main__":
                 update_survey_counts(themes["Total Relevant Participants"], td)
 
     with open(f"{output_dir}/theme_distributions.csv", "w") as f:
-        f.write("CAUTION: The totals reported here show the number of times each theme was reported not the "
-                "number of individuals or messages. Demographic totals apply to all codes (including NA NC etc.) \n")
-
         headers = ["Question", "Variable"] + list(make_survey_counts_dict().keys())
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
