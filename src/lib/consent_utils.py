@@ -25,17 +25,18 @@ class ConsentUtils(object):
                     if cc.code_scheme.get_code_with_code_id(td[cc.coded_field]["CodeID"]).control_code == Codes.STOP:
                         return True
                 else:
-                    if td[f"{cc.analysis_file_key}{Codes.STOP}"] == Codes.MATRIX_1:
-                        return True
+                    for label in td[cc.coded_field]:
+                        if cc.code_scheme.get_code_with_code_id(label["CodeID"]).control_code == Codes.STOP:
+                            return True
         return False
 
     @classmethod
     def determine_consent_withdrawn(cls, user, data, coding_plans, withdrawn_key="consent_withdrawn"):
         """
-        Determines whether consent has been withdrawn, by searching for Codes.STOP in the given list of keys.
+        Determines whether consent has been withdrawn, by searching for Codes.STOP in the given list of coding plans.
 
         TracedData objects where a stop code is found will have the key-value pair <withdrawn_key>: Codes.TRUE
-        appended. Objects where a stop code is not found are not modified.
+        appended, or Codes.FALSE if no stop code is found.
 
         Note that this does not actually set any other keys to Codes.STOP. Use Consent.set_stopped for this purpose.
 
@@ -43,11 +44,14 @@ class ConsentUtils(object):
         :type user: str
         :param data: TracedData objects to determine consent for.
         :type data: iterable of TracedData
-        :param coding_plans:
+        :param coding_plans: Coding plans for the fields to search for stop codes.
         :type coding_plans: iterable of CodingPlan
         :param withdrawn_key: Name of key to use for the consent withdrawn field.
         :type withdrawn_key: str
         """
+        for td in data:
+            td.append_data({withdrawn_key: Codes.FALSE}, Metadata(user, Metadata.get_call_location(), time.time()))
+
         stopped_uids = set()
         for td in data:
             if cls.td_has_stop_code(td, coding_plans):
