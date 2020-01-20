@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
     def make_survey_counts_dict():
         survey_counts = OrderedDict()
-        survey_counts["Total"] = 0
+        survey_counts["Total Participants"] = 0
         for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
@@ -289,13 +289,13 @@ if __name__ == "__main__":
                     code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
                     if code.control_code == Codes.STOP:
                         continue
-                    themes[f"{cc.analysis_file_key}{code.string_value}"]["Total"] += 1
+                    themes[f"{cc.analysis_file_key}{code.string_value}"]["Total Participants"] += 1
                     update_survey_counts(themes[f"{cc.analysis_file_key}{code.string_value}"], td)
                     if code.code_type == CodeTypes.NORMAL:
                         relevant_participant = True
 
             if relevant_participant:
-                themes["Total Relevant Participants"]["Total"] += 1
+                themes["Total Relevant Participants"]["Total Participants"] += 1
                 update_survey_counts(themes["Total Relevant Participants"], td)
 
     with open(f"{output_dir}/theme_distributions.csv", "w") as f:
