@@ -89,6 +89,42 @@ class AnalysisUtils(object):
         return not cls.withdrew_consent(td, consent_withdrawn_key) and cls.responded(td, coding_plan)
 
     @classmethod
+    def labelled(cls, td, consent_withdrawn_key, coding_plan):
+        """
+        Returns whether the given TracedData object has been labelled under the given coding_plan.
+
+        An object is considered labelled if all of the following hold:
+         - Consent was not withdrawn.
+         - A response was received (see `AnalysisUtils.responded` for the definition of this).
+         - The response has been assigned at least one label under each coding configuration.
+         - None of the assigned labels have the control code NOT_REVIEWED.
+
+        :param td: TracedData to check.
+        :type td: TracedData
+        :param consent_withdrawn_key: Key in the TracedData of the consent withdrawn field.
+        :type consent_withdrawn_key: str
+        :param coding_plan: A coding plan specifying the field names to look up in `td`, and the code scheme to use
+                            to interpret those values.
+        :type coding_plan: src.lib.pipeline_configuration.CodingPlan
+        :return: Whether `td` contains a labelled response to `coding_plan` and did not withdraw consent.
+        :rtype: bool
+        """
+        if cls.withdrew_consent(td, consent_withdrawn_key):
+            return False
+        
+        if not cls.responded(td, coding_plan):
+            return False
+
+        for cc in coding_plan.coding_configurations:
+            codes = cls._get_td_codes_for_coding_configuration(td, cc)
+            if len(codes) == 0:
+                return False
+            for code in codes:
+                if code.control_code == Codes.NOT_REVIEWED:
+                    return False
+        return True
+
+    @classmethod
     def relevant(cls, td, consent_withdrawn_key, coding_plan):
         """
         Returns whether the given TracedData object contains a relevant response to the given coding_plan.
@@ -108,7 +144,7 @@ class AnalysisUtils(object):
         """
         if cls.withdrew_consent(td, consent_withdrawn_key):
             return False
-
+        
         for cc in coding_plan.coding_configurations:
             codes = cls._get_td_codes_for_coding_configuration(td, cc)
             for code in codes:
@@ -163,6 +199,35 @@ class AnalysisUtils(object):
                     opt_ins.append(td)
                     break
         return opt_ins
+
+    @classmethod
+    def filter_labelled(cls, data, consent_withdrawn_key, coding_plans):
+        """
+        Filters a list of message or participant data for objects that opted-in and are fully labelled under all
+        the given coding plans.
+
+        For the definition of "labelled", see `AnalysisUtils.labelled`
+
+        :param data: Message or participant data to filter.
+        :type data: TracedData iterable
+        :param consent_withdrawn_key: Key in the TracedData of the consent withdrawn field.
+        :type consent_withdrawn_key: str
+        :param coding_plans: Coding plans specifying the fields in each TracedData object in `data` to look up.
+        :type coding_plans: list of src.lib.pipeline_configuration.CodingPlan
+        :return: data, filtered for only the objects that opted-in and are labelled under all of the coding plans.
+        :rtype: list of TracedData
+        """
+        labelled = []
+        for td in data:
+            td_is_labelled = True
+            for plan in coding_plans:
+                if not cls.labelled(td, consent_withdrawn_key, plan):
+                    td_is_labelled = False
+
+            if td_is_labelled:
+                labelled.append(td)
+
+        return labelled
 
     @classmethod
     def filter_relevant(cls, data, consent_withdrawn_key, coding_plans):

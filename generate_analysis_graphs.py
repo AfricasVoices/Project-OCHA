@@ -1,10 +1,10 @@
 import argparse
-from collections import OrderedDict
-
-import altair
 import csv
 import glob
 import json
+from collections import OrderedDict
+
+import altair
 from core_data_modules.cleaners import Codes
 from core_data_modules.logging import Logger
 from core_data_modules.traced_data.io import TracedDataJsonIO
@@ -82,6 +82,7 @@ if __name__ == "__main__":
 
             "Total Messages": "-",  # Can't report this for individual weeks because the data has been overwritten with "STOP"
             "Total Messages with Opt-Ins": len(AnalysisUtils.filter_opt_ins(messages, CONSENT_WITHDRAWN_KEY, [plan])),
+            "Total Labelled Messages": len(AnalysisUtils.filter_labelled(messages, CONSENT_WITHDRAWN_KEY, [plan])),
             "Total Relevant Messages": len(AnalysisUtils.filter_relevant(messages, CONSENT_WITHDRAWN_KEY, [plan])),
 
             "Total Participants": "-",
@@ -93,6 +94,7 @@ if __name__ == "__main__":
 
         "Total Messages": len(messages),
         "Total Messages with Opt-Ins": len(AnalysisUtils.filter_opt_ins(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
+        "Total Labelled Messages": len(AnalysisUtils.filter_labelled(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
         "Total Relevant Messages": len(AnalysisUtils.filter_relevant(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
 
         "Total Participants": len(individuals),
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     with open(f"{output_dir}/engagement_counts.csv", "w") as f:
         headers = [
             "Episode",
-            "Total Messages", "Total Messages with Opt-Ins", "Total Relevant Messages",
+            "Total Messages", "Total Messages with Opt-Ins", "Total Labelled Messages", "Total Relevant Messages",
             "Total Participants", "Total Participants with Opt-Ins", "Total Relevant Participants"
         ]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
