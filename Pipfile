@@ -12,6 +12,7 @@ python-dateutil = ">=2.8.0"  # Need this minimum so that isoparse handles T24:00
 google-cloud-storage = "*"
 altair = "*"
 selenium = "*"
+pyinstrument = "*"
 
 [dev-packages]
 
