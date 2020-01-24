@@ -34,10 +34,7 @@ RUN if [ -z "$CHROME_DRIVER_VERSION" ]; \
 # Install pyflame (for statistical CPU profiling) if this script is run with PROFILE_CPU flag
 ARG INSTALL_CPU_PROFILER="false"
 RUN if [ "$INSTALL_CPU_PROFILER" = "true" ]; then \
-        apt-get update && apt-get install -y autoconf automake autotools-dev g++ pkg-config python-dev python3-dev libtool make && \
-        git clone https://github.com/uber/pyflame.git /pyflame && cd /pyflame && git checkout "v1.6.7" && \
-        ./autogen.sh && ./configure && make && make install && \
-        rm -rf /pyflame; \
+        pip install py-spy; \
     fi
 
 # Install memory_profiler if this script is run with PROFILE_MEMORY flag
