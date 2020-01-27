@@ -48,7 +48,7 @@ OUTPUT_INDIVIDUALS_CSV=${11}
 OUTPUT_PRODUCTION_CSV=${12}
 
 # Build an image for this pipeline stage.
-docker build --build-arg INSTALL_CPU_PROFILER="$PROFILE_CPU" --build-arg INSTALL_MEMORY_PROFILER="$PROFILE_MEMORY" -t "$IMAGE_NAME" .
+docker build --build-arg INSTALL_MEMORY_PROFILER="$PROFILE_MEMORY" -t "$IMAGE_NAME" .
 
 # Create a container from the image that was just built.
 if [[ "$PROFILE_CPU" = true ]]; then

@@ -31,12 +31,6 @@ RUN if [ -z "$CHROME_DRIVER_VERSION" ]; \
   && chmod 755 /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION \
   && ln -fs /opt/selenium/chromedriver-$CHROME_DRIVER_VERSION /usr/bin/chromedriver
 
-# Install pyflame (for statistical CPU profiling) if this script is run with PROFILE_CPU flag
-ARG INSTALL_CPU_PROFILER="false"
-RUN if [ "$INSTALL_CPU_PROFILER" = "true" ]; then \
-        pip install pyinstrument; \
-    fi
-
 # Install memory_profiler if this script is run with PROFILE_MEMORY flag
 ARG INSTALL_MEMORY_PROFILER="false"
 RUN if [ "$INSTALL_MEMORY_PROFILER" = "true" ]; then \
