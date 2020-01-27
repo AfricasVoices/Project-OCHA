@@ -52,7 +52,7 @@ docker build --build-arg INSTALL_CPU_PROFILER="$PROFILE_CPU" --build-arg INSTALL
 
 # Create a container from the image that was just built.
 if [[ "$PROFILE_CPU" = true ]]; then
-    PROFILE_CPU_CMD="-m pyinstrument -o /data/cpu.prof -r html -- "
+    PROFILE_CPU_CMD="-m pyinstrument -o /data/cpu.prof --renderer html -- "
     SYS_PTRACE_CAPABILITY="--cap-add SYS_PTRACE"
 fi
 if [[ "$PROFILE_MEMORY" = true ]]; then
