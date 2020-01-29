@@ -1,8 +1,8 @@
 import argparse
 import csv
-import glob
 import json
 from collections import OrderedDict
+from glob import glob
 
 import altair
 from core_data_modules.cleaners import Codes
@@ -49,6 +49,7 @@ if __name__ == "__main__":
     output_dir = args.output_dir
 
     IOUtils.ensure_dirs_exist(output_dir)
+    IOUtils.ensure_dirs_exist(f"{output_dir}/graphs")
 
     log.info("Loading Pipeline Configuration File...")
     with open(pipeline_configuration_file_path) as f:
@@ -322,7 +323,7 @@ if __name__ == "__main__":
         y=altair.Y("count:Q", title="Number of Messages")
     ).properties(
         title="Messages per Episode"
-    ).save(f"{output_dir}/messages_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
+    ).save(f"{output_dir}/graphs/messages_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Graph the number of participants in each episode
     altair.Chart(
@@ -333,7 +334,7 @@ if __name__ == "__main__":
         y=altair.Y("count:Q", title="Number of Participants")
     ).properties(
         title="Participants per Episode"
-    ).save(f"{output_dir}/participants_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
+    ).save(f"{output_dir}/graphs/participants_per_episode.png", scale_factor=IMG_SCALE_FACTOR)
 
     log.info("Graphing the demographic distributions...")
     for demographic, counts in demographic_distributions.items():
@@ -346,7 +347,7 @@ if __name__ == "__main__":
             y=altair.Y("number_of_individuals:Q", title="Number of Individuals")
         ).properties(
             title=f"Season Distribution: {demographic}"
-        ).save(f"{output_dir}/season_distribution_{demographic}.png", scale_factor=IMG_SCALE_FACTOR)
+        ).save(f"{output_dir}/graphs/season_distribution_{demographic}.png", scale_factor=IMG_SCALE_FACTOR)
 
     # Plot the per-season distribution of responses for each survey question, per individual
     for plan in PipelineConfiguration.RQA_CODING_PLANS + PipelineConfiguration.SURVEY_CODING_PLANS:
@@ -382,16 +383,25 @@ if __name__ == "__main__":
             ).properties(
                 title=f"Season Distribution: {cc.analysis_file_key}"
             )
-            chart.save(f"{output_dir}/season_distribution_{cc.analysis_file_key}.html")
-            chart.save(f"{output_dir}/season_distribution_{cc.analysis_file_key}.png", scale_factor=IMG_SCALE_FACTOR)
+            chart.save(f"{output_dir}/graphs/season_distribution_{cc.analysis_file_key}.png", scale_factor=IMG_SCALE_FACTOR)
 
     if pipeline_configuration.drive_upload is not None:
+        log.info("Uploading CSVs to Drive...")
+        paths_to_upload = glob(f"{output_dir}/*.csv")
+        for i, path in enumerate(paths_to_upload):
+            log.info(f"Uploading CSV {i + 1}/{len(paths_to_upload)}: {path}...")
+            drive_client_wrapper.update_or_create(
+                path, pipeline_configuration.drive_upload.analysis_graphs_dir, target_folder_is_shared_with_me=True
+            )
+        
         log.info("Uploading graphs to Drive...")
-        paths_to_upload = glob.glob(f"{output_dir}/*.png")
+        paths_to_upload = glob(f"{output_dir}/graphs/*.png")
         for i, path in enumerate(paths_to_upload):
             log.info(f"Uploading graph {i + 1}/{len(paths_to_upload)}: {path}...")
-            drive_client_wrapper.update_or_create(path, pipeline_configuration.drive_upload.analysis_graphs_dir,
-                                                  target_folder_is_shared_with_me=True)
+            drive_client_wrapper.update_or_create(
+                path, f"{pipeline_configuration.drive_upload.analysis_graphs_dir}/graphs",
+                target_folder_is_shared_with_me=True
+            )
     else:
         log.info("Skipping uploading to Google Drive (because the pipeline configuration json does not contain the key "
                  "'DriveUploadPaths')")
