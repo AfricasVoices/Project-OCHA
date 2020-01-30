@@ -118,9 +118,9 @@ if __name__ == "__main__":
     repeat_participations = OrderedDict()
     for i in range(1, len(PipelineConfiguration.RQA_CODING_PLANS) + 1):
         repeat_participations[i] = {
-            "Episodes Participated In": i,
-            "Number of Individuals": 0,
-            "% of Individuals": None
+            "Number of Episodes Participated In": i,
+            "Number of Participants": 0,
+            "% of Participants": None
         }
 
     # Compute the number of individuals who participated each possible number of times, from 1 to <number of RQAs>
@@ -135,18 +135,18 @@ if __name__ == "__main__":
             if AnalysisUtils.opt_in(ind, CONSENT_WITHDRAWN_KEY, plan):
                 weeks_participated += 1
         assert weeks_participated != 0, f"Found individual '{ind['uid']}' with no participation in any week"
-        repeat_participations[weeks_participated]["Number of Individuals"] += 1
+        repeat_participations[weeks_participated]["Number of Participants"] += 1
 
     # Compute the percentage of individuals who participated each possible number of times.
     # Percentages are computed out of the total number of participants who opted-in.
     total_individuals = len(AnalysisUtils.filter_opt_ins(
         individuals, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS))
     for rp in repeat_participations.values():
-        rp["% of Individuals"] = round(rp["Number of Individuals"] / total_individuals * 100, 1)
+        rp["% of Participants"] = round(rp["Number of Participants"] / total_individuals * 100, 1)
 
     # Export the participation frequency data to a csv
     with open(f"{output_dir}/repeat_participations.csv", "w") as f:
-        headers = ["Episodes Participated In", "Number of Individuals", "% of Individuals"]
+        headers = ["Number of Episodes Participated In", "Number of Participants", "% of Participants"]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
