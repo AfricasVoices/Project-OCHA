@@ -201,9 +201,35 @@ class AnalysisUtils(object):
         return opt_ins
 
     @classmethod
-    def filter_labelled(cls, data, consent_withdrawn_key, coding_plans):
+    def filter_partially_labelled(cls, data, consent_withdrawn_key, coding_plans):
         """
-        Filters a list of message or participant data for objects that opted-in and are fully labelled under all
+        Filters a list of message or participant data for objects that opted-in and are fully labelled under at least
+        one of the given coding plans.
+
+        For the definition of "labelled", see `AnalysisUtils.labelled`
+
+        :param data: Message or participant data to filter.
+        :type data: TracedData iterable
+        :param consent_withdrawn_key: Key in the TracedData of the consent withdrawn field.
+        :type consent_withdrawn_key: str
+        :param coding_plans: Coding plans specifying the fields in each TracedData object in `data` to look up.
+        :type coding_plans: list of src.lib.pipeline_configuration.CodingPlan
+        :return: `data`, filtered for only the objects that opted-in and are labelled under at least one of the coding
+                 plans.
+        :rtype: list of TracedData
+        """
+        labelled = []
+        for td in data:
+            for plan in coding_plans:
+                if cls.labelled(td, consent_withdrawn_key, plan):
+                    labelled.append(td)
+                    break
+        return labelled
+
+    @classmethod
+    def filter_fully_labelled(cls, data, consent_withdrawn_key, coding_plans):
+        """
+        Filters a list of message or participant data for objects that opted-in and are fully labelled under all of
         the given coding plans.
 
         For the definition of "labelled", see `AnalysisUtils.labelled`

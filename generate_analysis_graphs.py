@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
             "Total Messages": "-",  # Can't report this for individual weeks because the data has been overwritten with "STOP"
             "Total Messages with Opt-Ins": len(AnalysisUtils.filter_opt_ins(messages, CONSENT_WITHDRAWN_KEY, [plan])),
-            "Total Labelled Messages": len(AnalysisUtils.filter_labelled(messages, CONSENT_WITHDRAWN_KEY, [plan])),
+            "Total Labelled Messages": len(AnalysisUtils.filter_partially_labelled(messages, CONSENT_WITHDRAWN_KEY, [plan])),
             "Total Relevant Messages": len(AnalysisUtils.filter_relevant(messages, CONSENT_WITHDRAWN_KEY, [plan])),
 
             "Total Participants": "-",
@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
         "Total Messages": len(messages),
         "Total Messages with Opt-Ins": len(AnalysisUtils.filter_opt_ins(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
-        "Total Labelled Messages": len(AnalysisUtils.filter_labelled(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
+        "Total Labelled Messages": len(AnalysisUtils.filter_fully_labelled(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
         "Total Relevant Messages": len(AnalysisUtils.filter_relevant(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
 
         "Total Participants": len(individuals),
