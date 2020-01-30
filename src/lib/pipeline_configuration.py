@@ -63,7 +63,7 @@ class PipelineConfiguration(object):
                            coding_mode=CodingModes.MULTIPLE,
                            code_scheme=CodeSchemes.S04E01_REASONS,
                            coded_field="rqa_s04e01_coded",
-                           analysis_file_key="rqa_s04e01_",
+                           analysis_file_key="rqa_s04e01",
                            fold_strategy=lambda x, y: FoldStrategies.list_of_labels(CodeSchemes.S04E01_REASONS, x, y)
                        )
                    ],
@@ -81,7 +81,7 @@ class PipelineConfiguration(object):
                            coding_mode=CodingModes.MULTIPLE,
                            code_scheme=CodeSchemes.S04E02_REASONS,
                            coded_field="rqa_s04e02_coded",
-                           analysis_file_key="rqa_s04e02_",
+                           analysis_file_key="rqa_s04e02",
                            fold_strategy=lambda x, y: FoldStrategies.list_of_labels(CodeSchemes.S04E02_REASONS, x, y)
                        )
                    ],
@@ -268,7 +268,7 @@ class PipelineConfiguration(object):
                            coding_mode=CodingModes.MULTIPLE,
                            code_scheme=CodeSchemes.SUGGESTIONS,
                            coded_field="suggestions_coded",
-                           analysis_file_key="suggestions_",
+                           analysis_file_key="suggestions",
                            fold_strategy=lambda x, y: FoldStrategies.list_of_labels(CodeSchemes.SUGGESTIONS, x, y)
                        )
                    ],

@@ -276,7 +276,7 @@ if __name__ == "__main__":
             for code in cc.code_scheme.codes:
                 if code.control_code == Codes.STOP:
                     continue
-                themes[f"{cc.analysis_file_key}{code.string_value}"] = make_survey_counts_dict()
+                themes[f"{cc.analysis_file_key}_{code.string_value}"] = make_survey_counts_dict()
 
         # Fill in the counts by iterating over every individual
         for td in individuals:
@@ -291,8 +291,8 @@ if __name__ == "__main__":
                     code = cc.code_scheme.get_code_with_code_id(label["CodeID"])
                     if code.control_code == Codes.STOP:
                         continue
-                    themes[f"{cc.analysis_file_key}{code.string_value}"]["Total"] += 1
-                    update_survey_counts(themes[f"{cc.analysis_file_key}{code.string_value}"], td)
+                    themes[f"{cc.analysis_file_key}_{code.string_value}"]["Total"] += 1
+                    update_survey_counts(themes[f"{cc.analysis_file_key}_{code.string_value}"], td)
 
     with open(f"{output_dir}/theme_distributions.csv", "w") as f:
         f.write("CAUTION: The totals reported here show the number of times each theme was reported not the "
@@ -372,7 +372,7 @@ if __name__ == "__main__":
                 assert cc.coding_mode == CodingModes.MULTIPLE
                 for ind in individuals:
                     for code in cc.code_scheme.codes:
-                        if ind[f"{cc.analysis_file_key}{code.string_value}"] == Codes.MATRIX_1:
+                        if ind[f"{cc.analysis_file_key}_{code.string_value}"] == Codes.MATRIX_1:
                             label_counts[code.string_value] += 1
 
             chart = altair.Chart(
