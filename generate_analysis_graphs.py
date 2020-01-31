@@ -269,8 +269,11 @@ if __name__ == "__main__":
 
     def set_survey_percentages(survey_counts, total_survey_counts):
         # Sets the survey % fields for each survey column by looking at the
-        survey_counts["Total Participants %"] = \
-            round(survey_counts["Total Participants"] / total_survey_counts["Total Participants"] * 100, 1)
+        if total_survey_counts["Total Participants"] == 0:
+            survey_counts["Total Participants %"] = "-"
+        else:
+            survey_counts["Total Participants %"] = \
+                round(survey_counts["Total Participants"] / total_survey_counts["Total Participants"] * 100, 1)
         
         for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
