@@ -231,7 +231,7 @@ if __name__ == "__main__":
     log.info("Computing the theme distributions...")
 
     def make_survey_counts_dict():
-        # Returns a dictionary containing raw count and % count fields for each
+        # Returns a dictionary containing raw count and % count fields for each survey question.
         survey_counts = OrderedDict()
         survey_counts["Total Participants"] = 0
         survey_counts["Total Participants %"] = None
@@ -249,6 +249,8 @@ if __name__ == "__main__":
         return survey_counts
 
     def update_survey_counts(survey_counts, td):
+        # Uses the given traced data object to increment the relevant survey counts, based on the survey codes in
+        # the traced data.
         for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
@@ -265,8 +267,11 @@ if __name__ == "__main__":
                         continue
                     survey_counts[f"{cc.analysis_file_key}:{code.string_value}"] += 1
 
-    def set_survey_percentages(survey_counts, survey_totals):
-        survey_counts["Total Participants %"] = round(survey_counts["Total Participants"] / survey_totals["Total Participants"] * 100, 1)
+    def set_survey_percentages(survey_counts, total_survey_counts):
+        # Sets the survey % fields for each survey column by looking at the
+        survey_counts["Total Participants %"] = \
+            round(survey_counts["Total Participants"] / total_survey_counts["Total Participants"] * 100, 1)
+        
         for plan in PipelineConfiguration.SURVEY_CODING_PLANS:
             for cc in plan.coding_configurations:
                 if cc.analysis_file_key is None:
@@ -276,14 +281,14 @@ if __name__ == "__main__":
                     if code.control_code == Codes.STOP:
                         continue
 
-                    survey_total = survey_totals[f"{cc.analysis_file_key}:{code.string_value}"]
-                    survey_count = survey_counts[f"{cc.analysis_file_key}:{code.string_value}"]
+                    code_count = survey_counts[f"{cc.analysis_file_key}:{code.string_value}"]
+                    code_total = total_survey_counts[f"{cc.analysis_file_key}:{code.string_value}"]
 
-                    if survey_total == 0:
+                    if code_total == 0:
                         survey_counts[f"{cc.analysis_file_key}:{code.string_value} %"] = "-"
                     else:
                         survey_counts[f"{cc.analysis_file_key}:{code.string_value} %"] = \
-                            round(survey_count / survey_total * 100, 1)
+                            round(code_count / code_total * 100, 1)
 
     episodes = OrderedDict()
     for episode_plan in PipelineConfiguration.RQA_CODING_PLANS:
@@ -347,7 +352,7 @@ if __name__ == "__main__":
                 row.update(survey_counts)
                 writer.writerow(row)
                 last_row_episode = episode
-
+    exit(0)
     log.info("Graphing the per-episode engagement counts...")
     # Graph the number of messages in each episode
     altair.Chart(
