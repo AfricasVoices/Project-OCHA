@@ -231,6 +231,7 @@ if __name__ == "__main__":
     log.info("Computing the theme distributions...")
 
     def make_survey_counts_dict():
+        # Returns a dictionary containing raw count and % count fields for each
         survey_counts = OrderedDict()
         survey_counts["Total Participants"] = 0
         survey_counts["Total Participants %"] = None
@@ -243,7 +244,6 @@ if __name__ == "__main__":
                     if code.control_code == Codes.STOP:
                         continue  # Ignore STOP codes because we already excluded everyone who opted out.
                     survey_counts[f"{cc.analysis_file_key}:{code.string_value}"] = 0
-                    
                     survey_counts[f"{cc.analysis_file_key}:{code.string_value} %"] = None
 
         return survey_counts
@@ -320,9 +320,7 @@ if __name__ == "__main__":
                 themes["Total Relevant Participants"]["Total Participants"] += 1
                 update_survey_counts(themes["Total Relevant Participants"], td)
                 
-    # Compute percentages
-    for episode_plan in PipelineConfiguration.RQA_CODING_PLANS:
-        themes = episodes[episode_plan.raw_field]
+        # Compute percentages from the counts
         set_survey_percentages(themes["Total Relevant Participants"], themes["Total Relevant Participants"])
 
         for cc in episode_plan.coding_configurations:
