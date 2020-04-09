@@ -1,4 +1,5 @@
 from .analysis_file import AnalysisFile
+from .analysis_utils import AnalysisUtils
 from .apply_manual_codes import ApplyManualCodes
 from .auto_code import AutoCode
 from .combine_raw_datasets import CombineRawDatasets

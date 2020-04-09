@@ -6,13 +6,13 @@ from glob import glob
 
 import altair
 from core_data_modules.cleaners import Codes
-from core_data_modules.data_models.code_scheme import CodeTypes
 from core_data_modules.logging import Logger
 from core_data_modules.traced_data.io import TracedDataJsonIO
 from core_data_modules.util import IOUtils
 from storage.google_cloud import google_cloud_utils
 from storage.google_drive import drive_client_wrapper
 
+from src import AnalysisUtils
 from src.lib import PipelineConfiguration
 from src.lib.pipeline_configuration import CodingModes
 
@@ -20,6 +20,7 @@ Logger.set_project_name("OCHA")
 log = Logger(__name__)
 
 IMG_SCALE_FACTOR = 10  # Increase this to increase the resolution of the outputted PNGs
+CONSENT_WITHDRAWN_KEY = "consent_withdrawn"
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generates graphs for analysis")
@@ -75,69 +76,39 @@ if __name__ == "__main__":
 
     # Compute the number of messages, individuals, and relevant messages per episode and overall.
     log.info("Computing the per-episode and per-season engagement counts...")
-    engagement_counts = OrderedDict()
+    engagement_counts = OrderedDict()  # of episode name to counts
     for plan in PipelineConfiguration.RQA_CODING_PLANS:
         engagement_counts[plan.dataset_name] = {
             "Episode": plan.dataset_name,
-            "Total Messages": 0,
-            "Relevant Messages": 0,
-            "Total Participants": 0,
-            "% Relevant Messages": None
+
+            "Total Messages": "-",  # Can't report this for individual weeks because the data has been overwritten with "STOP"
+            "Total Messages with Opt-Ins": len(AnalysisUtils.filter_opt_ins(messages, CONSENT_WITHDRAWN_KEY, [plan])),
+            "Total Labelled Messages": len(AnalysisUtils.filter_labelled(messages, CONSENT_WITHDRAWN_KEY, [plan])),
+            "Total Relevant Messages": len(AnalysisUtils.filter_relevant(messages, CONSENT_WITHDRAWN_KEY, [plan])),
+
+            "Total Participants": "-",
+            "Total Participants with Opt-Ins": len(AnalysisUtils.filter_opt_ins(individuals, CONSENT_WITHDRAWN_KEY, [plan])),
+            "Total Relevant Participants": len(AnalysisUtils.filter_relevant(individuals, CONSENT_WITHDRAWN_KEY, [plan]))
         }
     engagement_counts["Total"] = {
         "Episode": "Total",
-        "Total Messages": 0,
-        "Relevant Messages": 0,
-        "Total Participants": 0,
-        "% Relevant Messages": None
+
+        "Total Messages": len(messages),
+        "Total Messages with Opt-Ins": len(AnalysisUtils.filter_opt_ins(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
+        "Total Labelled Messages": len(AnalysisUtils.filter_labelled(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
+        "Total Relevant Messages": len(AnalysisUtils.filter_relevant(messages, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
+
+        "Total Participants": len(individuals),
+        "Total Participants with Opt-Ins": len(AnalysisUtils.filter_opt_ins(individuals, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS)),
+        "Total Relevant Participants": len(AnalysisUtils.filter_relevant(individuals, CONSENT_WITHDRAWN_KEY, PipelineConfiguration.RQA_CODING_PLANS))
     }
 
-    # Compute, per episode and across the season:
-    #  - Total Messages, by counting the number of consenting message objects that contain the raw_field key each week.
-    #  - Relevant Messages, by counting the number of consenting message objects which are coded with codes of type
-    #    CodeTypes.NORMAL. If a message was coded under multiple schemes, an additional assert is performed to ensure
-    #    the message was labelled with the same code type across all of those schemes.
-    for msg in messages:
-        if msg["consent_withdrawn"] == Codes.FALSE:
-            for plan in PipelineConfiguration.RQA_CODING_PLANS:
-                if plan.raw_field in msg:
-                    engagement_counts[plan.dataset_name]["Total Messages"] += 1
-                    engagement_counts["Total"]["Total Messages"] += 1
-
-                    # Get all the codes for this message under this code scheme
-                    codes = []
-                    for cc in plan.coding_configurations:
-                        if cc.coding_mode == CodingModes.SINGLE:
-                            codes.append(cc.code_scheme.get_code_with_code_id(msg[cc.coded_field]["CodeID"]))
-                        else:
-                            assert cc.coding_mode == CodingModes.MULTIPLE
-                            for label in msg[cc.coded_field]:
-                                codes.append(cc.code_scheme.get_code_with_code_id(label["CodeID"]))
-
-                    # Increment the count of relevant messages if the code is labelled with at least one normal code.
-                    code_types = [code.code_type for code in codes]
-                    if CodeTypes.NORMAL in code_types:
-                        engagement_counts[plan.dataset_name]["Relevant Messages"] += 1
-                        engagement_counts["Total"]["Relevant Messages"] += 1
-
-    # Compute, per episode and across the season:
-    #  - Total Participants, by counting the number of consenting individuals objects that contain the raw_field key
-    #    each week.
-    for ind in individuals:
-        if ind["consent_withdrawn"] == Codes.FALSE:
-            engagement_counts["Total"]["Total Participants"] += 1
-            for plan in PipelineConfiguration.RQA_CODING_PLANS:
-                if plan.raw_field in ind:
-                    engagement_counts[plan.dataset_name]["Total Participants"] += 1
-
-    # Compute:
-    #  - % Relevant Messages, by computing Relevant Messages / Total Messages * 100, to 1 decimal place.
-    for count in engagement_counts.values():
-        count["% Relevant Messages"] = round(count["Relevant Messages"] / count["Total Messages"] * 100, 1)
-
-    # Export the engagement counts to a csv.
     with open(f"{output_dir}/engagement_counts.csv", "w") as f:
-        headers = ["Episode", "Total Messages", "Relevant Messages", "% Relevant Messages", "Total Participants"]
+        headers = [
+            "Episode",
+            "Total Messages", "Total Messages with Opt-Ins", "Total Labelled Messages", "Total Relevant Messages",
+            "Total Participants", "Total Participants with Opt-Ins", "Total Relevant Participants"
+        ]
         writer = csv.DictWriter(f, fieldnames=headers, lineterminator="\n")
         writer.writeheader()
 
